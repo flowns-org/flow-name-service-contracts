@@ -1,7 +1,7 @@
 
 import FungibleToken from "./standard/FungibleToken.cdc"
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
-import SubDomain from "./SubDomain.cdc"
+import Domain from "./Domain.cdc"
 
 /*
   The main contract in the Flow Name Service.
@@ -21,9 +21,9 @@ pub contract Flowns {
 
 
   // events
-  pub event RootDomainDestroyed(domainId:UInt64)
+  pub event RootDomainDestroyed(id:UInt64)
 
-  pub event RootDomainCreated(domainName:String, domainId: UInt64)
+  pub event RootDomainCreated(name:String, id: UInt64)
 
   pub event registryChanged(registryName:String, registryPath:String)
 
@@ -34,7 +34,7 @@ pub contract Flowns {
     pub let owner: Address
     pub let name: String
     pub let nameHash: String
-    pub let subDomainCount: Fix64
+    pub let domainCount: Fix64
     pub let domainRegistry: String //todo registry info
   }
 
@@ -48,7 +48,7 @@ pub contract Flowns {
 
     pub let nameHash:String
 
-    pub let subDomainCount:UInt64
+    pub let DomainCount:UInt64
 
     pub let owner:Address
 
@@ -56,20 +56,20 @@ pub contract Flowns {
 
     pub var domainRegistry: Capability<&{Registry.Regigter}> // TODO
 
-    pub var subDomains: @{String: SubDomain}
+    pub var Domains: @{String: Domain}
     
     // sub domain
-    access(contract) var subDomainCapability: Capability<&SubDomain.Collection>
+    access(contract) var domainCapability: Capability<&Domain.Collection>
 
-    init(id:UInt64, name:String, nameHash:String, subDomainCap:Capability<&SubDomain.Collection>, vaultCap: Capability<&{FungibleToken.Receiver}>){
+    init(id:UInt64, name:String, nameHash:String, sDomainCap:Capability<&Domain.Collection>, vaultCap: Capability<&{FungibleToken.Receiver}>){
       self.id = id
       self.name = name
       self.nameHash = nameHash // TODO 
       self.owner = Flowns.account
-      self.subDomainCount = 0
+      self.DomainCount = 0
       self.domainVault <- FlowToken.createEmptyVault()
       self.domainRegistry = nil
-      self.subDomains = {}
+      self.Domains = {}
     }
 
     // set registry
@@ -78,14 +78,14 @@ pub contract Flowns {
       emit registryChanged(registryName: registry.name, registryPath: registry.path)
     }
 
-     pub fun getDomainInfo() : RootDomainInfo {
-       // wip
-     }
+    pub fun getDomainInfo() : RootDomainInfo {
+      // wip
+    }
 
 
     destroy(){
         log("Destroy Root domains")
-        destroy self.subDomainCapability
+        destroy self.domainCapability
         destroy self.domainVault
         emit RootDomainDestroyed(domainId: self.id)
     }
@@ -109,81 +109,80 @@ pub contract Flowns {
           id: UInt64,
           name: String, 
           nameHash: String,
-          subDomainCap: Capability<&SubDomain.Collection>,
+          domainCap: Capability<&Domain.Collection>,
           vaultCap: Capability<&{FungibleToken.Receiver}>,
           )
 
   }
 
-pub resource RootDomainCollection: DomainPublic, DomainAdmin {
+  pub resource RootDomainCollection: DomainPublic, DomainAdmin {
+      pub var domains: @{UInt64: RootDomain}
 
-        pub var domains: @{UInt64: RootDomain}
+      init(
+      ) {
+        self.domains <- {}
+      }
 
-        init(
+      // When creating a drop you send in an NFT and the number of editions you want to sell vs the unique one
+      // There will then be minted edition number of extra copies and put into the editions auction
+      pub fun createRootDomain(
+        id: UInt64,
+        name: String, 
+        nameHash: String,
+        domainCap: Capability<&SDomain.Collection>,
+        vaultCap: Capability<&{FungibleToken.Receiver}>
         ) {
-          self.domains <- {}
+
+        pre {
+            vaultCap.check() == true : "Vault capability should exist"
         }
 
-        // When creating a drop you send in an NFT and the number of editions you want to sell vs the unique one
-        // There will then be minted edition number of extra copies and put into the editions auction
-        pub fun createRootDomain(
-            id: UInt64,
-            name: String, 
-            nameHash: String,
-            subDomainCap: Capability<&SubDomain.Collection>,
-            vaultCap: Capability<&{FungibleToken.Receiver}>
-            ) {
+        let rootDomain  <- create RootDomain(
+          id: Flowns.totalRootDomains,
+          name:name,
+          nameHash:name,
+          domainCap <- DomainCap // todo: create domain for root
+          )
 
-            pre {
-                vaultCap.check() == true : "Vault capability should exist"
-            }
+        emit RootDomainCreated(name: name, id: rootDomain.id)
 
-             let rootDomain  <- create RootDomain(
-               id: Flowns.totalRootDomains,
-               name:name,
-               nameHash:name,
-               subDomainCap <- subDomainCap // todo: create subdomain
-               )
+        let oldDomain <- self.domains[rootDomain.id] <- rootDomain
+        destroy oldDomain
 
-            emit RootDomainCreated(name: name, domainId: rootDomain.id)
+      }
 
-            let oldDomain <- self.domains[rootDomain.id] <- rootDomain
-            destroy oldDomain
+      // TODO
+      access(account) fun withdraw(){
 
-        }
+      }
 
-        // TODO
-        access(account) fun withdraw(){
+      //Get all the drop statuses
+      pub fun getAllDomains(): {UInt64: RootDomainInfo} {
+          var domainInfos: {UInt64: RootDomainInfo }= {}
+          for id in self.domians.keys {
+              let itemRef = &self.domians[id] as? &RootDomain
+              domainInfos[id] = itemRef.getDomainInfo()
+          }
+          return domainInfos
 
-        }
+      }
 
-        //Get all the drop statuses
-        pub fun getAllDomains(): {UInt64: RootDomainInfo} {
-            var domainInfos: {UInt64: RootDomainInfo }= {}
-            for id in self.domians.keys {
-                let itemRef = &self.domians[id] as? &RootDomain
-                domainInfos[id] = itemRef.getDomainInfo()
-            }
-            return domainInfos
+      access(contract) fun getDomain(_ domainId:UInt64) : &RootDomain {
+          pre {
+              self.domains[domainId] != nil:
+                  "domain doesn't exist"
+          }
+          return &self.domains[domainId] as &RootDomain
+      }
 
-        }
-
-        access(contract) fun getDomain(_ domainId:UInt64) : &RootDomain {
-            pre {
-                self.domains[domainId] != nil:
-                    "domain doesn't exist"
-            }
-            return &self.domains[domainId] as &RootDomain
-        }
-
-        pub fun getDomainInfo(domainId:UInt64): RootDomainInfo {
-            return self.getDomain(domainId).getDomainInfo()
-        }
+      pub fun getDomainInfo(domainId:UInt64): RootDomainInfo {
+          return self.getDomain(domainId).getDomainInfo()
+      }
 
 
-        destroy() {            
-            destroy self.domains
-        }
+      destroy() {            
+          destroy self.domains
+      }
     }
 
     //
@@ -200,7 +199,7 @@ pub resource RootDomainCollection: DomainPublic, DomainAdmin {
             self.server = nil
         }
 
-         pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>) {
+        pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>) {
             pre {
                 cap.check() : "Invalid server capablity"
                 self.server == nil : "Server already set"
@@ -210,13 +209,13 @@ pub resource RootDomainCollection: DomainPublic, DomainAdmin {
 
         // withdraw vault balance
         pub fun withdraw(_ domainId: UInt64) {
-           pre {
-             self.server != nil : "Your client has not been linked to the server"
-           }
-           self.server!.borrow()!.withdraw(dropId)
+          pre {
+            self.server != nil : "Your client has not been linked to the server"
+          }
+          self.server!.borrow()!.withdraw(dropId)
         }
 
-       
+      
         pub fun createRootDomain(
           
           vaultCap: Capability<&{FungibleToken.Receiver}>)  {
