@@ -3,6 +3,7 @@ import FungibleToken from "./standard/FungibleToken.cdc"
 // import NonFungibleToken from 0x02
 // import FungibleToken from 0x01
 
+
 pub contract Domains {
 
     pub var totalSupply: UInt64
@@ -31,13 +32,12 @@ pub contract Domains {
       pub let nameHash: String
       pub let addresses:  {UInt64: String}
       pub let texts: {String:String}
-      pub let expiredAt: {String:String}
+      pub let parent: String
+      pub var expiredAt: UFix64
       pub fun getText(key: String):String
       pub fun getAddress(chainType: UInt64):String
       pub fun getAllText():{String:String}
       pub fun getAllAddresses():{UInt64:String}
-      
-      
     }
 
     pub resource interface DomainPrivate {
@@ -46,8 +46,6 @@ pub contract Domains {
         access(account) fun removeText(key: String)
         access(account) fun removeAddress(chainType: UInt64)
         access(account) fun setRecord(address: Address)
-
-
     }
 
     pub resource Subdomain: DomainPublic, DomainPrivate {
@@ -59,7 +57,7 @@ pub contract Domains {
         pub let parent: String
         pub let parentNameHash: String
         pub let expiredTip: String
-        pub let expiredAt: UFix64
+        pub var expiredAt: UFix64
 
         init(id: UInt64, name: String, nameHash: String, parent: String, parentNameHash: String) {
             self.id = id
@@ -146,12 +144,13 @@ pub contract Domains {
         pub let addresses:  {UInt64: String}
         pub let texts: {String:String}
         pub let subdomains:@{String: Subdomain}
-        pub var subdomainCount:UInt64
-        pub let expiredAt: UFix64
         pub let expiredTip: String
-        pub let content: String
+        pub let parent: String
+        pub var subdomainCount:UInt64
+        pub var expiredAt: UFix64
+        pub var content: String
 
-        init(id: UInt64, name: String, nameHash: String, expiredAt:UFix64) {
+        init(id: UInt64, name: String, nameHash: String, parent: String, expiredAt:UFix64) {
             self.id = id
             self.name=name
             self.nameHash = nameHash
@@ -161,6 +160,7 @@ pub contract Domains {
             self.subdomainCount = 0
             self.expiredAt = expiredAt
             self.subdomains <- {}
+            self.parent = parent
             self.expiredTip = "Domain is expired pls renew it"
         }
 
@@ -273,7 +273,13 @@ pub contract Domains {
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
     }
 
-    pub resource Collection: PublicCollection, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+     //return the content for this NFT
+    pub resource interface PrivateCollection {
+        pub fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{Domains.PublicCollection}>)
+    }
+
+
+    pub resource Collection: PublicCollection, PrivateCollection, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
         pub var domains: @{UInt64: NonFungibleToken.NFT}
         init () {
             self.domains <- {}
@@ -320,6 +326,21 @@ pub contract Domains {
             } else {
                 return nil
             }
+        }
+
+        pub fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{Domains.PublicCollection}>){
+            let domain <- create Domains.Domain(
+              id: id,
+              name: name,
+              nameHash: nameHash,
+              parent: parentName,
+              expiredAt:expiredAt
+            )
+            let nft <- domain as! @NonFungibleToken.NFT
+            Domains.expired[nameHash] = expiredAt
+            Domains.records[nameHash]= receiver.address
+            Domains.totalSupply = Domains.totalSupply + UInt64(1)
+            receiver.borrow()!.deposit(token: <- nft)
         }
 
         destroy() {
