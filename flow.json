@@ -7,13 +7,13 @@
 	},
 	"contracts": {
 		"NonFungibleToken":"./contracts/standard/NonFungibleToken.cdc",
-		"Domain":"./contracts/Domain.cdc",
+		"Domains":"./contracts/Domains.cdc",
 		"Flowns":"./contracts/Flowns.cdc",
 		"FungibleToken": {
 			"source": "./contracts/standard/FungibleToken.cdc",
 			"aliases": {
-			  "testnet": "9a0766d93b6608b7",
-			  "emulator": "ee82856bf20e2aa6"
+			  "testnet": "0x9a0766d93b6608b7",
+			  "emulator": "0xee82856bf20e2aa6"
 			}
 		  },
 		"FlowToken": {
@@ -39,7 +39,7 @@
 		"emulator": {
 			"emulator-account": [
 				"NonFungibleToken",
-				"Domain",
+				"Domains",
 				"Flowns"
 			]
 		}

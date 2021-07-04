@@ -1,9 +1,7 @@
-
-import FungibleToken from "./standard/FungibleToken.cdc"
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
-import Domains from "./Domains.cdc"
-import FlowToken from "./standard/FlowToken.cdc"
-
+import FungibleToken from "./standard/FungibleToken.cdc"
+// import NonFungibleToken from 0x02
+// import FungibleToken from 0x01
 
 
 /*
@@ -123,6 +121,7 @@ pub contract Flowns {
 
     pub fun setPrices(key:Int, price: UFix64) {
       self.prices[key]= price
+      // emit
     }
 
 
@@ -132,7 +131,7 @@ pub contract Flowns {
       let domain = domainCap.borrow()!
       let length = domain.name.length
       let price = self.prices[length]
-      if domain.parentNameHash != self.nameHash {
+      if domain.parent != self.name {
         panic("domain not root domain's sub domain")
       }
       if duration < UFix64(3153600) {
@@ -198,7 +197,7 @@ pub contract Flowns {
 
     access(account) fun withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>){
       let vault = receiver.borrow()!
-      vaultRef.deposit(from: <- self.domainVault.withdraw(amount: self.domainVault.balance))
+      vault.deposit(from: <- self.domainVault.withdraw(amount: self.domainVault.balance))
     }
 
     
@@ -264,28 +263,6 @@ pub contract Flowns {
 
       }
 
-      pub fun renewDomain(domainId: UInt64, domainCap: Capability<&{Domains.DomainPublic}>, duration: UFix64, feeTokens: @FungibleToken.Vault){
-        pre {
-             self.domains[domainId] != nil : "Root domain not exist..."
-          }
-        self.getDomain(domainId).renewDomain(domainCap: Capability<&{Domains.DomainPublic}>, duration: UFix64, feeTokens: @FungibleToken.Vault)
-      }
-
-      pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
-        pre {
-            self.domains[domainId] != nil : "Root domain not exist..."
-        }
-        self.getDomain(domainId).registerDomain(name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
-      }
-
-
-      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>){
-        pre {
-          self.domains[domainId] != nil : "Root domain not exist..."
-        }
-         self.getDomain(domainId).withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>)
-      }
-
       //Get all the drop statuses
       pub fun getAllDomains(): {UInt64: RootDomainInfo} {
           var domainInfos: {UInt64: RootDomainInfo }= {}
@@ -294,7 +271,6 @@ pub contract Flowns {
               domainInfos[id] = itemRef.getRootDomainInfo()
           }
           return domainInfos
-
       }
 
       access(contract) fun getDomain(_ domainId:UInt64) : &RootDomain {
@@ -308,7 +284,29 @@ pub contract Flowns {
       pub fun getDomainInfo(domainId:UInt64): RootDomainInfo {
           return self.getDomain(domainId).getRootDomainInfo()
       }
+      
+      pub fun renewDomain(domainId: UInt64, domainCap: Capability<&{Domains.DomainPublic}>, duration: UFix64, feeTokens: @FungibleToken.Vault ) {
+        pre {
+             self.domains[domainId] != nil : "Root domain not exist..."
+          }
+        let root = self.getDomain(domainId)
+        root.renewDomain(domainCap:domainCap, duration: duration, feeTokens: <- feeTokens)
+      }
+      
+      pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+        pre {
+            self.domains[domainId] != nil : "Root domain not exist..."
+        }
+        let root = self.getDomain(domainId)
+        root.registerDomain(name:name, nameHash:nameHash, duration:duration, feeTokens: <-feeTokens, receiver:receiver )
+      }
 
+      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>){
+        pre {
+          self.domains[domainId] != nil : "Root domain not exist..."
+        }
+         self.getDomain(domainId).withdrawVault(receiver:receiver)
+      }
 
       destroy() {            
           destroy self.domains
