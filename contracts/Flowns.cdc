@@ -112,7 +112,7 @@ pub contract Flowns {
           self.server != nil : "Your client has not been linked to the server"
       }
 
-      Flowns.totalRootDomains = Flowns.totalRootDomains + UInt64(1)
+      Flowns.totalRootDomains = Flowns.totalRootDomains + 1 as UInt64
       
       let expiredTime = getCurrentBlock().timestamp + UFix64(duration)
       self.domains[nameHash] = receiver.address
@@ -123,6 +123,7 @@ pub contract Flowns {
 
     pub fun setPrices(key:Int, price: UFix64) {
       self.prices[key]= price
+      // emit
     }
 
 
@@ -132,13 +133,13 @@ pub contract Flowns {
       let domain = domainCap.borrow()!
       let length = domain.name.length
       let price = self.prices[length]
-      if domain.parentNameHash != self.nameHash {
+      if domain.parent != self.name {
         panic("domain not root domain's sub domain")
       }
-      if duration < UFix64(3153600) {
+      if duration < 3153600.0 {
         panic("duration must geater than 3153600 ")
       }
-      if price == UFix64(0) {
+      if price == 0.0 {
         panic("Can not renew domain")
       }
 
@@ -148,7 +149,7 @@ pub contract Flowns {
       
       let rentFee = feeTokens.balance
 
-      if rentFee < rentPrice! {
+      if rentFee < rentPrice {
          panic("Not enough fee to renew your domain.")
       }
 
@@ -172,10 +173,10 @@ pub contract Flowns {
       
       let length = name.length
       let price = self.prices[length]
-      if duration < UFix64(3153600) {
+      if duration < 3153600.0 {
         panic("duration must geater than 3153600")
       }
-      if price == UFix64(0) {
+      if price == 0.0 {
         panic("Can not register domain")
       }
 
@@ -183,7 +184,7 @@ pub contract Flowns {
       
       let rentFee = feeTokens.balance
 
-      if rentFee < rentPrice! {
+      if rentFee < rentPrice {
          panic("Not enough fee to renew your domain.")
       }
 
@@ -198,7 +199,7 @@ pub contract Flowns {
 
     access(account) fun withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>){
       let vault = receiver.borrow()!
-      vaultRef.deposit(from: <- self.domainVault.withdraw(amount: self.domainVault.balance))
+      vault.deposit(from: <- self.domainVault.withdraw(amount: self.domainVault.balance))
     }
 
     
@@ -268,14 +269,16 @@ pub contract Flowns {
         pre {
              self.domains[domainId] != nil : "Root domain not exist..."
           }
-        self.getDomain(domainId).renewDomain(domainCap: Capability<&{Domains.DomainPublic}>, duration: UFix64, feeTokens: @FungibleToken.Vault)
+        let root = self.getDomain(domainId)
+        root.renewDomain(domainCap:domainCap, duration: duration, feeTokens: <- feeTokens)
       }
 
       pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
         pre {
             self.domains[domainId] != nil : "Root domain not exist..."
         }
-        self.getDomain(domainId).registerDomain(name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
+        let root = self.getDomain(domainId)
+        root.registerDomain(name:name, nameHash:nameHash, duration:duration, feeTokens: <-feeTokens, receiver:receiver )
       }
 
 
@@ -283,7 +286,7 @@ pub contract Flowns {
         pre {
           self.domains[domainId] != nil : "Root domain not exist..."
         }
-         self.getDomain(domainId).withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>)
+         self.getDomain(domainId).withdrawVault(receiver:receiver)
       }
 
       //Get all the drop statuses
@@ -386,6 +389,7 @@ pub contract Flowns {
 
     }
 
+ //make it possible for a user that wants to be a versus admin to create the client
     pub fun createAdminClient(): @Admin {
         return <- create Admin()
     }
