@@ -365,11 +365,13 @@ pub contract Domains: NonFungibleToken {
     self.totalSupply = 0
     self.CollectionPublicPath=/public/fnsDomainCollection
     self.CollectionStoragePath=/storage/fnsDomainCollection
+    // self.CollectionPrivatePath=/private/fnsDomainCollection
     self.records = {}
     self.expired = {}
     let account =self.account
     account.save(<- Domains.createEmptyCollection(), to: Domains.CollectionStoragePath)
     account.link<&Domains.Collection>(Domains.CollectionPublicPath, target: Domains.CollectionStoragePath)
+    // account.link<&{Domains.CollectionPrivate}>(Domains.CollectionPrivatePath, target: Domains.CollectionStoragePath)
 
     emit ContractInitialized()
 	}

@@ -13,6 +13,6 @@ import Flowns from 0xf8d6e0586b0a20c7
 /*
   This script will check an address and print out its an flowns admin
  */
-pub fun main() : { UInt64: Flowns.RootDomainInfo }? {
-    return Flowns.getAllRootDomains()
+pub fun main(id: UInt64) : { UInt64: Flowns.RootDomainInfo }? {
+    return Flowns.getRootDomainInfo(domainId: id)
 }

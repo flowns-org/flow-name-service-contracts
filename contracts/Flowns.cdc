@@ -6,9 +6,6 @@ import FlowToken from "./standard/FlowToken.cdc"
 
 
 
-/*
-  The main contract in the Flow Name Service.
- */
 pub contract Flowns {
 
   // paths
@@ -80,7 +77,7 @@ pub contract Flowns {
       self.name = name
       self.nameHash = nameHash // TODO 
       self.domainCount = 0
-      self.domainVault <- FlowToken.createEmptyVault()
+      self.domainVault <- Kibble.createEmptyVault()
       self.domains = {}
       self.prices = {}
       self.server = nil
@@ -228,12 +225,10 @@ pub contract Flowns {
   pub resource interface DomainAdmin {
 
       access(account) fun createRootDomain(
-          id: UInt64,
           name: String, 
           nameHash: String,
         )
       access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>)
-      
   }
 
   pub resource RootDomainCollection: DomainPublic, DomainAdmin {
@@ -247,7 +242,6 @@ pub contract Flowns {
       // When creating a drop you send in an NFT and the number of editions you want to sell vs the unique one
       // There will then be minted edition number of extra copies and put into the editions auction
       access(account) fun createRootDomain(
-        id: UInt64,
         name: String, 
         nameHash: String,
         ) {
@@ -255,11 +249,11 @@ pub contract Flowns {
         let rootDomain  <- create RootDomain(
           id: Flowns.totalRootDomains,
           name:name,
-          nameHash:name
+          nameHash:nameHash
           )
 
         emit RootDomainCreated(name: name, id: rootDomain.id)
-
+        Flowns.totalRootDomains = Flowns.totalRootDomains + 1 as UInt64
         let oldDomain <- self.domains[rootDomain.id] <- rootDomain
         destroy oldDomain
 
@@ -321,6 +315,8 @@ pub contract Flowns {
     //
     pub resource interface AdminPublic {
         pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
+        pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>)
+
     }
 
     // 
@@ -340,6 +336,14 @@ pub contract Flowns {
             self.server = cap
         }
 
+         pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>) {
+            pre {
+                cap.check() : "Invalid server capablity"
+                self.server!.borrow()!.server == nil : "Server already set"
+            }
+            self.server!.borrow()!.getDomain(domainId).addCapability(cap)
+        }
+
         // withdraw vault balance
         // pub fun withdraw(_ domainId: UInt64) {
         //  pre {
@@ -349,14 +353,13 @@ pub contract Flowns {
         // }
       
         pub fun createRootDomain(
-          id: UInt64,
           name: String, 
           nameHash: String
           ) {
           pre {
               self.server != nil : "Your client has not been linked to the server"
           }
-          self.server!.borrow()!.createRootDomain(id:id, name:name, nameHash:nameHash)
+          self.server!.borrow()!.createRootDomain(name:name, nameHash:nameHash)
         }
     
 
