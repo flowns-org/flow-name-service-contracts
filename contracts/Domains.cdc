@@ -5,6 +5,7 @@ import FungibleToken from "./standard/FungibleToken.cdc"
 
 
 
+
 pub contract Domains: NonFungibleToken {
 
     pub var totalSupply: UInt64
@@ -38,6 +39,7 @@ pub contract Domains: NonFungibleToken {
       pub fun getAddress(chainType: UInt64):String
       pub fun getAllText():{String:String}
       pub fun getAllAddresses():{UInt64:String}
+      pub fun getDomainName():String
     }
 
     pub resource interface DomainPrivate {
@@ -72,6 +74,11 @@ pub contract Domains: NonFungibleToken {
         pub fun checkParentExpired():Bool {
           let currentTimestamp = getCurrentBlock().timestamp
           return currentTimestamp >= Domains.expired[self.parentNameHash]!
+        }
+
+         pub fun getDomainName():String {
+          let domainName = ""
+          return domainName.concat(self.name).concat(".").concat(self.parent)
         }
 
         pub fun getText(key:String):String {
@@ -141,7 +148,12 @@ pub contract Domains: NonFungibleToken {
 
     }
 
-    pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT{
+    pub resource interface DomainManage {
+      access(account) fun createSubDomain(_ name: String, nameHash: String, parent: String)
+      access(account) fun removeSubDomain(nameHash: String)
+    }
+
+    pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT, DomainManage{
         pub let id: UInt64
         pub let name: String
         pub let nameHash: String
@@ -168,6 +180,11 @@ pub contract Domains: NonFungibleToken {
         pub fun checkExpired():Bool {
           let currentTimestamp = getCurrentBlock().timestamp
           return currentTimestamp >= Domains.expired[self.nameHash]!
+        }
+
+        pub fun getDomainName():String {
+          let domainName = ""
+          return domainName.concat(self.name).concat(".").concat(self.parent)
         }
 
         pub fun getText(key:String):String {
@@ -281,7 +298,7 @@ pub contract Domains: NonFungibleToken {
 
      //return the content for this NFT
     pub resource interface CollectionPrivate {
-        pub fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+        access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
     }
 
 
@@ -334,7 +351,7 @@ pub contract Domains: NonFungibleToken {
             }
         }
 
-        pub fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
+        access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
             let domain <- create Domains.NFT(
               id: id,
               name: name,
@@ -365,13 +382,12 @@ pub contract Domains: NonFungibleToken {
     self.totalSupply = 0
     self.CollectionPublicPath=/public/fnsDomainCollection
     self.CollectionStoragePath=/storage/fnsDomainCollection
-    // self.CollectionPrivatePath=/private/fnsDomainCollection
+    
     self.records = {}
     self.expired = {}
     let account =self.account
     account.save(<- Domains.createEmptyCollection(), to: Domains.CollectionStoragePath)
     account.link<&Domains.Collection>(Domains.CollectionPublicPath, target: Domains.CollectionStoragePath)
-    // account.link<&{Domains.CollectionPrivate}>(Domains.CollectionPrivatePath, target: Domains.CollectionStoragePath)
 
     emit ContractInitialized()
 	}

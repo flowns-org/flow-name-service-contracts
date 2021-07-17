@@ -6,6 +6,7 @@ import FlowToken from "./standard/FlowToken.cdc"
 
 
 
+
 pub contract Flowns {
 
   // paths
@@ -77,7 +78,7 @@ pub contract Flowns {
       self.name = name
       self.nameHash = nameHash // TODO 
       self.domainCount = 0
-      self.domainVault <- Kibble.createEmptyVault()
+      self.domainVault <- FlowToken.createEmptyVault()
       self.domains = {}
       self.prices = {}
       self.server = nil
@@ -220,6 +221,10 @@ pub contract Flowns {
         pub fun renewDomain(domainId: UInt64, domainCap: Capability<&{Domains.DomainPublic}>, duration: UFix64, feeTokens: @FungibleToken.Vault)
 
         pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
+
+        pub fun getPrices(domainId:UInt64): {Int:UFix64}
+
+        pub fun available(domainId:UInt64, nameHash:String):Bool
     }
 
   pub resource interface DomainAdmin {
@@ -229,6 +234,8 @@ pub contract Flowns {
           nameHash: String,
         )
       access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>)
+
+      access(account) fun setPrices(domainId:UInt64, len:Int, price:UFix64)
   }
 
   pub resource RootDomainCollection: DomainPublic, DomainAdmin {
@@ -283,7 +290,7 @@ pub contract Flowns {
          self.getDomain(domainId).withdrawVault(receiver:receiver)
       }
 
-      //Get all the drop statuses
+      // Get all the domain info
       pub fun getAllDomains(): {UInt64: RootDomainInfo} {
           var domainInfos: {UInt64: RootDomainInfo }= {}
           for id in self.domains.keys {
@@ -292,6 +299,10 @@ pub contract Flowns {
           }
           return domainInfos
 
+      }
+      // 
+      access(account) fun setPrices(domainId:UInt64, len:Int, price:UFix64){
+        self.getDomain(domainId).setPrices(key: len, price: price)
       }
 
       access(contract) fun getDomain(_ domainId:UInt64) : &RootDomain {
@@ -306,6 +317,13 @@ pub contract Flowns {
           return self.getDomain(domainId).getRootDomainInfo()
       }
 
+      pub fun getPrices(domainId:UInt64): {Int:UFix64} {
+          return self.getDomain(domainId).prices
+      }
+
+      pub fun available(domainId:UInt64, nameHash:String): Bool {
+        return self.getDomain(domainId).available(nameHash: nameHash)
+      }
 
       destroy() {            
           destroy self.domains
@@ -316,7 +334,7 @@ pub contract Flowns {
     pub resource interface AdminPublic {
         pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
         pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>)
-
+        pub fun createRootDomain(name: String, nameHash: String) 
     }
 
     // 
@@ -339,7 +357,6 @@ pub contract Flowns {
          pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>) {
             pre {
                 cap.check() : "Invalid server capablity"
-                self.server!.borrow()!.server == nil : "Server already set"
             }
             self.server!.borrow()!.getDomain(domainId).addCapability(cap)
         }
@@ -361,34 +378,6 @@ pub contract Flowns {
           }
           self.server!.borrow()!.createRootDomain(name:name, nameHash:nameHash)
         }
-    
-
-        // pub fun mintDomain(
-        //   rootId: UInt64,
-        //   name: String, 
-        //   nameHash: String,
-        //   duration: UInt64,
-        //   account: Address
-        //   ) {
-        //   pre {
-        //       self.server != nil : "Your collection has not been linked to the server"
-        //   }
-        //   let rootRef = self.server!.borrow()!.domains[rootId].borrow()!
-        //   let receiver = getAccount(account)
-        // .getCapability(Domains.CollectionPublicPath)
-        // .borrow<&NonFungibleToken.Receiver>()
-        // ?? panic("Could not borrow Balance reference to the Vault")
-        //   rootRef.mintDomain(rootRef.domainCount ,name, nameHash, duration, receiver)
-        // }
-
-        
-
-        // pub fun getFlowWallet():&FungibleToken.Vault {
-        //   pre {
-        //     self.server != nil : "Your client has not been linked to the server"
-        //   }
-        //   return Flowns.account.borrow<&FungibleToken.Vault>(from: /storage/flowTokenVault)!
-        // }
 
     }
 
@@ -415,6 +404,26 @@ pub contract Flowns {
       }
       return nil
     }
+    
+    pub fun available(domainId: UInt64, nameHash: String): Bool {
+      let account = Flowns.account
+      let rootCollectionCap=account.getCapability<&{Flowns.DomainPublic}>(self.CollectionPublicPath)
+      if let collection = rootCollectionCap.borrow()  {
+        return collection.available(domainId: domainId, nameHash: nameHash)
+      }
+      return false
+    }
+
+    pub fun getRentPrice(domainId: UInt64, name: String): {Int: UFix64} {
+      let account = Flowns.account
+      let rootCollectionCap=account.getCapability<&{Flowns.DomainPublic}>(self.CollectionPublicPath)
+      if let collection = rootCollectionCap.borrow()  {
+        return collection.getPrices(domainId: domainId)
+      }
+      return {}
+    }
+    
+    
 
     
 
