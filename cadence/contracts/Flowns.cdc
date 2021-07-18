@@ -335,6 +335,7 @@ pub contract Flowns {
         pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
         pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>)
         pub fun createRootDomain(name: String, nameHash: String) 
+        pub fun setRentPrice(domainId:UInt64, len:Int, price:UFix64) 
     }
 
     // 
@@ -377,6 +378,13 @@ pub contract Flowns {
               self.server != nil : "Your client has not been linked to the server"
           }
           self.server!.borrow()!.createRootDomain(name:name, nameHash:nameHash)
+        }
+
+        pub fun setRentPrice(domainId:UInt64, len:Int, price:UFix64) {
+           pre {
+              self.server != nil : "Your client has not been linked to the server"
+          }
+          self.server!.borrow()!.setPrices(domainId: domainId, len: len, price: price)
         }
 
     }
