@@ -6,18 +6,18 @@
 		}
 	},
 	"contracts": {
-		"NonFungibleToken":"./contracts/standard/NonFungibleToken.cdc",
-		"Domains":"./contracts/Domains.cdc",
-		"Flowns":"./contracts/Flowns.cdc",
+		"NonFungibleToken":"./cadence/contracts/standard/NonFungibleToken.cdc",
+		"Domains":"./cadence/contracts/Domains.cdc",
+		"Flowns":"./cadence/contracts/Flowns.cdc",
 		"FungibleToken": {
-			"source": "./contracts/standard/FungibleToken.cdc",
+			"source": "./cadence/contracts/standard/FungibleToken.cdc",
 			"aliases": {
 			  "testnet": "0x9a0766d93b6608b7",
 			  "emulator": "0xee82856bf20e2aa6"
 			}
 		  },
 		"FlowToken": {
-		"source": "./contracts/standard/FlowToken.cdc",
+		"source": "./cadence/contracts/standard/FlowToken.cdc",
 		"aliases": {
 			"testnet": "0x631e88ae7f1d7c20",
 			"emulator": "0x0ae53cb6e3f42a79"
@@ -32,7 +32,7 @@
 	"accounts": {
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
-			"keys": "34de3e965a5d671a47c01a41637c13d424b030eb7c9c1b3cad473f726b0f67fb"
+			"keys": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
 		}
 	},
 	"deployments": {

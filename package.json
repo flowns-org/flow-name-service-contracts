@@ -1,0 +1,24 @@
+{
+  "name": "flow-name-service-contracts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "git@github.com:flowns-org/flow-name-service-contracts.git",
+  "author": "Caos <caosbad@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@onflow/fcl": "^0.0.73",
+    "@onflow/types": "^0.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@onflow/util-encode-key": "^0.0.2",
+    "babel-jest": "^27.0.6",
+    "dotenv": "^10.0.0",
+    "flow-js-testing": "^0.1.11",
+    "jest": "^27.0.6",
+    "elliptic": "^6.5.4",
+    "sha3": "^2.1.4"
+  }
+}

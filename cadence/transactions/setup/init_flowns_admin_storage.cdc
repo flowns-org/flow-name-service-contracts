@@ -1,7 +1,7 @@
 
 
 // emulator
-import NonFungibleToken, Domains, Flowns from 0xf8d6e0586b0a20c7
+import Flowns from 0xFlowns
 
 // playground
 // import NonFungibleToken from 0x02
