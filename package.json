@@ -8,7 +8,8 @@
   "license": "MIT",
   "dependencies": {
     "@onflow/fcl": "^0.0.73",
-    "@onflow/types": "^0.0.4"
+    "@onflow/types": "^0.0.4",
+    "eth-ens-namehash": "^2.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -16,9 +17,9 @@
     "@onflow/util-encode-key": "^0.0.2",
     "babel-jest": "^27.0.6",
     "dotenv": "^10.0.0",
+    "elliptic": "^6.5.4",
     "flow-js-testing": "^0.1.11",
     "jest": "^27.0.6",
-    "elliptic": "^6.5.4",
     "sha3": "^2.1.4"
   }
 }

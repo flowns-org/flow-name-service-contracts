@@ -73,10 +73,15 @@ pub contract Domains: NonFungibleToken {
 
         pub fun checkParentExpired():Bool {
           let currentTimestamp = getCurrentBlock().timestamp
-          return currentTimestamp >= Domains.expired[self.parentNameHash]!
+          let expiredTime =  Domains.expired[self.parentNameHash]
+          var isExpired = false
+          if expiredTime == nil {
+            return true
+          }
+          return currentTimestamp >= expiredTime!
         }
 
-         pub fun getDomainName():String {
+        pub fun getDomainName():String {
           let domainName = ""
           return domainName.concat(self.name).concat(".").concat(self.parent)
         }
@@ -165,7 +170,7 @@ pub contract Domains: NonFungibleToken {
         pub var subdomainCount:UInt64
         pub var content: String
 
-        init(id: UInt64, name: String, nameHash: String, parent: String, expiredAt:UFix64) {
+        init(id: UInt64, name: String, nameHash: String, parent: String) {
             self.id = id
             self.name=name
             self.nameHash = nameHash
@@ -177,9 +182,13 @@ pub contract Domains: NonFungibleToken {
             self.parent = parent
             self.expiredTip = "Domain is expired pls renew it"
         }
-        pub fun checkExpired():Bool {
+        pub fun checkExpired(): Bool {
           let currentTimestamp = getCurrentBlock().timestamp
-          return currentTimestamp >= Domains.expired[self.nameHash]!
+          let expiredTime =  Domains.expired[self.nameHash]
+          if expiredTime != nil {
+            return (currentTimestamp + 86400.00) < expiredTime!
+          } 
+          return true
         }
 
         pub fun getDomainName():String {
@@ -240,10 +249,15 @@ pub contract Domains: NonFungibleToken {
           self.addresses.remove(key: chainType)
         }
 
+        //  access(account) fun initRecord(address: Address){
+        //   Domains.records[self.nameHash] = address
+        //   emit DomainRecordChanged(name: self.name, resolver: address)
+        // }
+
         // set domain record
         access(account) fun setRecord(address: Address){
            pre {
-            self.checkExpired() : self.expiredTip
+             Domains.records[self.nameHash]!=nil :""
           }
           // todo hash string
           Domains.records[self.nameHash] = address
@@ -254,7 +268,7 @@ pub contract Domains: NonFungibleToken {
            pre {
             self.checkExpired() : self.expiredTip
           }
-          if self.subdomains[nameHash] !=nil{
+          if self.subdomains[nameHash] !=nil {
             panic("Subdomain already existed.")
           }
           let subdomain <- create Subdomain(
@@ -352,12 +366,14 @@ pub contract Domains: NonFungibleToken {
         }
 
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
+          pre{
+            Domains.records[nameHash] == nil : "domain not available"
+          }
             let domain <- create Domains.NFT(
               id: id,
               name: name,
               nameHash: nameHash,
               parent: parentName,
-              expiredAt:expiredAt
             )
             let nft <- domain
             Domains.expired[nameHash] = expiredAt
@@ -375,6 +391,17 @@ pub contract Domains: NonFungibleToken {
       let collection <- create Collection()
       return <- collection
     }
+
+    pub fun domainExpiredTime(nameHash: String) :UFix64? {
+      let expiredTime = Domains.expired[nameHash]
+      return expiredTime
+    }
+
+    pub fun domainRecord(nameHash: String) :Address? {
+      let address = Domains.records[nameHash]
+      return address
+    }
+
 
 
 	init() {

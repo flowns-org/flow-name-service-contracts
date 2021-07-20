@@ -1,11 +1,11 @@
 import fs from 'fs'
 import { authz } from './authz.js'
 import fcl from '@onflow/fcl'
-import { nodeUrl, accountAddr, paths } from '../config/constants.js'
+import { nodeUrl, accountAddr, paths, flowTokenAddr, flowFungibleAddr } from '../config/constants.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const { setup, scripts } = paths
+const { setup, scripts, transactions } = paths
 
 export const fclInit = () => {
   fcl
@@ -14,6 +14,8 @@ export const fclInit = () => {
     .put('0xDomains', accountAddr)
     .put('0xFlowns', accountAddr)
     .put('0xNonFungibleToken', accountAddr)
+    .put('0xFungibleToken', flowFungibleAddr)
+    .put('0xFlowToken', flowTokenAddr)
 }
 
 export const sendTrx = async (CODE, args) => {
@@ -36,16 +38,22 @@ export const execScript = async (script, args = []) => {
 }
 
 export const buildAndSendTrx = async (key, args = []) => {
-  const trxScript = await readCode(setup[key])
+  const trxScript = await readCode(transactions[key])
   const trxId = await sendTrx(trxScript, args)
   console.log(trxId)
   const txStatus = await fcl.tx(trxId).onceSealed()
   console.log(txStatus)
 }
 
+export const buildSetupTrx = async (key, args = []) => {
+  const trxScript = await readCode(setup[key])
+  const trxId = await sendTrx(trxScript, args)
+  const txStatus = await fcl.tx(trxId).onceSealed()
+  console.log(txStatus)
+}
+
 export const buildAndExecScript = async (key, args = []) => {
   const script = await readCode(scripts[key])
-  console.log(script)
   const result = await execScript(script, args)
   return result
 }
