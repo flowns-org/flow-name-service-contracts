@@ -50,6 +50,7 @@ export const paths = {
     queryFlowTokenBalance: buildPath('query_flow_balance.cdc', 'script'),
     queryDomainExpiredTime: buildPath('query_domain_expired_time.cdc', 'script'),
     queryDomainRecord: buildPath('query_domain_record.cdc', 'script'),
+    queryDomainInfo: buildPath('query_domain_info.cdc', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',
