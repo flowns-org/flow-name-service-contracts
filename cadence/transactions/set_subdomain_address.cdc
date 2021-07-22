@@ -4,7 +4,7 @@ import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 
 transaction(domainNameHash:String, chainType:UInt64, address: String) {
-  var domain: &{Domains.DomainPrivate}
+  var subdomain: &{Domains.DomainPrivate}
   prepare(account: AuthAccount) {
     let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
     let collection = collectionCap.borrow()!
@@ -25,4 +25,3 @@ transaction(domainNameHash:String, chainType:UInt64, address: String) {
     self.domain.setAddress(chainType:chainType, address:address)
   }
 }
-

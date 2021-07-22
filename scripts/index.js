@@ -22,10 +22,10 @@ const main = async () => {
   // console.log(domain)
 
   // get user all info
-  // const subdomainHash = hash.hash('dev.caoss.flow')
-  // const res1 = await buildAndSendTrx('mintSubdomain', [
+  const subdomainHash = hash.hash('remove.caoss.flow')
+  // await buildAndSendTrx('mintSubdomain', [
   //   fcl.arg(nameHash, t.String),
-  //   fcl.arg('dev', t.String),
+  //   fcl.arg('remove', t.String),
   //   fcl.arg(subdomainHash, t.String),
   // ])
 
@@ -36,20 +36,31 @@ const main = async () => {
   //   fcl.arg('0x91a20a7e25a35415', t.String),
   // ])
 
-  // set text
-  await buildAndSendTrx('setDomainText', [
-    fcl.arg(nameHash, t.String),
-    fcl.arg('twitter', t.String),
-    fcl.arg('@caosbad', t.String),
-  ])
+  // remove subdomain
+  // await buildAndSendTrx('removeSubdomain', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg(subdomainHash, t.String),
+  // ])
 
-  await buildAndSendTrx('setDomainText', [
+  // set text
+  // await buildAndSendTrx('setDomainText', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg('twitter', t.String),
+  //   fcl.arg('@caosbad', t.String),
+  // ])
+
+  // await buildAndSendTrx('setDomainText', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg('github', t.String),
+  //   fcl.arg('@caosbad', t.String),
+  // ])
+
+await buildAndSendTrx('setSubdomainText', [
     fcl.arg(nameHash, t.String),
+    fcl.arg(subdomainHash, t.String),
     fcl.arg('github', t.String),
     fcl.arg('@caosbad', t.String),
   ])
-
-
 
   const res = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
   console.log(res)

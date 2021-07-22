@@ -1,5 +1,5 @@
 import t from '@onflow/types'
-import { fclInit, buildSetupTrx, buildAndExecScript } from '../utils/index.js'
+import { fclInit, buildSetupTrx, buildAndExecScript, buildAndSendTrx } from '../utils/index.js'
 import fcl from '@onflow/fcl'
 import hash from 'eth-ens-namehash'
 import { accountAddr } from '../config/constants.js'
@@ -29,7 +29,7 @@ const main = async () => {
   const nameHash = hash.hash('caoss.flow')
   const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')
   // renew
-  const res1 = await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
+  await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
 
   const subdomainHash = hash.hash('blog.caoss.flow')
   const res1 = await buildAndSendTrx('mintSubdomain', [

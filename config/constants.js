@@ -57,7 +57,9 @@ export const paths = {
     registerDomain: '../cadence/transactions/register_domain.cdc',
     renewDomain: '../cadence/transactions/renew_domain.cdc',
     mintSubdomain: '../cadence/transactions/mint_subdomain.cdc',
+    removeSubdomain: '../cadence/transactions/remove_subdomain.cdc',
     setDomainAddress: '../cadence/transactions/set_domain_address.cdc',
     setDomainText: '../cadence/transactions/set_domain_text.cdc',
+    setSubdomainText: '../cadence/transactions/set_subdomain_text.cdc',
   },
 }

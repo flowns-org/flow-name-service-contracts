@@ -103,12 +103,14 @@ pub contract Domains: NonFungibleToken {
       pub let addresses:  {UInt64: String}
       pub let texts: {String:String}
       pub let parent: String
+      pub var subdomains: @{String:Subdomain}
       pub fun getText(key: String):String
       pub fun getAddress(chainType: UInt64):String
       pub fun getAllTexts():{String:String}
       pub fun getAllAddresses():{UInt64:String}
       pub fun getDomainName():String
       pub fun getDetail(): DomainDetail
+      pub fun getSubdomainsDetail(): [SubdomainDetail]
     }
 
      pub resource interface SubdomainPublic {
@@ -261,7 +263,7 @@ pub contract Domains: NonFungibleToken {
         pub let nameHash: String
         pub let addresses:  {UInt64: String}
         pub let texts: {String:String}
-        pub let subdomains: @{String: Subdomain}
+        pub var subdomains: @{String: Subdomain}
         pub let expiredTip: String
         pub let parent: String
         pub var subdomainCount:UInt64
@@ -377,6 +379,17 @@ pub contract Domains: NonFungibleToken {
           return detail
         }
 
+        pub fun getSubdomainsDetail(): [SubdomainDetail] {
+          let ids = self.subdomains.keys
+          var subdomains:[SubdomainDetail] = []
+          for id in ids {
+            let subRef = &self.subdomains[id] as! auth &Subdomain
+            let detail = subRef.getDetail()
+            subdomains.append(detail)
+          }
+          return subdomains
+        }
+
         // set domain record
         access(account) fun setRecord(address: Address){
            pre {
@@ -435,6 +448,7 @@ pub contract Domains: NonFungibleToken {
     pub resource interface CollectionPrivate {
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
         pub fun borrowDomainPrivate(_ id: UInt64): &{Domains.DomainPrivate}
+        pub fun borrowSubDomainPrivate(id: UInt64, nameHash:String): &Subdomain
     }
 
 
@@ -491,6 +505,18 @@ pub contract Domains: NonFungibleToken {
           let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
           return ref as! &Domains.NFT
         }
+
+         pub fun borrowSubDomainPrivate(id: UInt64, nameHash: String ): &Subdomain {
+          pre {
+              self.ownedNFTs[id] != nil:
+                  "domain doesn't exist"
+          }
+          let domainRef = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+          let domain = domainRef as! &Domains.NFT
+          let sub = &domain.subdomains[nameHash] as! &Subdomain
+          return sub
+        }
+
 
 
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
