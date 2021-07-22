@@ -1,20 +1,17 @@
 import Domains from 0xDomains
 
-pub fun main(nameHash: String): Domains.DomainDetail? {
-  let address = Domains.records[nameHash] ?? panic("Domain not exist")
+pub fun main(address: Address): [Domains.DomainDetail] {
   let account = getAccount(address)
   let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
   let collection = collectionCap.borrow()!
-  var detail:Domains.DomainDetail? = nil
+  let domains:[Domains.DomainDetail] = []
   let ids = collection.getIDs()
   
   for id in ids {
     let domain = collection.borrowDomain(id:id)
-    if domain.nameHash == nameHash {
-      detail = domain.getDetail()
-    }
-   
+    let detail = domain.getDetail()
+    domains.append(detail)
   }
 
-  return detail
+  return domains
 }

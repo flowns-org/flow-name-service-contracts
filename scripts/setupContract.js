@@ -1,7 +1,9 @@
 import t from '@onflow/types'
 import { fclInit, buildSetupTrx, buildAndExecScript } from '../utils/index.js'
 import fcl from '@onflow/fcl'
+import hash from 'eth-ens-namehash'
 import { accountAddr } from '../config/constants.js'
+import { registerDomain, renewDomain} from './buildTrxs.js'
 
 const main = async () => {
   // fcl init and load config
@@ -23,6 +25,40 @@ const main = async () => {
     fcl.arg(5, t.Int),
     fcl.arg('0.0000002', t.UFix64),
   ])
+
+  const nameHash = hash.hash('caoss.flow')
+  const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')
+  // renew
+  const res1 = await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
+
+  const subdomainHash = hash.hash('blog.caoss.flow')
+  const res1 = await buildAndSendTrx('mintSubdomain', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('dev', t.String),
+    fcl.arg(subdomainHash, t.String),
+  ])
+
+
+    // set domain
+  // await buildAndSendTrx('setDomainAddress', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg(1, t.UInt64),
+  //   fcl.arg('0x91a20a7e25a35415', t.String),
+  // ])
+
+  // set text
+  await buildAndSendTrx('setDomainText', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('twitter', t.String),
+    fcl.arg('@caosbad', t.String),
+  ])
+
+  await buildAndSendTrx('setDomainText', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('github', t.String),
+    fcl.arg('@caosbad', t.String),
+  ])
+
 
   // const dmoain = await buildAndExecScript('queryRootDomainsById', [fcl.arg(0, t.UInt64)])
   // console.log(dmoain)

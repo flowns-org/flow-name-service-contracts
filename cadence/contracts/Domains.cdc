@@ -12,6 +12,7 @@ pub contract Domains: NonFungibleToken {
 
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
 
     // domain records
     pub let records: {String: Address}
@@ -34,7 +35,6 @@ pub contract Domains: NonFungibleToken {
     pub let owner: Address
     pub let name: String
     pub let nameHash: String
-    pub let expiredAt: UFix64
     pub let addresses: {UInt64: String}
     pub let texts: {String:String}
     pub let parentName: String
@@ -44,7 +44,6 @@ pub contract Domains: NonFungibleToken {
       owner: Address,
       name: String,
       nameHash: String, 
-      expiredAt: UFix64,
       addresses:{UInt64: String},
       texts: {String:String},
       parentName: String,
@@ -53,7 +52,6 @@ pub contract Domains: NonFungibleToken {
         self.owner=owner
         self.name=name
         self.nameHash=nameHash
-        self.expiredAt=expiredAt
         self.addresses=addresses
         self.texts=texts
         self.parentName=parentName
@@ -82,8 +80,8 @@ pub contract Domains: NonFungibleToken {
       texts: {String:String},
       parentName: String,
       subdomainCount:UInt64,
-      content: String,
-      subdomains:[SubdomainDetail]
+      subdomains:[SubdomainDetail],
+      content: String
       ) {
         self.owner=owner
         self.name=name
@@ -113,15 +111,40 @@ pub contract Domains: NonFungibleToken {
       pub fun getDetail(): DomainDetail
     }
 
+     pub resource interface SubdomainPublic {
+      pub let id: UInt64
+      pub let name: String
+      pub let nameHash: String
+      pub let addresses:  {UInt64: String}
+      pub let texts: {String:String}
+      pub let parent: String
+      pub fun getText(key: String):String
+      pub fun getAddress(chainType: UInt64):String
+      pub fun getAllTexts():{String:String}
+      pub fun getAllAddresses():{UInt64:String}
+      pub fun getDomainName():String
+      pub fun getDetail(): SubdomainDetail
+    }
+
+    pub resource interface SubdomainPrivate {
+        pub fun setText(key: String, value: String)
+        pub fun setAddress(chainType: UInt64, address: String)
+        pub fun removeText(key: String)
+        pub fun removeAddress(chainType: UInt64)
+    }
+
+
     pub resource interface DomainPrivate {
-        access(account) fun setText(key: String, value: String)
-        access(account) fun setAddress(chainType: UInt64, address: String)
-        access(account) fun removeText(key: String)
-        access(account) fun removeAddress(chainType: UInt64)
+        pub fun setText(key: String, value: String)
+        pub fun setAddress(chainType: UInt64, address: String)
+        pub fun removeText(key: String)
+        pub fun removeAddress(chainType: UInt64)
+        pub fun createSubDomain(name: String, nameHash: String)
+        pub fun removeSubDomain(nameHash: String)
         access(account) fun setRecord(address: Address)
     }
 
-    pub resource Subdomain: DomainPublic, DomainPrivate {
+    pub resource Subdomain: SubdomainPublic, SubdomainPrivate {
         pub let id: UInt64
         pub let name: String
         pub let nameHash: String
@@ -129,6 +152,7 @@ pub contract Domains: NonFungibleToken {
         pub let texts: {String: String}
         pub let parent: String
         pub let parentNameHash: String
+        pub let content:String
         pub let expiredTip: String
 
         init(id: UInt64, name: String, nameHash: String, parent: String, parentNameHash: String) {
@@ -139,6 +163,7 @@ pub contract Domains: NonFungibleToken {
             self.texts={}
             self.parent=parent
             self.parentNameHash = parentNameHash
+            self.content = ""
             self.expiredTip = "Subdomain is expired please renew your parent domain."
         }
 
@@ -184,73 +209,53 @@ pub contract Domains: NonFungibleToken {
           return self.addresses
         }
 
-        pub fun getDetail(): DomainDetail {
+        pub fun getDetail(): SubdomainDetail {
            pre {
              self.checkParentExpired() : self.expiredTip
           }
-          let owner = Domains.records[self.parentNameHash]
-          
-          let detail = DomainDetail(
-            onwer:owner,
+          let owner = Domains.records[self.parentNameHash]!
+          let detail = SubdomainDetail(
+            owner:owner,
             name: self.getDomainName(), 
             nameHash: self.nameHash,
             addresses:self.getAllAddresses(),
             texts: self.getAllTexts(),
-            parent: self.parent,
-            subdomainCount: 0,
-            subdomains:[],
+            parentName: self.parent,
             content:self.content
           )
+          return detail
         }
 
 
-        access(account) fun setText(key: String, value: String){
+        pub fun setText(key: String, value: String){
            pre {
              self.checkParentExpired() : self.expiredTip
           }
           self.texts[key] = value
         }
-        access(account) fun setAddress(chainType: UInt64, address: String){
+        pub fun setAddress(chainType: UInt64, address: String){
            pre {
              self.checkParentExpired() : self.expiredTip
           }
           self.addresses[chainType] = address
         }
-        access(account) fun removeText(key: String){
+        pub fun removeText(key: String){
            pre {
             self.checkParentExpired() : self.expiredTip
           }
           self.texts.remove(key: key)
         }
-        access(account) fun removeAddress(chainType: UInt64){
+        pub fun removeAddress(chainType: UInt64){
            pre {
             self.checkParentExpired() : self.expiredTip
           }
           self.addresses.remove(key: chainType)
         }
 
-        access(account) fun setRecord(address: Address){
-           pre {
-            self.checkParentExpired() : self.expiredTip
-          }
-        }
-
-        access(account) fun setExpire(_ expiredAt: UFix64){
-          pre {
-            self.checkParentExpired() : self.expiredTip
-          }
-        }
-
-        
-
     }
 
-    pub resource interface DomainManage {
-      access(account) fun createSubDomain(_ name: String, nameHash: String, parent: String)
-      access(account) fun removeSubDomain(nameHash: String)
-    }
 
-    pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT, DomainManage{
+    pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT{
         pub let id: UInt64
         pub let name: String
         pub let nameHash: String
@@ -316,25 +321,25 @@ pub contract Domains: NonFungibleToken {
           return self.addresses
         }
 
-        access(account) fun setText(key: String, value: String){
+        pub fun setText(key: String, value: String){
            pre {
             self.checkExpired() : self.expiredTip
           }
           self.texts[key] = value
         }
-        access(account) fun setAddress(chainType: UInt64, address: String){
+        pub fun setAddress(chainType: UInt64, address: String){
            pre {
             self.checkExpired() : self.expiredTip
           }
           self.addresses[chainType] = address
         }
-        access(account) fun removeText(key: String){
+        pub fun removeText(key: String){
            pre {
             self.checkExpired() : self.expiredTip
           }
           self.texts.remove(key: key)
         }
-        access(account) fun removeAddress(chainType: UInt64){
+        pub fun removeAddress(chainType: UInt64){
            pre {
             self.checkExpired() : self.expiredTip
           }
@@ -346,26 +351,30 @@ pub contract Domains: NonFungibleToken {
            pre {
              self.checkExpired() : self.expiredTip
           }
-          let owner = Domains.records[self.nameHash]
+          let owner = Domains.records[self.nameHash]!
+          let expired = Domains.expired[self.nameHash]!
           
           let ids = self.subdomains.keys
-          var subdomains = []
+          var subdomains:[SubdomainDetail] = []
           for id in ids {
-            let sub = self.subdomains[id]
-            subdomains.append(sub.getDetail())
+            let subRef = &self.subdomains[id] as! auth &Subdomain
+            let detail = subRef.getDetail()
+            subdomains.append(detail)
           }
 
           let detail = DomainDetail(
-            onwer:owner,
+            owner:owner,
             name: self.getDomainName(), 
             nameHash: self.nameHash,
+            expiredAt:expired,
             addresses:self.getAllAddresses(),
             texts: self.getAllTexts(),
-            parent: self.parent,
+            parentName: self.parent,
             subdomainCount: self.subdomainCount,
             subdomains:subdomains,
             content:self.content
           )
+          return detail
         }
 
         // set domain record
@@ -373,12 +382,11 @@ pub contract Domains: NonFungibleToken {
            pre {
              Domains.records[self.nameHash]!=nil :""
           }
-          // todo hash string
           Domains.records[self.nameHash] = address
           emit DomainRecordChanged(name: self.name, resolver: address)
         }
 
-        access(account) fun createSubDomain(_ name: String, nameHash: String, parent: String){
+        pub fun createSubDomain(name: String, nameHash: String){
            pre {
             self.checkExpired() : self.expiredTip
           }
@@ -400,7 +408,7 @@ pub contract Domains: NonFungibleToken {
           destroy oldSubdomain
         }
 
-        access(account) fun removeSubDomain(nameHash: String){
+        pub fun removeSubDomain(nameHash: String){
           
           Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
           self.subdomainCount = self.subdomainCount - (1 as UInt64)
@@ -426,6 +434,7 @@ pub contract Domains: NonFungibleToken {
      //return the content for this NFT
     pub resource interface CollectionPrivate {
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+        pub fun borrowDomainPrivate(_ id: UInt64): &{Domains.DomainPrivate}
     }
 
 
@@ -474,6 +483,16 @@ pub contract Domains: NonFungibleToken {
           return ref as! &Domains.NFT
         }
 
+        pub fun borrowDomainPrivate(_ id: UInt64): &{Domains.DomainPrivate} {
+          pre {
+              self.ownedNFTs[id] != nil:
+                  "domain doesn't exist"
+          }
+          let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+          return ref as! &Domains.NFT
+        }
+
+
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
           pre{
             Domains.records[nameHash] == nil : "domain not available"
@@ -511,20 +530,21 @@ pub contract Domains: NonFungibleToken {
       return address
     }
 
-
+    
 
 	init() {
     // Initialize the total supply
     self.totalSupply = 0
     self.CollectionPublicPath=/public/fnsDomainCollection
     self.CollectionStoragePath=/storage/fnsDomainCollection
+    self.CollectionPrivatePath=/private/fnsDomainCollection
     
     self.records = {}
     self.expired = {}
     let account =self.account
     account.save(<- Domains.createEmptyCollection(), to: Domains.CollectionStoragePath)
     account.link<&Domains.Collection>(Domains.CollectionPublicPath, target: Domains.CollectionStoragePath)
-
+    // account.link<&Domains.Collection>(Domains.CollectionPrivatePath, target: Domains.CollectionStoragePath)
     emit ContractInitialized()
 	}
 }

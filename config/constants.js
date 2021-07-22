@@ -51,9 +51,13 @@ export const paths = {
     queryDomainExpiredTime: buildPath('query_domain_expired_time.cdc', 'script'),
     queryDomainRecord: buildPath('query_domain_record.cdc', 'script'),
     queryDomainInfo: buildPath('query_domain_info.cdc', 'script'),
+    queryUsersAllDomain: buildPath('query_users_domains_info.cdc', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',
     renewDomain: '../cadence/transactions/renew_domain.cdc',
+    mintSubdomain: '../cadence/transactions/mint_subdomain.cdc',
+    setDomainAddress: '../cadence/transactions/set_domain_address.cdc',
+    setDomainText: '../cadence/transactions/set_domain_text.cdc',
   },
 }
