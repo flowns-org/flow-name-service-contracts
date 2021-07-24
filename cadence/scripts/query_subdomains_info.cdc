@@ -5,13 +5,14 @@ pub fun main(address: Address, nameHash: String): [Domains.SubdomainDetail] {
   let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
   let collection = collectionCap.borrow()!
   let ids = collection.getIDs()
-  let detail:[Domains.SubdomainDetail]  = []
+  var details:[Domains.SubdomainDetail]  = []
   for id in ids {
     let domain = collection.borrowDomain(id:id)
     if domain.nameHash == nameHash {
-      detail = domain.getSubdomainsDetail()
+      let subdomainDetail = domain.getSubdomainsDetail()
+      details = subdomainDetail
     }
   }
 
-  return domains
+  return details
 }

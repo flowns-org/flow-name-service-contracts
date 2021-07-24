@@ -101,7 +101,12 @@ pub contract Flowns {
       )
     }
 
-    access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
+    pub fun getVaultBalance() : UFix64 {
+      return self.domainVault.balance
+    }
+
+
+    access(account) fun mintDomain(name:String, nameHash:String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       pre {
           self.server != nil : "Your client has not been linked to the server"
       }
@@ -111,23 +116,23 @@ pub contract Flowns {
       let expiredTime = getCurrentBlock().timestamp + duration
       self.server!.borrow()!.mintDomain(id:self.domainCount, name:name, nameHash: nameHash, parentName: self.name, expiredAt:expiredTime, receiver:receiver)
       self.domainCount = self.domainCount + (1 as UInt64)
-      // self.domains[nameHash] = receiver.address
 
     }
-    
 
     pub fun setPrices(key:Int, price: UFix64) {
       self.prices[key]= price
       // emit
     }
 
-
-
-    pub fun renewDomain(domain: &{Domains.DomainPublic}, duration: UFix64, feeTokens: @FungibleToken.Vault) {
+    pub fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
     
       // let domain = domainCap.borrow()!
-      let length = domain.name.length
-      let price = self.prices[length]
+
+      var len = domain.name.length
+      if len > 10 {
+        len = 10
+      }
+      let price = self.prices[len]
       if domain.parent != self.name {
         panic("domain not root domain's sub domain")
       }
@@ -149,8 +154,8 @@ pub contract Flowns {
       }
 
       self.domainVault.deposit(from: <- feeTokens)
-      let expiredTime = Domains.expired[domain.nameHash]! + UFix64(duration)
-      Domains.expired[domain.nameHash] = expiredTime
+      let expiredAt = Domains.expired[domain.nameHash]! + UFix64(duration)
+      domain.setExpired(expiredAt: expiredAt)
 
       emit RenewDomain(name:domain.name, duration: duration, price: rentFee )
 
@@ -163,8 +168,11 @@ pub contract Flowns {
 
       }
       
-      let length = name.length
-      let price = self.prices[length]
+      var len = name.length
+      if len > 10 {
+        len = 10
+      }
+      let price = self.prices[len]
       if duration < 3153600.0 {
         panic("duration must geater than 3153600")
       }
@@ -190,9 +198,9 @@ pub contract Flowns {
 
     }
 
-    access(account) fun withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>){
+    access(account) fun withdrawVault(receiver:Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
       let vault = receiver.borrow()!
-      vault.deposit(from: <- self.domainVault.withdraw(amount: self.domainVault.balance))
+      vault.deposit(from: <- self.domainVault.withdraw(amount: amount))
     }
 
     destroy(){
@@ -211,11 +219,13 @@ pub contract Flowns {
 
         pub fun getAllDomains(): {UInt64: RootDomainInfo}
 
-        pub fun renewDomain(domainId: UInt64, domain: &{Domains.DomainPublic}, duration: UFix64, feeTokens: @FungibleToken.Vault)
+        pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault)
 
         pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
 
         pub fun getPrices(domainId:UInt64): {Int:UFix64}
+
+        pub fun getVaultBalance(domainId:UInt64): UFix64
 
         // pub fun available(domainId:UInt64, nameHash:String):Bool
     }
@@ -226,9 +236,11 @@ pub contract Flowns {
           name: String, 
           nameHash: String,
         )
-      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>)
+      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>, amount: UFix64)
 
       access(account) fun setPrices(domainId:UInt64, len:Int, price:UFix64)
+      
+      access(account) fun mintDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
   }
 
   pub resource RootDomainCollection: DomainPublic, DomainAdmin {
@@ -259,7 +271,7 @@ pub contract Flowns {
 
       }
 
-      pub fun renewDomain(domainId: UInt64, domain: &{Domains.DomainPublic}, duration: UFix64, feeTokens: @FungibleToken.Vault){
+      pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault){
         pre {
              self.domains[domainId] != nil : "Root domain not exist..."
           }
@@ -275,13 +287,30 @@ pub contract Flowns {
         root.registerDomain(name:name, nameHash:nameHash, duration:duration, feeTokens: <-feeTokens, receiver:receiver )
       }
 
+      pub fun getVaultBalance(domainId:UInt64): UFix64 {
+         pre {
+          self.domains[domainId] != nil : "Root domain not exist..."
+        }
+        let rootRef = &self.domains[domainId] as? &RootDomain
 
-      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>){
+        return rootRef.getVaultBalance()
+      }
+
+      access(account) fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
         pre {
           self.domains[domainId] != nil : "Root domain not exist..."
         }
-         self.getDomain(domainId).withdrawVault(receiver:receiver)
+         self.getDomain(domainId).withdrawVault(receiver:receiver, amount:amount)
       }
+
+      access(account) fun mintDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>) {
+         pre {
+          self.domains[domainId] != nil : "Root domain not exist..."
+        }
+        let root = self.getDomain(domainId)
+         root.mintDomain(name: name, nameHash: nameHash, duration: duration, receiver: receiver)
+      }
+
 
       // Get all the domain info
       pub fun getAllDomains(): {UInt64: RootDomainInfo} {
@@ -325,15 +354,17 @@ pub contract Flowns {
 
     //
     pub resource interface AdminPublic {
-        pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
-        pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>)
-        pub fun createRootDomain(name: String, nameHash: String) 
-        pub fun setRentPrice(domainId:UInt64, len:Int, price:UFix64) 
+      pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
+      pub fun addRootDomainCapability(domainId:UInt64, cap: Capability<&Domains.Collection>)
+      pub fun createRootDomain(name: String, nameHash: String) 
+      pub fun setRentPrice(domainId:UInt64, len:Int, price:UFix64) 
+      pub fun withdrawVault(domainId:UInt64, receiver:Capability<&{FungibleToken.Receiver}>, amount: UFix64)
+      pub fun mintDomain(domainId:UInt64, name: String, nameHash: String, duration:UFix64, receiver:Capability<&{NonFungibleToken.Receiver}>)
+
     }
 
     // 
     pub resource Admin: AdminPublic {
-
         access(self) var server: Capability<&Flowns.RootDomainCollection>?
 
         init() {
@@ -378,6 +409,20 @@ pub contract Flowns {
               self.server != nil : "Your client has not been linked to the server"
           }
           self.server!.borrow()!.setPrices(domainId: domainId, len: len, price: price)
+        }
+
+        pub fun withdrawVault(domainId:UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
+           pre {
+              self.server != nil : "Your client has not been linked to the server"
+          }
+          self.server!.borrow()!.withdrawVault(domainId: domainId, receiver: receiver, amount:amount)
+        }
+
+        pub fun mintDomain(domainId:UInt64, name: String, nameHash: String, duration:UFix64,receiver: Capability<&{NonFungibleToken.Receiver}>) {
+           pre {
+              self.server != nil : "Your client has not been linked to the server"
+          }
+          self.server!.borrow()!.mintDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, receiver: receiver)
         }
 
     }
@@ -427,17 +472,25 @@ pub contract Flowns {
       return {}
     }
 
+    pub fun getRootVaultBalance(domainId: UInt64): UFix64 {
+      let account = Flowns.account
+      let rootCollectionCap=account.getCapability<&{Flowns.DomainPublic}>(self.CollectionPublicPath)
+      let collection = rootCollectionCap.borrow()?? panic("Could not borrow collection ")
+      let balance = collection.getVaultBalance(domainId: domainId)
+      return balance
+    }
+
     pub fun registerDomain(domainId: UInt64, name:String, nameHash:String, duration:UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       let account = Flowns.account
       let rootCollectionCap=account.getCapability<&{Flowns.DomainPublic}>(self.CollectionPublicPath)
-      let collection = rootCollectionCap.borrow() ?? panic("Could not borrow admin client")
+      let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
       collection.registerDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver)
     }
     
-     pub fun renewDomain(domainId: UInt64, domain: &{Domains.DomainPublic}, duration: UFix64, feeTokens: @FungibleToken.Vault) {
+     pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
       let account = Flowns.account
       let rootCollectionCap=account.getCapability<&{Flowns.DomainPublic}>(self.CollectionPublicPath)
-      let collection = rootCollectionCap.borrow() ?? panic("Could not borrow admin client")
+      let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
       collection.renewDomain(domainId: domainId, domain:domain, duration:duration, feeTokens: <-feeTokens)
     }
     
@@ -457,8 +510,7 @@ pub contract Flowns {
         let account=self.account
         self.totalRootDomains =0
         
-        // self.rootDomainMapping = {}
-        let FlownsReceiver=account.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+        // let FlownsReceiver=account.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
         
         log("Setting up flowns capability")
         let collection <- create RootDomainCollection()

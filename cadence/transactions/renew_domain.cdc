@@ -6,16 +6,17 @@ import NonFungibleToken from 0xNonFungibleToken
 transaction(domainId:UInt64, nameHash:String, duration:UFix64, amount: UFix64) {
   let vault: @FungibleToken.Vault
   // let domainCap:Capability<&{Domains.DomainPublic}>
-  var domain: &{Domains.DomainPublic}
+  var domain: &Domains.NFT
   prepare(account: AuthAccount) {
     let collectionRef = account.borrow<&{Domains.CollectionPublic}>(from: Domains.CollectionStoragePath) ?? panic("Could not find your domain collection cap")
-    var domain: &{Domains.DomainPublic}? = nil
-
+    var domain: &Domains.NFT? = nil
+    let collectionPrivate = account.borrow<&{Domains.CollectionPrivate}>(from: Domains.CollectionStoragePath) ?? panic("Could not find your domain collection cap")
+    
     let ids = collectionRef.getIDs()
     for id in ids {
       let item = collectionRef.borrowDomain(id:id)
       if item.nameHash == nameHash {
-        domain = item
+        domain = collectionPrivate.borrowDomainPrivate(id)
       } 
     }
     self.domain = domain!

@@ -34,7 +34,7 @@ const main = async () => {
   const subdomainHash = hash.hash('blog.caoss.flow')
   const res1 = await buildAndSendTrx('mintSubdomain', [
     fcl.arg(nameHash, t.String),
-    fcl.arg('dev', t.String),
+    fcl.arg('blog', t.String),
     fcl.arg(subdomainHash, t.String),
   ])
 

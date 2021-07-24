@@ -24,7 +24,8 @@ pub contract Domains: NonFungibleToken {
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
     pub event Created(id: UInt64, name:String)
-    pub event DomainRecordChanged(name: String, resolver:Address)
+    pub event DomainRecordChanged(name: String, resolver: Address)
+    pub event DomainExpiredChanged(name: String, expiredAt: UFix64)
     pub event SubDomainCreated(id: UInt64, hash:String)
     pub event SubDomainRemoved(id: UInt64, hash:String)
     // todo events update
@@ -144,6 +145,10 @@ pub contract Domains: NonFungibleToken {
         pub fun createSubDomain(name: String, nameHash: String)
         pub fun removeSubDomain(nameHash: String)
         access(account) fun setRecord(address: Address)
+        pub fun setSubdomainText(nameHash:String, key: String, value: String)
+        pub fun setSubdomainAddress(nameHash:String, chainType: UInt64, address: String)
+        pub fun removeSubdomainText(nameHash:String, key: String)
+        pub fun removeSubdomainAddress(nameHash:String, chainType: UInt64)
     }
 
     pub resource Subdomain: SubdomainPublic, SubdomainPrivate {
@@ -169,15 +174,6 @@ pub contract Domains: NonFungibleToken {
             self.expiredTip = "Subdomain is expired please renew your parent domain."
         }
 
-        pub fun checkParentExpired():Bool {
-          let currentTimestamp = getCurrentBlock().timestamp
-          let expiredTime =  Domains.expired[self.parentNameHash]
-          if expiredTime != nil {
-            return (currentTimestamp + 86400.00) < expiredTime!
-          } 
-          return true
-        }
-
         pub fun getDomainName():String {
           let domainName = ""
           return domainName.concat(self.name).concat(".").concat(self.parent)
@@ -185,35 +181,35 @@ pub contract Domains: NonFungibleToken {
 
         pub fun getText(key:String):String {
           pre {
-            self.checkParentExpired() : self.expiredTip
+            !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           return self.texts[key]!
         }
 
         pub fun getAddress(chainType:UInt64):String {
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           return self.addresses[chainType]!
         }
 
         pub fun getAllTexts():{String:String}{
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           return self.texts
         }
 
         pub fun getAllAddresses():{UInt64:String}{
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           return self.addresses
         }
 
         pub fun getDetail(): SubdomainDetail {
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           let owner = Domains.records[self.parentNameHash]!
           let detail = SubdomainDetail(
@@ -231,25 +227,25 @@ pub contract Domains: NonFungibleToken {
 
         pub fun setText(key: String, value: String){
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           self.texts[key] = value
         }
         pub fun setAddress(chainType: UInt64, address: String){
            pre {
-             self.checkParentExpired() : self.expiredTip
+             !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           self.addresses[chainType] = address
         }
         pub fun removeText(key: String){
            pre {
-            self.checkParentExpired() : self.expiredTip
+            !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           self.texts.remove(key: key)
         }
         pub fun removeAddress(chainType: UInt64){
            pre {
-            self.checkParentExpired() : self.expiredTip
+            !Domains.isExpired(self.parentNameHash) : self.expiredTip
           }
           self.addresses.remove(key: chainType)
         }
@@ -281,14 +277,7 @@ pub contract Domains: NonFungibleToken {
             self.parent = parent
             self.expiredTip = "Domain is expired pls renew it"
         }
-        pub fun checkExpired(): Bool {
-          let currentTimestamp = getCurrentBlock().timestamp
-          let expiredTime =  Domains.expired[self.nameHash]
-          if expiredTime != nil {
-            return (currentTimestamp + 86400.00) < expiredTime!
-          } 
-          return true
-        }
+        
 
         pub fun getDomainName():String {
           let domainName = ""
@@ -297,61 +286,94 @@ pub contract Domains: NonFungibleToken {
 
         pub fun getText(key:String):String {
           pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           return self.texts[key]!
         }
 
         pub fun getAddress(chainType:UInt64):String {
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           return self.addresses[chainType]!
         }
 
         pub fun getAllTexts():{String:String}{
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           return self.texts
         }
 
         pub fun getAllAddresses():{UInt64:String}{
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           return self.addresses
         }
 
         pub fun setText(key: String, value: String){
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           self.texts[key] = value
         }
         pub fun setAddress(chainType: UInt64, address: String){
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           self.addresses[chainType] = address
         }
         pub fun removeText(key: String){
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           self.texts.remove(key: key)
         }
         pub fun removeAddress(chainType: UInt64){
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           self.addresses.remove(key: chainType)
+        }
+
+          pub fun setSubdomainText(nameHash:String, key: String, value: String){
+           pre {
+             !Domains.isExpired(self.nameHash) : self.expiredTip
+             self.subdomains[nameHash] != nil : "Subdomain not exsit..."
+          }
+          let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
+          subdomain.setText(key: key, value: value)
+        }
+        pub fun setSubdomainAddress(nameHash:String, chainType: UInt64, address: String){
+           pre {
+             !Domains.isExpired(self.nameHash) : self.expiredTip
+             self.subdomains[nameHash] != nil : "Subdomain not exsit..."
+          }
+          let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
+          subdomain.setAddress(chainType: chainType, address: address)
+        }
+        pub fun removeSubdomainText(nameHash:String, key: String) {
+           pre {
+             !Domains.isExpired(self.nameHash) : self.expiredTip
+             self.subdomains[nameHash] != nil : "Subdomain not exsit..."
+          }
+          let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
+          subdomain.removeText(key: key)
+        }
+        pub fun removeSubdomainAddress(nameHash:String, chainType: UInt64) {
+           pre {
+             !Domains.isExpired(self.nameHash) : self.expiredTip
+             self.subdomains[nameHash] != nil : "Subdomain not exsit..."
+          }
+          let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
+          subdomain.removeAddress(chainType: chainType)
         }
 
         
         pub fun getDetail(): DomainDetail {
            pre {
-             self.checkExpired() : self.expiredTip
+             !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           let owner = Domains.records[self.nameHash]!
           let expired = Domains.expired[self.nameHash]!
@@ -392,16 +414,23 @@ pub contract Domains: NonFungibleToken {
 
         // set domain record
         access(account) fun setRecord(address: Address){
-           pre {
-             Domains.records[self.nameHash]!=nil :""
+          pre {
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           Domains.records[self.nameHash] = address
           emit DomainRecordChanged(name: self.name, resolver: address)
         }
 
+        // set domain expired
+        access(account) fun setExpired(expiredAt: UFix64){
+          
+          Domains.expired[self.nameHash] = expiredAt
+          emit DomainExpiredChanged(name: self.name, expiredAt: expiredAt)
+        }
+
         pub fun createSubDomain(name: String, nameHash: String){
            pre {
-            self.checkExpired() : self.expiredTip
+            !Domains.isExpired(self.nameHash) : self.expiredTip
           }
           if self.subdomains[nameHash] !=nil {
             panic("Subdomain already existed.")
@@ -410,7 +439,7 @@ pub contract Domains: NonFungibleToken {
             id:self.subdomainCount,
             name:name,
             nameHash:nameHash,
-            parent: self.name,
+            parent: self.getDomainName(),
             parentNameHash:self.nameHash
           )
           let oldSubdomain <- self.subdomains[nameHash] <- subdomain
@@ -447,8 +476,8 @@ pub contract Domains: NonFungibleToken {
      //return the content for this NFT
     pub resource interface CollectionPrivate {
         access(account) fun mintDomain(id: UInt64, name:String, nameHash:String, parentName:String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
-        pub fun borrowDomainPrivate(_ id: UInt64): &{Domains.DomainPrivate}
-        pub fun borrowSubDomainPrivate(id: UInt64, nameHash:String): &Subdomain
+        pub fun borrowDomainPrivate(_ id: UInt64): &Domains.NFT
+        // pub fun borrowSubDomainPrivate(id: UInt64, nameHash:String): &Subdomain
     }
 
 
@@ -497,7 +526,7 @@ pub contract Domains: NonFungibleToken {
           return ref as! &Domains.NFT
         }
 
-        pub fun borrowDomainPrivate(_ id: UInt64): &{Domains.DomainPrivate} {
+        pub fun borrowDomainPrivate(_ id: UInt64): &Domains.NFT {
           pre {
               self.ownedNFTs[id] != nil:
                   "domain doesn't exist"
@@ -506,16 +535,16 @@ pub contract Domains: NonFungibleToken {
           return ref as! &Domains.NFT
         }
 
-         pub fun borrowSubDomainPrivate(id: UInt64, nameHash: String ): &Subdomain {
-          pre {
-              self.ownedNFTs[id] != nil:
-                  "domain doesn't exist"
-          }
-          let domainRef = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-          let domain = domainRef as! &Domains.NFT
-          let sub = &domain.subdomains[nameHash] as! &Subdomain
-          return sub
-        }
+        //  pub fun borrowSubDomainPrivate(id: UInt64, nameHash: String ): &Subdomain {
+        //   pre {
+        //       self.ownedNFTs[id] != nil:
+        //           "domain doesn't exist"
+        //   }
+        //   let domainRef = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+        //   let domain = domainRef as! &Domains.NFT
+        //   let sub = &domain.subdomains[nameHash] as! &Subdomain
+        //   return sub
+        // }
 
 
 
@@ -531,13 +560,14 @@ pub contract Domains: NonFungibleToken {
             )
             let nft <- domain
             Domains.expired[nameHash] = expiredAt
-            Domains.records[nameHash]= receiver.address
+            // Domains.records[nameHash]= receiver.address
+            nft.setRecord(address: receiver.address)
             Domains.totalSupply = Domains.totalSupply + 1 as UInt64
             receiver.borrow()!.deposit(token: <- nft)
         }
 
         destroy() {
-            destroy self.ownedNFTs
+          destroy self.ownedNFTs
         }
     }
 
@@ -546,12 +576,22 @@ pub contract Domains: NonFungibleToken {
       return <- collection
     }
 
-    pub fun domainExpiredTime(nameHash: String) :UFix64? {
+    pub fun domainExpiredTime(_ nameHash: String) :UFix64? {
       let expiredTime = Domains.expired[nameHash]
       return expiredTime
     }
 
-    pub fun domainRecord(nameHash: String) :Address? {
+    pub fun isExpired(_ nameHash:String): Bool {
+      let currentTimestamp = getCurrentBlock().timestamp
+      let expiredTime =  Domains.expired[nameHash]
+      if expiredTime != nil {
+        // make one day buffer 
+        return (currentTimestamp - 86400.00) > expiredTime!
+      } 
+      return false
+    }
+
+    pub fun domainRecord(_ nameHash: String) :Address? {
       let address = Domains.records[nameHash]
       return address
     }

@@ -1,4 +1,3 @@
-import FlowToken from 0xFlowToken
 import FungibleToken from 0xFungibleToken
 
 pub fun main(address:Address) : UFix64 {
