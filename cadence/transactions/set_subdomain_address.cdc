@@ -3,7 +3,7 @@ import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 
-transaction(domainNameHash:String, subdomainNameHash:String, chainType:UInt64, address: String) {
+transaction(domainNameHash: String, subdomainNameHash: String, chainType: UInt64, address: String) {
   var domain: &{Domains.DomainPrivate}
   prepare(account: AuthAccount) {
     var domainRef: &{Domains.DomainPrivate}? = nil
@@ -14,7 +14,7 @@ transaction(domainNameHash:String, subdomainNameHash:String, chainType:UInt64, a
     let ids = collection.getIDs()
 
     for id in ids {
-      let item = collection.borrowDomain(id:id)
+      let item = collection.borrowDomain(id: id)
       if item.nameHash == domainNameHash {
         domainRef = collectionPrivate.borrowDomainPrivate(id)
       } 
@@ -22,6 +22,6 @@ transaction(domainNameHash:String, subdomainNameHash:String, chainType:UInt64, a
     self.domain = domainRef!
   }
   execute {
-    self.domain.setSubdomainAddress(nameHash:subdomainNameHash, chainType:chainType, address:address)
+    self.domain.setSubdomainAddress(nameHash: subdomainNameHash, chainType: chainType, address: address)
   }
 }

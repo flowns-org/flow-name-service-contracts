@@ -7,7 +7,7 @@ pub fun main(address: Address, nameHash: String): [Domains.SubdomainDetail] {
   let ids = collection.getIDs()
   var details:[Domains.SubdomainDetail]  = []
   for id in ids {
-    let domain = collection.borrowDomain(id:id)
+    let domain = collection.borrowDomain(id: id)
     if domain.nameHash == nameHash {
       let subdomainDetail = domain.getSubdomainsDetail()
       details = subdomainDetail

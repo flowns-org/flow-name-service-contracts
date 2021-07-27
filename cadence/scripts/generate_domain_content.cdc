@@ -9,7 +9,7 @@ pub fun main(nameHash: String): [Domains.DomainDetail] {
   let ids = collection.getIDs()
   
   for id in ids {
-    let domain = collection.borrowDomain(id:id)
+    let domain = collection.borrowDomain(id: id)
     if domain.nameHash == nameHash {
       domain = domain.getDetail()
     }

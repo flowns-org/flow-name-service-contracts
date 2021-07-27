@@ -1,7 +1,7 @@
 import Flowns from 0xFlowns
 import Domains from 0xDomains
 
-transaction(domainNameHash:String, subdomainNameHash:String, key:String, value: String) {
+transaction(domainNameHash: String, subdomainNameHash: String, key: String, value: String) {
   var domain: &{Domains.DomainPrivate}
   prepare(account: AuthAccount) {
     var domainRef:&{Domains.DomainPrivate}? = nil
@@ -12,7 +12,7 @@ transaction(domainNameHash:String, subdomainNameHash:String, key:String, value: 
     let ids = collection.getIDs()
 
     for id in ids {
-      let domain = collection.borrowDomain(id:id)
+      let domain = collection.borrowDomain(id: id)
       if domain!.nameHash == domainNameHash {
        domainRef = collectionPrivate.borrowDomainPrivate(id)
       }
@@ -21,6 +21,6 @@ transaction(domainNameHash:String, subdomainNameHash:String, key:String, value: 
     self.domain = domainRef!
   }
   execute {
-    self.domain.setSubdomainText(nameHash:subdomainNameHash, key:key, value:value)
+    self.domain.setSubdomainText(nameHash: subdomainNameHash, key: key, value: value)
   }
 }

@@ -8,7 +8,7 @@ pub fun main(address: Address): [Domains.DomainDetail] {
   let ids = collection.getIDs()
   
   for id in ids {
-    let domain = collection.borrowDomain(id:id)
+    let domain = collection.borrowDomain(id: id)
     let detail = domain.getDetail()
     domains.append(detail)
   }
