@@ -32,6 +32,8 @@ pub contract Flowns {
 
   pub event FlownsAdminCreated()
 
+  pub event RootDomainVaultChanged()
+
 
   // structs 
   pub struct RootDomainInfo {
@@ -68,7 +70,7 @@ pub contract Flowns {
 
     // Here is the vault to receive domain rent fee, every root domain has his own vault
     // you can call Flowns.getRootVaultBalance to get balance
-    priv let domainVault: @FungibleToken.Vault
+    priv var domainVault: @FungibleToken.Vault
 
     // Here is the prices store for domain rent fee
     // When user register or renew a domain ,the rent price is get from here, and price store by {domains length: flow per second}
@@ -113,6 +115,9 @@ pub contract Flowns {
 
     // Query root domain vault balance
     pub fun getVaultBalance() : UFix64 {
+      pre {
+        self.domainVault != nil : "Vault not init yet..."
+      }
       return self.domainVault.balance
     }
 
@@ -189,6 +194,7 @@ pub contract Flowns {
       }
 
       let price = self.prices[len]
+      // limit the register and renew time longer than one year
       if duration < 3153600.0 {
         panic("duration must geater than 3153600")
       }
@@ -219,6 +225,22 @@ pub contract Flowns {
       vault.deposit(from: <- self.domainVault.withdraw(amount: amount))
       
       emit RootDomainVaultWithdrawn(name: self.name, amount: amount)
+    }
+
+    access(account) fun changeRootDomainVault(vault: @FungibleToken.Vault) {
+
+      let balance = self.getVaultBalance()
+
+      if balance > 0.0 {
+        panic("Please withdraw the balance of the previous vault first ")
+      }
+
+      let preVault <- self.domainVault <- vault
+      
+      // clean the price
+      self.prices = {}
+      emit RootDomainVaultChanged()
+      destroy preVault
     }
 
     destroy(){
@@ -257,6 +279,8 @@ pub contract Flowns {
     )
 
     access(account) fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64)
+
+    access(account) fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault)
 
     access(account) fun setPrices(domainId: UInt64, len: Int, price: UFix64)
     
@@ -326,6 +350,13 @@ pub contract Flowns {
       self.getDomain(domainId).withdrawVault(receiver: receiver, amount: amount)
     }
 
+    access(account) fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault) {
+      pre {
+        self.domains[domainId] != nil : "Root domain not exist..."
+      }
+      self.getDomain(domainId).changeRootDomainVault(vault: <- vault)
+    }
+
     access(account) fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>) {
         pre {
         self.domains[domainId] != nil : "Root domain not exist..."
@@ -384,6 +415,8 @@ pub contract Flowns {
     pub fun setRentPrice(domainId: UInt64, len: Int, price: UFix64)
 
     pub fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64)
+
+    pub fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault)
     
     pub fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
 
@@ -441,6 +474,15 @@ pub contract Flowns {
       }
 
       self.server!.borrow()!.withdrawVault(domainId: domainId, receiver: receiver, amount: amount)
+    }
+
+    // Withdraw vault 
+    pub fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault) {
+      pre {
+        self.server != nil : "Your client has not been linked to the server"
+      }
+
+      self.server!.borrow()!.changeRootDomainVault(domainId: domainId, vault: <- vault)
     }
 
     // Mint domain with root domain
