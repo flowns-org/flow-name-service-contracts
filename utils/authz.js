@@ -30,3 +30,41 @@ export async function authz(account) {
     }),
   }
 }
+
+export function authFunc(opt = {}) {
+  const { addr, keyId = 0, tempId = 'SERVICE_ACCOUNT', key } = opt
+
+  return (account) => {
+    return {
+      ...account,
+      tempId,
+      addr: fcl.sansPrefix(addr),
+      keyId: Number(keyId),
+      signingFunction: (signable) => ({
+        addr: fcl.withPrefix(addr), // must match the address that requested the signature, but with a prefix
+        keyId: Number(keyId), // must match the keyId in the account that requested the signature
+        signature: sign(key, signable.message), // signable.message |> hexToBinArray |> hash |> sign |> binArrayToHex
+        // if you arent in control of the transaction that is being signed we recommend constructing the
+        // message from signable.voucher using the @onflow/encode module
+      }),
+    }
+  }
+}
+
+export function test1Authz() {
+  const authz = authFunc({
+    addr: '0x01cf0e2f2f715450',
+    key: '368083923398158fe8f6e31b7483e8d00c4a2c959900cc28cc173dbd5c78b6b4',
+    keyId: 0,
+  })
+  return authz
+}
+
+export function test2Authz() {
+  const authz = authFunc({
+    addr: '0x179b6b1cb6755e31',
+    key: '5f10a1fd823113cff24e49d780d2103d31a6d92f9ebe7680c12a71d238688967',
+    keyId: 0,
+  })
+  return authz
+}
