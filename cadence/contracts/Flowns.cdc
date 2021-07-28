@@ -2,7 +2,7 @@
 import FungibleToken from "./standard/FungibleToken.cdc"
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import Domains from "./Domains.cdc"
-import FlowToken from "./standard/FlowToken.cdc"
+
 
 // Flowns is the core contract of FNS, Flowns define Root domain and admin resource
 pub contract Flowns {
@@ -79,12 +79,12 @@ pub contract Flowns {
     // Server need to init before open register
     access(self) var server: Capability<&Domains.Collection>?
 
-    init(id: UInt64, name: String, nameHash: String){
+    init(id: UInt64, name: String, nameHash: String, vault: @FungibleToken.Vault){
       self.id = id
       self.name = name
       self.nameHash = nameHash
       self.domainCount = 0
-      self.domainVault <- FlowToken.createEmptyVault()
+      self.domainVault <- vault
       self.prices = {}
       self.server = nil
     }
@@ -253,6 +253,7 @@ pub contract Flowns {
     access(account) fun createRootDomain(
       name: String, 
       nameHash: String,
+      vault: @FungibleToken.Vault
     )
 
     access(account) fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64)
@@ -276,12 +277,14 @@ pub contract Flowns {
     access(account) fun createRootDomain(
       name: String, 
       nameHash: String,
+      vault: @FungibleToken.Vault
     ) {
 
       let rootDomain  <- create RootDomain(
         id: Flowns.totalRootDomains,
         name: name,
-        nameHash: nameHash
+        nameHash: nameHash,
+        vault: <- vault
       )
 
       Flowns.totalRootDomains = Flowns.totalRootDomains + 1 as UInt64
@@ -376,7 +379,7 @@ pub contract Flowns {
 
     pub fun addRootDomainCapability(domainId: UInt64, cap: Capability<&Domains.Collection>)
 
-    pub fun createRootDomain(name: String, nameHash: String)
+    pub fun createRootDomain(name: String, nameHash: String, vault: @FungibleToken.Vault)
 
     pub fun setRentPrice(domainId: UInt64, len: Int, price: UFix64)
 
@@ -414,12 +417,12 @@ pub contract Flowns {
     }
 
     // Create root domain with admin
-    pub fun createRootDomain(name: String, nameHash: String) {
+    pub fun createRootDomain(name: String, nameHash: String, vault: @FungibleToken.Vault) {
       pre {
         self.server != nil : "Your client has not been linked to the server"
       }
 
-      self.server!.borrow()!.createRootDomain(name: name, nameHash: nameHash)
+      self.server!.borrow()!.createRootDomain(name: name, nameHash: nameHash, vault: <- vault)
     }
 
     // Set rent price
@@ -537,9 +540,7 @@ pub contract Flowns {
 
     let account = self.account
     self.totalRootDomains = 0
-    
-    // let FlownsReceiver = account.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-    
+        
     log("Setting up flowns capability")
     let collection <- create RootDomainCollection()
     account.save(<-collection, to: Flowns.CollectionStoragePath)
