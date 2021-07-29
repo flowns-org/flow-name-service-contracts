@@ -497,7 +497,7 @@ pub contract Flowns {
   }
 
   // Create admin resource
-  pub fun createAdminClient(): @Admin {
+  priv fun createAdminClient(): @Admin {
     emit FlownsAdminCreated()
     return <- create Admin()
   }
@@ -581,6 +581,9 @@ pub contract Flowns {
     self.FlownsAdminStoragePath =/storage/flownsAdmin
 
     let account = self.account
+    let admin <- Flowns.createAdminClient()
+
+    account.save<@Flowns.Admin>(<-admin, to: Flowns.FlownsAdminStoragePath)
     self.totalRootDomains = 0
         
     log("Setting up flowns capability")
@@ -588,5 +591,6 @@ pub contract Flowns {
     account.save(<-collection, to: Flowns.CollectionStoragePath)
     account.link<&{Flowns.RootDomainPublic}>(Flowns.CollectionPublicPath, target: Flowns.CollectionStoragePath)
     account.link<&Flowns.RootDomainCollection>(Flowns.CollectionPrivatePath, target: Flowns.CollectionStoragePath)
+    account.link<&Flowns.Admin{Flowns.AdminPublic}>(Flowns.FlownsAdminPublicPath, target: Flowns.FlownsAdminStoragePath)
   }
 }
