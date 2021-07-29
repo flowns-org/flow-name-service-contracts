@@ -35,7 +35,7 @@ export const paths = {
     initDomainCollection: buildPath('init_domains_collection.cdc', 'setup'),
     initFlownsAdminStorage: buildPath('init_flowns_admin_storage.cdc', 'setup'),
     setupAdminServer: '../cadence/transactions/setup/setup_admin_server.cdc',
-    mintFlowRootDomain: '../cadence/transactions/setup/mint_flow_root_domains.cdc',
+    mintRootDomain: '../cadence/transactions/setup/mint_root_domains.cdc',
     setupRootDomainServer: '../cadence/transactions/setup/setup_root_domain_server.cdc',
     setupDomainRentPrice: '../cadence/transactions/setup/setup_domain_rent_price.cdc',
     mintFlowToken: '../cadence/transactions/setup/mint_tokens.cdc',

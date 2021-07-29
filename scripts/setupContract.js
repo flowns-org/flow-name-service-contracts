@@ -3,7 +3,7 @@ import { fclInit, buildSetupTrx, buildAndExecScript, buildAndSendTrx } from '../
 import fcl from '@onflow/fcl'
 import hash from 'eth-ens-namehash'
 import { accountAddr } from '../config/constants.js'
-import { registerDomain, renewDomain} from './buildTrxs.js'
+import { registerDomain, renewDomain } from './buildTrxs.js'
 
 const main = async () => {
   // fcl init and load config
@@ -13,7 +13,11 @@ const main = async () => {
   // setup admin cap
   await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
   // mint flow root domain
-  await buildSetupTrx('mintFlowRootDomain')
+  await buildSetupTrx(
+    'mintRootDomain',
+    fcl.arg('flow', t.String),
+    fcl.arg('0x9f1a2c1ae3169a570d1045fe9fc6cb93e68bcc86c545e8dda83ee4aeda090469', t.String),
+  )
   // setup root domain
   await buildSetupTrx('setupRootDomainServer', [
     fcl.arg(accountAddr, t.Address),
@@ -38,8 +42,7 @@ const main = async () => {
     fcl.arg(subdomainHash, t.String),
   ])
 
-
-    // set domain
+  // set domain
   // await buildAndSendTrx('setDomainAddress', [
   //   fcl.arg(nameHash, t.String),
   //   fcl.arg(1, t.UInt64),
@@ -58,7 +61,6 @@ const main = async () => {
     fcl.arg('github', t.String),
     fcl.arg('@caosbad', t.String),
   ])
-
 
   // const dmoain = await buildAndExecScript('queryRootDomainsById', [fcl.arg(0, t.UInt64)])
   // console.log(dmoain)
