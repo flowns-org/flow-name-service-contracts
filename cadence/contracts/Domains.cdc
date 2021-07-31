@@ -686,6 +686,7 @@ pub contract Domains: NonFungibleToken {
     return address
   }
 
+  // update records in case domain name not match hash
   access(account) fun updateRecords(nameHash: String, address: Address?) {
     if Domains.records[nameHash] == nil {
       panic("name hash not exist ...")

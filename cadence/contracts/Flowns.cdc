@@ -420,6 +420,8 @@ pub contract Flowns {
     
     pub fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
 
+    pub fun updateRecords(nameHash: String, address: Address?) 
+
   }
 
 
@@ -474,6 +476,11 @@ pub contract Flowns {
       }
 
       self.server!.borrow()!.withdrawVault(domainId: domainId, receiver: receiver, amount: amount)
+    }
+
+    // update records 
+    pub fun updateRecords(nameHash: String, address: Address?) {
+      Domains.updateRecords(nameHash: nameHash, address: address)
     }
 
     // Withdraw vault 
