@@ -330,7 +330,7 @@ pub contract Domains: NonFungibleToken {
       self.name = name
       self.nameHash = nameHash
       self.addresses = {}
-      self.texts ={}
+      self.texts = {}
       self.subdomainCount = 0
       self.subdomains <- {}
       self.parent = parent
@@ -684,6 +684,14 @@ pub contract Domains: NonFungibleToken {
   pub fun domainRecord(_ nameHash: String) : Address? {
     let address = Domains.records[nameHash]
     return address
+  }
+
+  access(account) fun updateRecords(nameHash: String, address: Address?) {
+    if Domains.records[nameHash] == nil {
+      panic("name hash not exist ...")
+    }
+    Domains.records[nameHash] = address
+    Domains.expired[nameHash] = nil
   }
 
 	init() {

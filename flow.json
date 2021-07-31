@@ -29,6 +29,12 @@
         "testnet": "0xe223d8a629e49c68",
         "emulator": "0x01cf0e2f2f715450"
       }
+    },
+    "Kibble": {
+      "source": "./cadence/contracts/tokens/Kibble.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7"
+      }
     }
   },
   "networks": {
@@ -42,11 +48,11 @@
       "keys": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
     },
     "test1": {
-      "address": "0x01cf0e2f2f715450",
+      "address": "01cf0e2f2f715450",
       "keys": "368083923398158fe8f6e31b7483e8d00c4a2c959900cc28cc173dbd5c78b6b4"
     },
     "test2": {
-      "address": "0x179b6b1cb6755e31",
+      "address": "179b6b1cb6755e31",
       "keys": "5f10a1fd823113cff24e49d780d2103d31a6d92f9ebe7680c12a71d238688967"
     }
   },
@@ -55,9 +61,12 @@
       "emulator-account": [
         "NonFungibleToken",
         "Domains",
-        "Flowns"
+        "Flowns",
+        "Kibble"
       ],
-      "test1": [],
+      "test1": [
+        "FUSD"
+      ],
       "test2": []
     }
   }

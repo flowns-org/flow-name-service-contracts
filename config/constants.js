@@ -11,6 +11,10 @@ export const accountAddr = process.env.FLOW_ACCOUNT_ADDRESS
 
 export const flowTokenAddr = process.env.FLOW_TOKEN_ADDRESS
 
+export const FUSDTokenAddr = process.env.FUSD_TOKEN_ADDRESS
+
+export const KibbleTokenAddr = process.env.KIBBLE_TOKEN_ADDRESS
+
 export const flowFungibleAddr = process.env.FLOW_FUNGIBLE_ADDRESS
 
 export const publicKey = process.env.FLOW_ACCOUNT_PUBLIC_KEY

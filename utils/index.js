@@ -7,6 +7,8 @@ import {
   paths,
   flowTokenAddr,
   flowFungibleAddr,
+  KibbleTokenAddr,
+  FUSDTokenAddr
 } from '../config/constants.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -22,6 +24,8 @@ export const fclInit = () => {
     .put('0xNonFungibleToken', accountAddr)
     .put('0xFungibleToken', flowFungibleAddr)
     .put('0xFlowToken', flowTokenAddr)
+    .put('0xKibble', KibbleTokenAddr)
+    .put('0xFUSD', FUSDTokenAddr)
 }
 
 export const sendTrx = async (CODE, args, auth = null) => {

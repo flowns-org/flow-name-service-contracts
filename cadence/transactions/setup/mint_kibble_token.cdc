@@ -1,6 +1,6 @@
 // playground
-//import Kibble from 0x03
-//import FungibleToken from 0x01
+import Kibble from 0xKibble
+import FungibleToken from 0xFungibleToken
 
 transaction(recipient: Address, amount: UFix64) {
     let tokenAdmin: &Kibble.Administrator

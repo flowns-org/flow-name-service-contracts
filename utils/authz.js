@@ -8,6 +8,9 @@ import fcl from '@onflow/fcl'
 // type account = { tempId: String, addr: String, keyId: Number, signingFunction: signingFunction }
 // authz :: account -> account
 
+export const test1Addr = '0x01cf0e2f2f715450'
+export const test2Addr = '0x179b6b1cb6755e31'
+
 export async function authz(account) {
   return {
     // there is stuff in the account that is passed in
@@ -53,7 +56,7 @@ export function authFunc(opt = {}) {
 
 export function test1Authz() {
   const authz = authFunc({
-    addr: '0x01cf0e2f2f715450',
+    addr: test1Addr,
     key: '368083923398158fe8f6e31b7483e8d00c4a2c959900cc28cc173dbd5c78b6b4',
     keyId: 0,
   })
@@ -62,7 +65,7 @@ export function test1Authz() {
 
 export function test2Authz() {
   const authz = authFunc({
-    addr: '0x179b6b1cb6755e31',
+    addr: test2Addr,
     key: '5f10a1fd823113cff24e49d780d2103d31a6d92f9ebe7680c12a71d238688967',
     keyId: 0,
   })
