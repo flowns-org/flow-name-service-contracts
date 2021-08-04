@@ -4,11 +4,10 @@ import fcl from '@onflow/fcl'
 
 import { buildAndSendTrx, buildAndExecScript } from '../utils/index.js'
 
-
-export const registerDomain = async (domainId, name, duration, amount) => {
-  const domainName = `${name}.flow`
+export const registerDomain = async (domainId, name, rootName, duration, amount) => {
+  const domainName = `${name}.${rootName}`
   const nameHash = hash.hash(domainName)
-
+  console.log(name, nameHash)
   const res = await buildAndSendTrx('registerDomain', [
     fcl.arg(domainId, t.UInt64),
     fcl.arg(name, t.String),
@@ -19,8 +18,8 @@ export const registerDomain = async (domainId, name, duration, amount) => {
   return res
 }
 
-export const renewDomain = async (domainId, name, duration, amount) => {
-  const domainName = `${name}.flow`
+export const renewDomain = async (domainId, name, rootName, duration, amount) => {
+  const domainName = `${name}.${rootName}`
   const nameHash = hash.hash(domainName)
 
   const res = await buildAndSendTrx('renewDomain', [
@@ -32,8 +31,8 @@ export const renewDomain = async (domainId, name, duration, amount) => {
   return res
 }
 
-export const mintDomain = async (domainId, name, duration) => {
-  const domainName = `${name}.flow`
+export const mintDomain = async (domainId, name, rootName, duration) => {
+  const domainName = `${name}.${rootName}`
   const nameHash = hash.hash(domainName)
   const res = await buildAndSendTrx('mintDomain', [
     fcl.arg(domainId, t.UInt64),

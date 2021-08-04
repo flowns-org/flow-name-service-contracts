@@ -1,3 +1,4 @@
+import { build } from '@onflow/sdk'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -59,6 +60,7 @@ export const paths = {
     queryUsersAllDomain: buildPath('query_users_domains_info.cdc', 'script'),
     queryUsersAllSubDomain: buildPath('query_subdomains_info.cdc', 'script'),
     queryRootDomainVaultBalance: buildPath('query_root_vault_balance.cdc', 'script'),
+    queryFUSDBalance: buildPath('query_fusd_balance', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',
@@ -75,5 +77,9 @@ export const paths = {
     removeSubdomainAddress: '../cadence/transactions/remove_subdomain_address.cdc',
     withdrawRootVault: '../cadence/transactions/withdraw_root_vault.cdc',
     mintDomain: '../cadence/transactions/mint_domain.cdc',
+    createFUSDMinter: '../cadence/transactions/create_fusd_minter.cdc',
+    createFUSDVault: '../cadence/transactions/create_fusd_vault.cdc',
+    mintFUSD: '../cadence/transactions/mint_fusd.cdc',
+    changeRootDomainVaultWithFusd: '../cadence/transactions/change_root_domain_vault_with_fusd.cdc',
   },
 }

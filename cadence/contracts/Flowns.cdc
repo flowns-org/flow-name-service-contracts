@@ -530,7 +530,7 @@ pub contract Flowns {
   }
   
   // Check domain available 
-  pub fun available(domainId: UInt64, nameHash: String): Bool {
+  pub fun available(nameHash: String): Bool {
 
     if Domains.records[nameHash] == nil {
       return true

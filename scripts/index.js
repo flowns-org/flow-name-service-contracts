@@ -10,9 +10,9 @@ const main = async () => {
   fclInit()
   // console.log('register domains with caos')
   // register
-  // const result = await registerDomain(0, 'caosa', '3153600.00000000', '5.00000000')
+  // const result = await registerDomain(0, 'caosa','flow' '3153600.00000000', '5.00000000')
   // renew
-  // const res1 = await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
+  // const res1 = await renewDomain(0, 'caoss','flow', '3153600.00000000', '0.70000000')
   const nameHash = hash.hash('caoss.flow')
 
   // get domain info by hashname
@@ -120,7 +120,10 @@ const main = async () => {
 
   const res4 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
   console.log(res4)
-  const res = await buildAndExecScript('queryUsersAllSubDomain', [fcl.arg(accountAddr, t.Address), fcl.arg(nameHash, t.String)])
+  const res = await buildAndExecScript('queryUsersAllSubDomain', [
+    fcl.arg(accountAddr, t.Address),
+    fcl.arg(nameHash, t.String),
+  ])
   console.log(res)
 
   // const res1 = await buildAndExecScript('queryDomainRecord', [fcl.arg(nameHash, t.String)])
@@ -132,7 +135,7 @@ const main = async () => {
   // console.log(res3)
   // const dmoain = await buildAndExecScript('queryRootDomainsById', [fcl.arg(0, t.UInt64)])
   // console.log(dmoain)
-  // const res = await buildAndExecScript('queryDomainAvailable', [fcl.arg(0, t.UInt64), fcl.arg(nameHash, t.String)])
+  // const res = await buildAndExecScript('queryDomainAvailable', [fcl.arg(nameHash, t.String)])
   // console.log(res)
 
   // query root vault

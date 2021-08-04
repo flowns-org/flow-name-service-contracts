@@ -9,15 +9,14 @@ const main = async () => {
   // fcl init and load config
   fclInit()
   // init admin storage
-  await buildSetupTrx('initFlownsAdminStorage')
+  // await buildSetupTrx('initFlownsAdminStorage')
   // setup admin cap
   await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
   // mint flow root domain
-  await buildSetupTrx(
-    'mintRootDomain',
+  await buildSetupTrx('mintRootDomain', [
     fcl.arg('flow', t.String),
     fcl.arg('0x9f1a2c1ae3169a570d1045fe9fc6cb93e68bcc86c545e8dda83ee4aeda090469', t.String),
-  )
+  ])
   // setup root domain
   await buildSetupTrx('setupRootDomainServer', [
     fcl.arg(accountAddr, t.Address),
@@ -33,7 +32,7 @@ const main = async () => {
   const nameHash = hash.hash('caoss.flow')
   const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')
   // renew
-  await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
+  await renewDomain(0, 'caoss', 'flow', '3153600.00000000', '0.70000000')
 
   const subdomainHash = hash.hash('blog.caoss.flow')
   const res1 = await buildAndSendTrx('mintSubdomain', [
