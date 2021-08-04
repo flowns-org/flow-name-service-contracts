@@ -62,11 +62,10 @@
         "NonFungibleToken",
         "Domains",
         "Flowns",
-        "Kibble"
-      ],
-      "test1": [
+        "Kibble",
         "FUSD"
       ],
+      "test1": [],
       "test2": []
     }
   }

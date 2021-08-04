@@ -43,7 +43,11 @@ export const paths = {
     mintRootDomain: '../cadence/transactions/setup/mint_root_domains.cdc',
     setupRootDomainServer: '../cadence/transactions/setup/setup_root_domain_server.cdc',
     setupDomainRentPrice: '../cadence/transactions/setup/setup_domain_rent_price.cdc',
-    mintFlowToken: '../cadence/transactions/setup/mint_tokens.cdc',
+    mintFlowToken: '../cadence/transactions/setup/mint_flow_token.cdc',
+    mintKibbleToken: '../cadence/transactions/setup/mint_kibble_token.cdc',
+    initTokens: '../cadence/transactions/setup/init_tokens.cdc',
+    mintFUSD: '../cadence/transactions/setup/mint_fusd.cdc',
+    createFUSDMinter: '../cadence/transactions/setup/create_fusd_minter.cdc',
   },
   scripts: {
     checkDomainCollection: '../cadence/scripts/check_domain_collection.cdc',
@@ -77,9 +81,7 @@ export const paths = {
     removeSubdomainAddress: '../cadence/transactions/remove_subdomain_address.cdc',
     withdrawRootVault: '../cadence/transactions/withdraw_root_vault.cdc',
     mintDomain: '../cadence/transactions/mint_domain.cdc',
-    createFUSDMinter: '../cadence/transactions/create_fusd_minter.cdc',
     createFUSDVault: '../cadence/transactions/create_fusd_vault.cdc',
-    mintFUSD: '../cadence/transactions/mint_fusd.cdc',
     changeRootDomainVaultWithFusd: '../cadence/transactions/change_root_domain_vault_with_fusd.cdc',
   },
 }

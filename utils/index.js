@@ -55,7 +55,6 @@ export const buildAndSendTrx = async (key, args = [], authFunc = null) => {
     const trxScript = await readCode(transactions[key])
     const trxId = await sendTrx(trxScript, args, authFunc)
     const txStatus = await fcl.tx(trxId).onceSealed()
-    console.log(txStatus)
     return txStatus
   } catch (error) {
     console.log(error)
