@@ -83,5 +83,6 @@ export const paths = {
     mintDomain: '../cadence/transactions/mint_domain.cdc',
     createFUSDVault: '../cadence/transactions/create_fusd_vault.cdc',
     changeRootDomainVaultWithFusd: '../cadence/transactions/change_root_domain_vault_with_fusd.cdc',
+    SetFlownsPauseStatus: '../cadence/transactions/set_flowns_pause_status.cdc',
   },
 }

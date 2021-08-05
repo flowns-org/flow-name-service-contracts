@@ -15,6 +15,7 @@ pub contract Flowns {
 
   // variables
   pub var totalRootDomains: UInt64
+  // status that set register pause or not
   pub var isPause: Bool
 
   // events
@@ -33,6 +34,10 @@ pub contract Flowns {
   pub event FlownsAdminCreated()
 
   pub event RootDomainVaultChanged()
+
+  pub event FlownsPaused()
+
+  pub event FlownsActivated()
 
 
   // structs 
@@ -503,7 +508,15 @@ pub contract Flowns {
     }
 
     pub fun setPause(_ flag: Bool) {
-      Flowns.isPause = false
+      pre {
+        Flowns.isPause != flag : "Already done!"
+      }
+      Flowns.isPause = flag
+      if flag == true {
+        emit FlownsPaused()
+      } else {
+        emit FlownsActivated()
+      }
     }
 
   }
@@ -580,7 +593,7 @@ pub contract Flowns {
   
   pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
     pre {
-      Flowns.isPause == false : "Register pause"
+      Flowns.isPause == false : "Renewer pause"
     }
     let account = Flowns.account
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)

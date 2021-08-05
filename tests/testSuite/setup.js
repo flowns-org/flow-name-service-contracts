@@ -3,11 +3,11 @@ import fcl from '@onflow/fcl'
 import hash from 'eth-ens-namehash'
 import dotenv from 'dotenv'
 import moment from 'moment'
-import { accountAddr } from '../config/constants.js'
+import { accountAddr } from '../../config/constants.js'
 // import { checkTrxSealed } from './utils'
-import { test1Authz, test2Authz, test1Addr, test2Addr } from '../utils/authz'
-import { buildAndExecScript, buildSetupTrx, fclInit, buildAndSendTrx } from '../utils/index'
-import { mintDomain, registerDomain } from '../scripts/buildTrxs'
+import { test1Authz, test2Authz, test1Addr, test2Addr } from '../../utils/authz'
+import { buildAndExecScript, buildSetupTrx, fclInit, buildAndSendTrx } from '../../utils/index'
+import { mintDomain, registerDomain } from '../../scripts/buildTrxs'
 
 const oneYear = 60 * 60 * 24 * 265
 const oneMonth = 60 * 60 * 24 * 30
@@ -25,7 +25,7 @@ let caosFnsDomainNamHash = hash.hash(`${caosDomainName}.${fnsName}`)
 const devDomainName = 'dev'
 let devDomainNameHash = hash.hash(`${devDomainName}.${flowName}`)
 
-describe('Contract setup test cases', () => {
+export const setupTest = () => describe('Contract setup test cases', () => {
   beforeAll(() => {
     return fclInit()
     dotenv.config()
@@ -180,7 +180,7 @@ describe('Contract setup test cases', () => {
   test('change root vault when it has blance', async () => {
     const timestamp = moment.now() / 1000
 
-    const registerRes = await registerDomain(
+    const registerFailRes = await registerDomain(
       fnsDomainId,
       caosDomainName,
       fnsName,
@@ -188,8 +188,24 @@ describe('Contract setup test cases', () => {
       '3.10',
     )
 
-    expect(registerRes).not.toBeNull()
-    expect(registerRes.status).toBe(4)
+    expect(registerFailRes).toBeNull()
+
+    const pauseRes = await buildAndSendTrx('SetFlownsPauseStatus', [fcl.arg(false, t.Bool)])
+
+    expect(pauseRes).not.toBeNull()
+    expect(pauseRes.status).toBe(4)
+
+    const registerSuccessRes = await registerDomain(
+      fnsDomainId,
+      caosDomainName,
+      fnsName,
+      oneYear.toFixed(2),
+      '3.10',
+    )
+
+    expect(registerSuccessRes).not.toBeNull()
+    expect(registerSuccessRes.status).toBe(4)
+
     const query = await buildAndExecScript('queryDomainInfo', [
       fcl.arg(caosFnsDomainNamHash, t.String),
     ])
@@ -197,7 +213,7 @@ describe('Contract setup test cases', () => {
     expect(query.name).toBe(`${caosDomainName}.${fnsName}`)
     expect(query.nameHash).toBe(caosFnsDomainNamHash)
     expect(query.parentName).toBe(fnsName)
-    expect(Number(query.expiredAt)).toBe(Math.floor(timestamp + oneYear))
+    expect(Number(query.expiredAt)).toBeGreaterThanOrEqual(Math.floor(timestamp + oneYear))
 
     const balanceQuery = await buildAndExecScript('queryRootDomainVaultBalance', [
       fcl.arg(fnsDomainId, t.UInt64),
@@ -226,13 +242,13 @@ describe('Contract setup test cases', () => {
     ])
     expect(changeVaultAgainRes).not.toBeNull()
     expect(changeVaultAgainRes.status).toBe(4)
-    
+
     await buildSetupTrx('setupDomainRentPrice', [
       fcl.arg(fnsDomainId, t.UInt64),
       fcl.arg(4, t.Int),
       fcl.arg('0.0000001', t.UFix64),
     ])
-    
+
     const registerAgainRes = await registerDomain(
       fnsDomainId,
       'fail',
