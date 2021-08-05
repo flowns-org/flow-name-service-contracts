@@ -15,7 +15,7 @@ pub contract Flowns {
 
   // variables
   pub var totalRootDomains: UInt64
-
+  pub var isPause: Bool
 
   // events
   pub event RootDomainDestroyed(id: UInt64)
@@ -320,7 +320,7 @@ pub contract Flowns {
 
     pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault){
       pre {
-            self.domains[domainId] != nil : "Root domain not exist..."
+          self.domains[domainId] != nil : "Root domain not exist..."
         }
       let root = self.getDomain(domainId)
       root.renewDomain(domain: domain, duration: duration, feeTokens: <- feeTokens)
@@ -328,7 +328,7 @@ pub contract Flowns {
 
     pub fun registerDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       pre {
-          self.domains[domainId] != nil : "Root domain not exist..."
+        self.domains[domainId] != nil : "Root domain not exist..."
       }
       let root = self.getDomain(domainId)
       root.registerDomain(name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver )
@@ -422,6 +422,7 @@ pub contract Flowns {
 
     pub fun updateRecords(nameHash: String, address: Address?) 
 
+    pub fun setPause(_ flag: Bool)
   }
 
 
@@ -501,6 +502,10 @@ pub contract Flowns {
       self.server!.borrow()!.mintDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, receiver: receiver)
     }
 
+    pub fun setPause(_ flag: Bool) {
+      Flowns.isPause = false
+    }
+
   }
 
   // Create admin resource
@@ -564,7 +569,9 @@ pub contract Flowns {
   }
 
   pub fun registerDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
-
+    pre {
+      Flowns.isPause == false : "Register pause"
+    }
     let account = Flowns.account
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
@@ -572,7 +579,9 @@ pub contract Flowns {
   }
   
   pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
-
+    pre {
+      Flowns.isPause == false : "Register pause"
+    }
     let account = Flowns.account
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
@@ -592,7 +601,7 @@ pub contract Flowns {
 
     account.save<@Flowns.Admin>(<-admin, to: Flowns.FlownsAdminStoragePath)
     self.totalRootDomains = 0
-        
+    self.isPause = true
     log("Setting up flowns capability")
     let collection <- create RootDomainCollection()
     account.save(<-collection, to: Flowns.CollectionStoragePath)

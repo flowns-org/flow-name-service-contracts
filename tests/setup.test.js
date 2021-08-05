@@ -41,7 +41,7 @@ describe('Contract setup test cases', () => {
   test('init admin cap with root domain collection', async () => {
     const res = await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
     expect(res).not.toBeNull()
-    const { status, events } = res
+    const { status } = res
     // check
     expect(status).toBe(4)
   })
