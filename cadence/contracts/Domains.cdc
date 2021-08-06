@@ -1,6 +1,7 @@
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
 import FlowToken from "./tokens/FlowToken.cdc"
+
 // Domains define the domain and sub domain resource
 // Use records and expired to store domain's owner and expiredTime
 pub contract Domains: NonFungibleToken {
@@ -40,6 +41,10 @@ pub contract Domains: NonFungibleToken {
   pub event DomainMinted(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Address)
   pub event DomainVaultDeposited(vaultType: String, amount: UFix64, to: Address?)
   pub event DomainVaultWithdrawn(vaultType: String, amount: UFix64, from: String)
+  pub event DomainCollectionAdded(collectionType: String, to: Address?)
+  pub event DomainCollectionWithdrawn(vaultType: String, itemId: UInt64, from: String)
+
+
 
 
   // Subdomain detail
@@ -80,6 +85,7 @@ pub contract Domains: NonFungibleToken {
     pub let subdomainCount: UInt64
     pub let subdomains: {String: SubdomainDetail}
     pub let vaultBalances: {String: UFix64}
+    pub let collections: {String: [UInt64]}
 
 
     init(
@@ -92,8 +98,8 @@ pub contract Domains: NonFungibleToken {
       parentName: String,
       subdomainCount: UInt64,
       subdomains: {String: SubdomainDetail},
-      vaultBalances: {String: UFix64}
-
+      vaultBalances: {String: UFix64},
+      collections: {String: [UInt64]}
     ) {
 
       self.owner = owner
@@ -106,6 +112,7 @@ pub contract Domains: NonFungibleToken {
       self.subdomainCount = subdomainCount
       self.subdomains = subdomains
       self.vaultBalances = vaultBalances
+      self.collections = collections
     } 
   }
 
@@ -134,6 +141,8 @@ pub contract Domains: NonFungibleToken {
     pub fun getSubdomainsDetail(): [SubdomainDetail]
 
     pub fun depositVault(from: @FungibleToken.Vault)
+
+    pub fun addCollection(collection: @NonFungibleToken.Collection)
   }
 
   pub resource interface SubdomainPublic {
@@ -197,6 +206,8 @@ pub contract Domains: NonFungibleToken {
     pub var vaults: @{String: FungibleToken.Vault}
 
     pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault
+
+    pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT 
 
   }
 
@@ -338,6 +349,7 @@ pub contract Domains: NonFungibleToken {
     pub let parent: String
     pub var subdomainCount: UInt64
     pub var vaults: @{String: FungibleToken.Vault}
+    pub var collections: @{String: NonFungibleToken.Collection}
 
     init(id: UInt64, name: String, nameHash: String, parent: String) {
 
@@ -351,6 +363,7 @@ pub contract Domains: NonFungibleToken {
       self.parent = parent
       self.expiredTip = "Domain is expired pls renew it"
       self.vaults <- {}
+      self.collections <- {}
     }
     
     // get domain full name with root domain
@@ -472,20 +485,29 @@ pub contract Domains: NonFungibleToken {
       let owner = Domains.records[self.nameHash]!
       let expired = Domains.expired[self.nameHash]!
       
-      let ids = self.subdomains.keys
-      var subdomains:{String: SubdomainDetail} = {}
-      for id in ids {
-        let subRef = &self.subdomains[id] as! auth &Subdomain
+      let subdomainKeys = self.subdomains.keys
+      var subdomains: {String: SubdomainDetail} = {}
+      for subdomainKey in subdomainKeys {
+        let subRef = &self.subdomains[subdomainKey] as! auth &Subdomain
         let detail = subRef.getDetail()
-        subdomains[id] = detail
+        subdomains[subdomainKey] = detail
       }
 
-      var vaultBalances:{String: UFix64} = {}
-      let keys = self.vaults.keys
-      for key in keys {
-        let balRef = &self.vaults[key] as! &FungibleToken.Vault
+      var vaultBalances: {String: UFix64} = {}
+      let vaultKeys = self.vaults.keys
+      for vaultKey in vaultKeys {
+        let balRef = &self.vaults[vaultKey] as! &FungibleToken.Vault
         let balance = balRef.balance
-        vaultBalances[key] = balance
+        vaultBalances[vaultKey] = balance
+      }
+
+      var collections:{String: [UInt64]} = {}
+
+      let collectionKeys = self.collections.keys
+      for collectionKey in collectionKeys {
+        let collectionRef = &self.collections[collectionKey] as! &NonFungibleToken.Collection
+        let ids = collectionRef.getIDs()
+        collections[collectionKey] = ids
       }
 
       let detail = DomainDetail(
@@ -498,7 +520,8 @@ pub contract Domains: NonFungibleToken {
         parentName: self.parent,
         subdomainCount: self.subdomainCount,
         subdomains: subdomains,
-        vaultBalances:vaultBalances
+        vaultBalances:vaultBalances,
+        collections: collections
       )
       return detail
     }
@@ -571,14 +594,14 @@ pub contract Domains: NonFungibleToken {
     pub fun depositVault(from: @FungibleToken.Vault) {
       let typeKey = from.getType().identifier
       let amount = from.balance
-      let owner = from.owner?.address
+      let address = from.owner?.address
       if self.vaults[typeKey] == nil {
         self.vaults[typeKey] <-! from
       } else {
         let vaultRef = &self.vaults[typeKey] as! auth &FungibleToken.Vault
         vaultRef.deposit(from: <- from)
       }
-      emit DomainVaultDeposited(vaultType: typeKey, amount: amount, to: owner )
+      emit DomainVaultDeposited(vaultType: typeKey, amount: amount, to: address )
 
     }
 
@@ -597,9 +620,36 @@ pub contract Domains: NonFungibleToken {
     }
 
 
+
+    pub fun addCollection(collection: @NonFungibleToken.Collection) {
+      let typeKey = collection.getType().identifier
+      let address = collection.owner?.address
+      if self.collections[typeKey] == nil {
+        self.collections[typeKey] <-! collection
+        emit DomainCollectionAdded(collectionType: typeKey, to: address )
+      } else {
+        destroy collection
+        panic("Collection already exist...")
+      }
+    }
+
+    pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
+      pre {
+        self.collections[key] != nil : "Vault not exsit..."
+      }
+      let collectionRef = &self.collections[key] as! auth &NonFungibleToken.Collection
+
+      emit DomainCollectionWithdrawn(vaultType: key, itemId: itemId, from: self.getDomainName())
+
+      return <- collectionRef.withdraw(withdrawID: itemId)
+    }
+
+
+
     destroy() {
       destroy self.subdomains
       destroy self.vaults
+      destroy self.collections
     }
   }
 
