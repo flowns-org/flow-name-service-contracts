@@ -190,7 +190,7 @@ export const setupTest = () => describe('Contract setup test cases', () => {
 
     expect(registerFailRes).toBeNull()
 
-    const pauseRes = await buildAndSendTrx('SetFlownsPauseStatus', [fcl.arg(false, t.Bool)])
+    const pauseRes = await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
 
     expect(pauseRes).not.toBeNull()
     expect(pauseRes.status).toBe(4)

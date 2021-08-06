@@ -1,6 +1,6 @@
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
-
+import FlowToken from "./tokens/FlowToken.cdc"
 // Domains define the domain and sub domain resource
 // Use records and expired to store domain's owner and expiredTime
 pub contract Domains: NonFungibleToken {
@@ -38,6 +38,8 @@ pub contract Domains: NonFungibleToken {
   pub event DmoainAddressChanged(nameHash: String, chainType: UInt64, address: String)
   pub event DmoainTextChanged(nameHash: String, key: String, value: String)
   pub event DomainMinted(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Address)
+  pub event DomainVaultDeposited(vaultType: String, amount: UFix64, to: Address?)
+  pub event DomainVaultWithdrawn(vaultType: String, amount: UFix64, from: String)
 
 
   // Subdomain detail
@@ -76,18 +78,22 @@ pub contract Domains: NonFungibleToken {
     pub let texts: {String: String}
     pub let parentName: String
     pub let subdomainCount: UInt64
-    pub let subdomains: [SubdomainDetail]
+    pub let subdomains: {String: SubdomainDetail}
+    pub let vaultBalances: {String: UFix64}
+
 
     init(
       owner: Address,
       name: String,
       nameHash: String, 
       expiredAt: UFix64,
-      addresses:{UInt64: String},
+      addresses: {UInt64: String},
       texts: {String: String},
       parentName: String,
       subdomainCount: UInt64,
-      subdomains:[SubdomainDetail]
+      subdomains: {String: SubdomainDetail},
+      vaultBalances: {String: UFix64}
+
     ) {
 
       self.owner = owner
@@ -99,6 +105,7 @@ pub contract Domains: NonFungibleToken {
       self.parentName = parentName
       self.subdomainCount = subdomainCount
       self.subdomains = subdomains
+      self.vaultBalances = vaultBalances
     } 
   }
 
@@ -125,6 +132,8 @@ pub contract Domains: NonFungibleToken {
     pub fun getDetail(): DomainDetail
 
     pub fun getSubdomainsDetail(): [SubdomainDetail]
+
+    pub fun depositVault(from: @FungibleToken.Vault)
   }
 
   pub resource interface SubdomainPublic {
@@ -184,6 +193,11 @@ pub contract Domains: NonFungibleToken {
     pub fun removeSubdomainText(nameHash: String, key: String)
 
     pub fun removeSubdomainAddress(nameHash: String, chainType: UInt64)
+
+    pub var vaults: @{String: FungibleToken.Vault}
+
+    pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault
+
   }
 
   // Subdomain resource belongs Domain.NFT
@@ -323,6 +337,7 @@ pub contract Domains: NonFungibleToken {
     // parent domain name
     pub let parent: String
     pub var subdomainCount: UInt64
+    pub var vaults: @{String: FungibleToken.Vault}
 
     init(id: UInt64, name: String, nameHash: String, parent: String) {
 
@@ -335,6 +350,7 @@ pub contract Domains: NonFungibleToken {
       self.subdomains <- {}
       self.parent = parent
       self.expiredTip = "Domain is expired pls renew it"
+      self.vaults <- {}
     }
     
     // get domain full name with root domain
@@ -457,11 +473,19 @@ pub contract Domains: NonFungibleToken {
       let expired = Domains.expired[self.nameHash]!
       
       let ids = self.subdomains.keys
-      var subdomains:[SubdomainDetail] = []
+      var subdomains:{String: SubdomainDetail} = {}
       for id in ids {
         let subRef = &self.subdomains[id] as! auth &Subdomain
         let detail = subRef.getDetail()
-        subdomains.append(detail)
+        subdomains[id] = detail
+      }
+
+      var vaultBalances:{String: UFix64} = {}
+      let keys = self.vaults.keys
+      for key in keys {
+        let balRef = &self.vaults[key] as! &FungibleToken.Vault
+        let balance = balRef.balance
+        vaultBalances[key] = balance
       }
 
       let detail = DomainDetail(
@@ -474,6 +498,7 @@ pub contract Domains: NonFungibleToken {
         parentName: self.parent,
         subdomainCount: self.subdomainCount,
         subdomains: subdomains,
+        vaultBalances:vaultBalances
       )
       return detail
     }
@@ -543,8 +568,38 @@ pub contract Domains: NonFungibleToken {
 
     }
 
-      destroy() {
-        destroy self.subdomains
+    pub fun depositVault(from: @FungibleToken.Vault) {
+      let typeKey = from.getType().identifier
+      let amount = from.balance
+      let owner = from.owner?.address
+      if self.vaults[typeKey] == nil {
+        self.vaults[typeKey] <-! from
+      } else {
+        let vaultRef = &self.vaults[typeKey] as! auth &FungibleToken.Vault
+        vaultRef.deposit(from: <- from)
+      }
+      emit DomainVaultDeposited(vaultType: typeKey, amount: amount, to: owner )
+
+    }
+
+    pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault {
+      pre {
+        self.vaults[key] != nil : "Vault not exsit..."
+      }
+      let vaultRef = &self.vaults[key] as! auth &FungibleToken.Vault
+      let balance = vaultRef.balance
+      var withdrawAmount = amount
+      if amount == 0.0 {
+        withdrawAmount = balance
+      }
+      emit DomainVaultWithdrawn(vaultType: key, amount: balance, from: self.getDomainName())
+      return <- vaultRef.withdraw(amount: withdrawAmount)
+    }
+
+
+    destroy() {
+      destroy self.subdomains
+      destroy self.vaults
     }
   }
 

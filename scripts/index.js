@@ -15,14 +15,16 @@ const main = async () => {
   // const res1 = await renewDomain(0, 'caoss','flow', '3153600.00000000', '0.70000000')
   const nameHash = hash.hash('caoss.flow')
 
+
   // get domain info by hashname
   // const domain = await buildAndExecScript('queryDomainInfo', [
   //   fcl.arg(nameHash, t.String),
   // ])
   // console.log(domain)
 
+
   // get user all info
-  const subdomainHash = hash.hash('blog.caoss.flow')
+  const subdomainHash = hash.hash('blog.caos.flow')
   // await buildAndSendTrx('mintSubdomain', [
   //   fcl.arg(nameHash, t.String),
   //   fcl.arg('remove', t.String),
@@ -54,17 +56,17 @@ const main = async () => {
   // ])
 
   // set text
-  await buildAndSendTrx('setDomainText', [
-    fcl.arg(nameHash, t.String),
-    fcl.arg('twitter', t.String),
-    fcl.arg('@caosbad', t.String),
-  ])
+  // await buildAndSendTrx('setDomainText', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg('twitter', t.String),
+  //   fcl.arg('@caosbad', t.String),
+  // ])
 
-  await buildAndSendTrx('setDomainText', [
-    fcl.arg(nameHash, t.String),
-    fcl.arg('github', t.String),
-    fcl.arg('@caosbad', t.String),
-  ])
+  // await buildAndSendTrx('setDomainText', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg('github', t.String),
+  //   fcl.arg('@caosbad', t.String),
+  // ])
   // remove text
   // await buildAndSendTrx('removeDomainText', [
   //   fcl.arg(nameHash, t.String),
@@ -105,7 +107,7 @@ const main = async () => {
   // ])
   const shortNameHash = hash.hash('caosine.flow')
 
-  // await mintDomain(0, 'caosine', '87000.00000000')
+  // await mintDomain(0, 'test.fow', '87000.00000000')
 
   // const balance = await buildAndExecScript('queryFlowTokenBalance', [fcl.arg(accountAddr, t.Address)])
   // console.log(balance)
@@ -120,11 +122,11 @@ const main = async () => {
 
   const res4 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
   console.log(res4)
-  const res = await buildAndExecScript('queryUsersAllSubDomain', [
-    fcl.arg(accountAddr, t.Address),
-    fcl.arg(nameHash, t.String),
-  ])
-  console.log(res)
+  // const res = await buildAndExecScript('queryUsersAllSubDomain', [
+  //   fcl.arg(accountAddr, t.Address),
+  //   fcl.arg(nameHash, t.String),
+  // ])
+  // console.log(res)
 
   // const res1 = await buildAndExecScript('queryDomainRecord', [fcl.arg(nameHash, t.String)])
   // console.log(res1)
@@ -138,9 +140,24 @@ const main = async () => {
   // const res = await buildAndExecScript('queryDomainAvailable', [fcl.arg(nameHash, t.String)])
   // console.log(res)
 
-  // query root vault
+  const res = await buildAndSendTrx('depositeDomainVaultWithFlow', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('10.0', t.UFix64),
+  ])
 
-  // query withdraw root vault
+  const res5 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+  console.log(res5)
+
+  console.log('withdraw 10 flow token')
+  // query domain vault 
+  await buildAndSendTrx('withdrawVaultWithVaultType', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('A.0ae53cb6e3f42a79.FlowToken.Vault', t.String),
+    fcl.arg('10.0', t.UFix64),
+  ])
+
+  const res6 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+  console.log(res6)
 }
 
 main()

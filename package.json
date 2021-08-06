@@ -15,6 +15,7 @@
   "scripts": {
     "setup": "node ./scripts/setupContract.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "setup:con": "node scripts/setupContract.js",
     "setup:env": "node scripts/setupEnv.js",
     "init:emulator": "flow project deploy && yarn acc:test1 && yarn acc:test2 && yarn setup:env ",
     "acc:test1": "flow accounts create --key 05013fc02bde69176dd7668422e834411bd38189ffe5db4c63083c39de75cc61b850929065b6a68411653a1790183c99012077761335d5ecd4a70a89d4bc2627",
