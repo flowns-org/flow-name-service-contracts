@@ -118,8 +118,8 @@ const main = async () => {
 
   // const res = await buildAndExecScript('queryRootDomainVaultBalance', [fcl.arg(0, t.UInt64)])
 
-  const res4 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
-  console.log(res4)
+  // const res4 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+  // console.log(res4)
   // const res = await buildAndExecScript('queryUsersAllSubDomain', [
   //   fcl.arg(accountAddr, t.Address),
   //   fcl.arg(nameHash, t.String),
@@ -165,13 +165,16 @@ const main = async () => {
   // const info = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
 
 
-  await buildAndSendTrx('withdrawNFTFromDomain', [
-    fcl.arg(nameHash, t.String),
-    fcl.arg('A.f8d6e0586b0a20c7.Domains.Collection', t.String),
-    fcl.arg(1, t.UInt64),
-  ])
-  const info = await buildAndExecScript('queryDomainInfo', [fcl.arg(nameHash, t.String)])
-  console.dir(JSON.stringify(info))
+  // await buildAndSendTrx('withdrawNFTFromDomain', [
+  //   fcl.arg(nameHash, t.String),
+  //   fcl.arg('A.f8d6e0586b0a20c7.Domains.Collection', t.String),
+  //   fcl.arg(1, t.UInt64),
+  // ])
+  // const info = await buildAndExecScript('queryDomainInfo', [fcl.arg(nameHash, t.String)])
+  // console.dir(JSON.stringify(info))
+
+  const hashStr = await buildAndExecScript('calcDomainHash')
+  console.log(hashStr)
 
 }
 

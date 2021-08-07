@@ -43,6 +43,8 @@ pub contract Domains: NonFungibleToken {
   pub event DomainVaultWithdrawn(vaultType: String, amount: UFix64, from: String)
   pub event DomainCollectionAdded(collectionType: String, to: Address?)
   pub event DomainCollectionWithdrawn(vaultType: String, itemId: UInt64, from: String)
+  pub event DomainReceiveOpened(name: String)
+  pub event DomainReceiveClosed(name: String)
 
 
 
@@ -90,6 +92,7 @@ pub contract Domains: NonFungibleToken {
     pub let subdomains: {String: SubdomainDetail}
     pub let vaultBalances: {String: UFix64}
     pub let collections: {String: [UInt64]}
+    pub let receivable: Bool
 
 
     init(
@@ -105,6 +108,7 @@ pub contract Domains: NonFungibleToken {
       subdomains: {String: SubdomainDetail},
       vaultBalances: {String: UFix64},
       collections: {String: [UInt64]}
+      receivable: Bool
     ) {
       self.id = id
       self.owner = owner
@@ -118,6 +122,7 @@ pub contract Domains: NonFungibleToken {
       self.subdomains = subdomains
       self.vaultBalances = vaultBalances
       self.collections = collections
+      self.receivable = receivable
     } 
   }
 
@@ -130,6 +135,7 @@ pub contract Domains: NonFungibleToken {
     pub let texts: {String: String}
     pub let parent: String
     pub var subdomains: @{String: Subdomain}
+    pub var receivable: Bool
    
 
     pub fun getText(key: String): String
@@ -218,6 +224,8 @@ pub contract Domains: NonFungibleToken {
     pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault
 
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT 
+
+    pub fun setReceivable(_ flag: Bool)
 
   }
 
@@ -361,6 +369,7 @@ pub contract Domains: NonFungibleToken {
     pub var subdomainCount: UInt64
     pub var vaults: @{String: FungibleToken.Vault}
     pub var collections: @{String: NonFungibleToken.Collection}
+    pub var receivable: Bool
 
     init(id: UInt64, name: String, nameHash: String, parent: String) {
 
@@ -375,6 +384,7 @@ pub contract Domains: NonFungibleToken {
       self.expiredTip = "Domain is expired pls renew it"
       self.vaults <- {}
       self.collections <- {}
+      self.receivable = true
     }
     
     // get domain full name with root domain
@@ -533,7 +543,8 @@ pub contract Domains: NonFungibleToken {
         subdomainCount: self.subdomainCount,
         subdomains: subdomains,
         vaultBalances:vaultBalances,
-        collections: collections
+        collections: collections,
+        receivable: self.receivable
       )
       return detail
     }
@@ -592,7 +603,9 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun removeSubDomain(nameHash: String){
-      
+      pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
+      }
       Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
       self.subdomainCount = self.subdomainCount - (1 as UInt64)
       let oldToken <- self.subdomains.remove(key: nameHash) ?? panic("missing subdomain")
@@ -604,6 +617,10 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun depositVault(from: @FungibleToken.Vault) {
+      pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
+        self.receivable : "Domain is not receivable"
+      }
       let typeKey = from.getType().identifier
       let amount = from.balance
       let address = from.owner?.address
@@ -619,6 +636,7 @@ pub contract Domains: NonFungibleToken {
 
     pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault {
       pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
         self.vaults[key] != nil : "Vault not exsit..."
       }
       let vaultRef = &self.vaults[key] as! auth &FungibleToken.Vault
@@ -632,6 +650,10 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun addCollection(collection: @NonFungibleToken.Collection) {
+      pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
+        self.receivable : "Domain is not receivable"
+      }
       let typeKey = collection.getType().identifier
       let address = collection.owner?.address
       if self.collections[typeKey] == nil {
@@ -644,12 +666,16 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun checkCollection(key: String): Bool {
+      pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
+      }
       return self.collections[key] != nil
     }
 
     pub fun depositNFT(key: String, token: @NonFungibleToken.NFT) {
       pre {
         self.collections[key] != nil : "Collection not exsit..."
+        !Domains.isExpired(self.nameHash) : self.expiredTip
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection
       collectionRef.deposit(token: <- token)
@@ -658,12 +684,25 @@ pub contract Domains: NonFungibleToken {
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
       pre {
         self.collections[key] != nil : "Collection not exsit..."
+        !Domains.isExpired(self.nameHash) : self.expiredTip
       }
       let collectionRef = &self.collections[key] as! auth &NonFungibleToken.Collection
 
       emit DomainCollectionWithdrawn(vaultType: key, itemId: itemId, from: self.getDomainName())
 
       return <- collectionRef.withdraw(withdrawID: itemId)
+    }
+
+    pub fun setReceivable(_ flag: Bool) {
+      pre {
+        !Domains.isExpired(self.nameHash) : self.expiredTip
+      }
+      self.receivable = flag
+      if flag == false {
+        emit DomainReceiveClosed(name: self.getDomainName())
+      } else {
+        emit DomainReceiveOpened(name: self.getDomainName())
+      }
     }
     
     destroy() {

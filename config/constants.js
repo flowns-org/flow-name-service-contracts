@@ -64,7 +64,8 @@ export const paths = {
     queryUsersAllDomain: buildPath('query_users_domains_info.cdc', 'script'),
     queryUsersAllSubDomain: buildPath('query_subdomains_info.cdc', 'script'),
     queryRootDomainVaultBalance: buildPath('query_root_vault_balance.cdc', 'script'),
-    queryFUSDBalance: buildPath('query_fusd_balance', 'script'),
+    queryFUSDBalance: buildPath('query_fusd_balance.cdc', 'script'),
+    calcDomainHash: buildPath('calc_domain_hash.cdc', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',
