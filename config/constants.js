@@ -86,5 +86,7 @@ export const paths = {
     setFlownsPauseStatus: '../cadence/transactions/set_flowns_pause_status.cdc',
     depositeDomainVaultWithFlow: '../cadence/transactions/deposit_domain_vault_with_flow.cdc',
     withdrawVaultWithVaultType: '../cadence/transactions/withdraw_domain_vault_with_vault_type.cdc',
+    sendNFTToDomain: '../cadence/transactions/send_nft_to_domain.cdc',
+    withdrawNFTFromDomain: '../cadence/transactions/withdraw_nft_from_domain.cdc',
   },
 }

@@ -1,6 +1,6 @@
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
-import FlowToken from "./tokens/FlowToken.cdc"
+
 
 // Domains define the domain and sub domain resource
 // Use records and expired to store domain's owner and expiredTime
@@ -49,32 +49,36 @@ pub contract Domains: NonFungibleToken {
 
   // Subdomain detail
   pub struct SubdomainDetail {
-  pub let owner: Address
-  pub let name: String
-  pub let nameHash: String
-  pub let addresses: {UInt64: String}
-  pub let texts: {String: String}
-  pub let parentName: String
-  
-  init(
-    owner: Address,
-    name: String,
-    nameHash: String, 
-    addresses:{UInt64: String},
-    texts: {String: String},
-    parentName: String,
+    pub let id: UInt64
+    pub let owner: Address
+    pub let name: String
+    pub let nameHash: String
+    pub let addresses: {UInt64: String}
+    pub let texts: {String: String}
+    pub let parentName: String
+    
+    init(
+      id: UInt64
+      owner: Address,
+      name: String,
+      nameHash: String, 
+      addresses:{UInt64: String},
+      texts: {String: String},
+      parentName: String,
     ) {
+      self.id = id
       self.owner = owner
       self.name = name
       self.nameHash = nameHash
       self.addresses = addresses
       self.texts = texts
       self.parentName = parentName
-    }
+    }   
   }
   
   // Domain detail
   pub struct DomainDetail {
+    pub let id: UInt64
     pub let owner: Address
     pub let name: String
     pub let nameHash: String
@@ -89,6 +93,7 @@ pub contract Domains: NonFungibleToken {
 
 
     init(
+      id: UInt64,
       owner: Address,
       name: String,
       nameHash: String, 
@@ -101,7 +106,7 @@ pub contract Domains: NonFungibleToken {
       vaultBalances: {String: UFix64},
       collections: {String: [UInt64]}
     ) {
-
+      self.id = id
       self.owner = owner
       self.name = name
       self.nameHash = nameHash
@@ -125,6 +130,7 @@ pub contract Domains: NonFungibleToken {
     pub let texts: {String: String}
     pub let parent: String
     pub var subdomains: @{String: Subdomain}
+   
 
     pub fun getText(key: String): String
 
@@ -143,6 +149,10 @@ pub contract Domains: NonFungibleToken {
     pub fun depositVault(from: @FungibleToken.Vault)
 
     pub fun addCollection(collection: @NonFungibleToken.Collection)
+
+    pub fun checkCollection(key: String): Bool
+
+    pub fun depositNFT(key: String, token:@NonFungibleToken.NFT)
   }
 
   pub resource interface SubdomainPublic {
@@ -180,6 +190,8 @@ pub contract Domains: NonFungibleToken {
 
   // Domain private for Domain resource owner manage domain and subdomain
   pub resource interface DomainPrivate {
+    pub var vaults: @{String: FungibleToken.Vault}
+    pub var collections: @{String: NonFungibleToken.Collection}
 
     pub fun setText(key: String, value: String)
 
@@ -202,8 +214,6 @@ pub contract Domains: NonFungibleToken {
     pub fun removeSubdomainText(nameHash: String, key: String)
 
     pub fun removeSubdomainAddress(nameHash: String, chainType: UInt64)
-
-    pub var vaults: @{String: FungibleToken.Vault}
 
     pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault
 
@@ -283,6 +293,7 @@ pub contract Domains: NonFungibleToken {
       let owner = Domains.records[self.parentNameHash]!
 
       let detail = SubdomainDetail(
+        id: self.id,
         owner: owner,
         name: self.getDomainName(), 
         nameHash: self.nameHash,
@@ -511,6 +522,7 @@ pub contract Domains: NonFungibleToken {
       }
 
       let detail = DomainDetail(
+        id: self.id,
         owner: owner,
         name: self.getDomainName(), 
         nameHash: self.nameHash,
@@ -619,8 +631,6 @@ pub contract Domains: NonFungibleToken {
       return <- vaultRef.withdraw(amount: withdrawAmount)
     }
 
-
-
     pub fun addCollection(collection: @NonFungibleToken.Collection) {
       let typeKey = collection.getType().identifier
       let address = collection.owner?.address
@@ -633,9 +643,21 @@ pub contract Domains: NonFungibleToken {
       }
     }
 
+    pub fun checkCollection(key: String): Bool {
+      return self.collections[key] != nil
+    }
+
+    pub fun depositNFT(key: String, token: @NonFungibleToken.NFT) {
+      pre {
+        self.collections[key] != nil : "Collection not exsit..."
+      }
+      let collectionRef = &self.collections[key] as &NonFungibleToken.Collection
+      collectionRef.deposit(token: <- token)
+    }
+
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
       pre {
-        self.collections[key] != nil : "Vault not exsit..."
+        self.collections[key] != nil : "Collection not exsit..."
       }
       let collectionRef = &self.collections[key] as! auth &NonFungibleToken.Collection
 
@@ -643,9 +665,7 @@ pub contract Domains: NonFungibleToken {
 
       return <- collectionRef.withdraw(withdrawID: itemId)
     }
-
-
-
+    
     destroy() {
       destroy self.subdomains
       destroy self.vaults

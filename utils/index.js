@@ -30,8 +30,6 @@ export const fclInit = () => {
 
 export const sendTrx = async (CODE, args, auth = null) => {
   const authFunc = auth || authz
-  console.log(authz)
-  console.log(auth)
   const txId = await fcl
     .send([
       fcl.transaction(CODE),

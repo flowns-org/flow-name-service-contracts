@@ -15,6 +15,7 @@
   "scripts": {
     "setup": "node ./scripts/setupContract.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "setup:index": "node scripts/index.js",
     "setup:con": "node scripts/setupContract.js",
     "setup:env": "node scripts/setupEnv.js",
     "init:emulator": "flow project deploy && yarn acc:test1 && yarn acc:test2 && yarn setup:env ",

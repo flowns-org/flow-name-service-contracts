@@ -36,6 +36,10 @@ const main = async () => {
   // renew
   await renewDomain(0, 'caoss', 'flow', '3153600.00000000', '0.70000000')
 
+  await registerDomain(0, 'testt', 'flow', '3153600.00000000', '5.00000000')
+  await registerDomain(0, 'caosa', 'flow', '3153600.00000000', '5.00000000')
+  await registerDomain(0, 'caosb', 'flow', '3153600.00000000', '5.00000000')
+
   const subdomainHash = hash.hash('blog.caoss.flow')
   const res1 = await buildAndSendTrx('mintSubdomain', [
     fcl.arg(nameHash, t.String),

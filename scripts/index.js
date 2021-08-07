@@ -15,13 +15,11 @@ const main = async () => {
   // const res1 = await renewDomain(0, 'caoss','flow', '3153600.00000000', '0.70000000')
   const nameHash = hash.hash('caoss.flow')
 
-
   // get domain info by hashname
   // const domain = await buildAndExecScript('queryDomainInfo', [
   //   fcl.arg(nameHash, t.String),
   // ])
   // console.log(domain)
-
 
   // get user all info
   const subdomainHash = hash.hash('blog.caos.flow')
@@ -140,6 +138,7 @@ const main = async () => {
   // const res = await buildAndExecScript('queryDomainAvailable', [fcl.arg(nameHash, t.String)])
   // console.log(res)
 
+  /* domain vault maintain
   const res = await buildAndSendTrx('depositeDomainVaultWithFlow', [
     fcl.arg(nameHash, t.String),
     fcl.arg('10.0', t.UFix64),
@@ -158,6 +157,22 @@ const main = async () => {
 
   const res6 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
   console.log(res6)
+  */
+
+  // await buildAndSendTrx('sendNFTToDomain', [fcl.arg(nameHash, t.String), fcl.arg(1, t.UInt64)])
+  // await buildAndSendTrx('sendNFTToDomain', [fcl.arg(nameHash, t.String), fcl.arg(2, t.UInt64)])
+  // await buildAndSendTrx('sendNFTToDomain', [fcl.arg(nameHash, t.String), fcl.arg(3, t.UInt64)])
+  // const info = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+
+
+  await buildAndSendTrx('withdrawNFTFromDomain', [
+    fcl.arg(nameHash, t.String),
+    fcl.arg('A.f8d6e0586b0a20c7.Domains.Collection', t.String),
+    fcl.arg(1, t.UInt64),
+  ])
+  const info = await buildAndExecScript('queryDomainInfo', [fcl.arg(nameHash, t.String)])
+  console.dir(JSON.stringify(info))
+
 }
 
 main()
