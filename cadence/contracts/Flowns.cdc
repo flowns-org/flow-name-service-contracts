@@ -331,7 +331,7 @@ pub contract Flowns {
       pre {
           self.domains[domainId] != nil : "Root domain not exist..."
         }
-      let root = self.getDomain(domainId)
+      let root = self.getRootDomain(domainId)
       root.renewDomain(domain: domain, duration: duration, feeTokens: <- feeTokens)
     }
 
@@ -339,7 +339,7 @@ pub contract Flowns {
       pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
-      let root = self.getDomain(domainId)
+      let root = self.getRootDomain(domainId)
       root.registerDomain(name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver )
     }
 
@@ -356,21 +356,21 @@ pub contract Flowns {
       pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
-      self.getDomain(domainId).withdrawVault(receiver: receiver, amount: amount)
+      self.getRootDomain(domainId).withdrawVault(receiver: receiver, amount: amount)
     }
 
     access(account) fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault) {
       pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
-      self.getDomain(domainId).changeRootDomainVault(vault: <- vault)
+      self.getRootDomain(domainId).changeRootDomainVault(vault: <- vault)
     }
 
     access(account) fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>) {
         pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
-      let root = self.getDomain(domainId)
+      let root = self.getRootDomain(domainId)
       root.mintDomain(name: name, nameHash: nameHash, duration: duration, receiver: receiver)
     }
 
@@ -385,11 +385,11 @@ pub contract Flowns {
     }
     
     access(account) fun setPrices(domainId: UInt64, len: Int, price: UFix64){
-      self.getDomain(domainId).setPrices(key: len, price: price)
+      self.getRootDomain(domainId).setPrices(key: len, price: price)
     }
 
-    // Set rent price to root domain
-    access(contract) fun getDomain(_ domainId: UInt64) : &RootDomain {
+    // get domain reference
+    access(contract) fun getRootDomain(_ domainId: UInt64) : &RootDomain {
       pre {
         self.domains[domainId] != nil: "domain doesn't exist"
       }
@@ -398,12 +398,12 @@ pub contract Flowns {
 
     // get Root domain info
     pub fun getDomainInfo(domainId: UInt64): RootDomainInfo {
-      return self.getDomain(domainId).getRootDomainInfo()
+      return self.getRootDomain(domainId).getRootDomainInfo()
     }
 
     // Query root domain's rent price
     pub fun getPrices(domainId: UInt64): {Int: UFix64} {
-      return self.getDomain(domainId).prices
+      return self.getRootDomain(domainId).prices
     }
 
 
@@ -458,7 +458,7 @@ pub contract Flowns {
       pre {
           cap.check() : "Invalid server capablity"
       }
-      self.server!.borrow()!.getDomain(domainId).addCapability(cap)
+      self.server!.borrow()!.getRootDomain(domainId).addCapability(cap)
     }
 
     // Create root domain with admin
