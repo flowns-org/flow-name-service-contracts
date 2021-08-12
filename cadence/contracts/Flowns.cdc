@@ -147,6 +147,10 @@ pub contract Flowns {
     // Renew domain
     pub fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
       
+      let deprecatedRecorrds = Domains.deprecated[domain.nameHash]
+      if deprecatedRecorrds != nil && deprecatedRecorrds![domain.id] != nil {
+        panic("Domain already deprecated ...")
+      }
       // When domain name longer than 10, the price will set by 10 price
       var len = domain.name.length
       if len > 10 {
@@ -190,7 +194,7 @@ pub contract Flowns {
     pub fun registerDomain(name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       pre {
         self.server != nil : "Your client has not been linked to the server"
-        Domains.records[nameHash] == nil : "Domain not available"
+        Flowns.available(nameHash: nameHash) == true : "Domain not available"
       }
       // same as renew domain
       var len = name.length
