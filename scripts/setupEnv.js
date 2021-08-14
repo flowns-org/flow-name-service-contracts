@@ -20,6 +20,9 @@ const main = async () => {
   await buildSetupTrx('initTokens', [], test1Authz())
   await buildSetupTrx('initTokens', [], test2Authz())
 
+
+
+
   await buildSetupTrx('mintKibbleToken', [
     fcl.arg(test1Addr, t.Address),
     fcl.arg('100.00', t.UFix64),
@@ -31,6 +34,10 @@ const main = async () => {
   await buildSetupTrx('createFUSDMinter', [])
   await buildSetupTrx('mintFUSD', [fcl.arg(test1Addr, t.Address), fcl.arg('100.00', t.UFix64)])
   await buildSetupTrx('mintFUSD', [fcl.arg(test2Addr, t.Address), fcl.arg('100.00', t.UFix64)])
+
+
+  // await buildSetupTrx('initDomainCollection', [], test1Authz())
+  // await buildSetupTrx('initDomainCollection', [], test2Authz())
 }
 
 main()

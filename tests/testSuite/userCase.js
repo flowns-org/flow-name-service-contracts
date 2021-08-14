@@ -2,7 +2,7 @@ import t from '@onflow/types'
 import fcl from '@onflow/fcl'
 import hash from 'eth-ens-namehash'
 import dotenv from 'dotenv'
-import moment, { duration } from 'moment'
+import moment from 'moment'
 import { accountAddr } from '../../config/constants.js'
 // import { checkTrxSealed } from './utils'
 import { test1Authz, test2Authz, test1Addr, test2Addr } from '../../utils/authz'
@@ -89,13 +89,13 @@ export const userTest = () =>
       const test1Bal = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
-      const test2Bal = await buildAndExecScript('queryFlowTokenBalance', [
+      const test2Bal = await buildAndExecScript('queryFUSDBalance', [
         fcl.arg(test2Addr, t.Address),
       ])
       // check resource
       const test1Reg = await registerDomain(
         flowDomainId,
-        'tes1',
+        test1DomainName,
         flowName,
         oneYear.toFixed(2),
         '6.4',
@@ -104,25 +104,26 @@ export const userTest = () =>
 
       const test2Reg = await registerDomain(
         fnsDomainId,
-        'tes1',
-        flowName,
+        test2DomainName,
+        fnsName,
         oneYear.toFixed(2),
         '3.2',
-        test1Authz(),
+        test2Authz(),
+        'FUSD'
       )
       expect(test1Reg).not.toBeNull()
       expect(test1Reg.status).toBe(4)
 
-      expect(test1Reg).not.toBeNull()
-      expect(test1Reg.status).toBe(4)
+      expect(test2Reg).not.toBeNull()
+      expect(test2Reg.status).toBe(4)
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
-      const test2BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
+      const test2BalAfter = await buildAndExecScript('queryFUSDBalance', [
         fcl.arg(test2Addr, t.Address),
       ])
-      expect(test1BalAfter).toBe(test1Bal - 6.4)
-      expect(test2BalAfter).toBe(test2Bal - 3.2)
+      expect(Number(test1BalAfter)).toBe(test1Bal - 6.4)
+      expect(Number(test2BalAfter)).toBe(test2Bal - 3.2)
     })
 
     test('register duplicate domain ', async () => {

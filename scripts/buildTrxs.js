@@ -4,12 +4,12 @@ import fcl from '@onflow/fcl'
 
 import { buildAndSendTrx, buildAndExecScript } from '../utils/index.js'
 
-export const registerDomain = async (domainId, name, rootName, duration, amount, authz = null) => {
+export const registerDomain = async (domainId, name, rootName, duration, amount, authz = null, token = 'flow') => {
   const domainName = `${name}.${rootName}`
   const nameHash = hash.hash(domainName)
   console.log(name, nameHash)
   const res = await buildAndSendTrx(
-    'registerDomain',
+    token == 'flow' ?'registerDomain':'registerDomainWithFUSD',
     [
       fcl.arg(domainId, t.UInt64),
       fcl.arg(name, t.String),
@@ -21,6 +21,8 @@ export const registerDomain = async (domainId, name, rootName, duration, amount,
   )
   return res
 }
+
+
 
 export const renewDomain = async (domainId, name, rootName, duration, amount, authz = null) => {
   const domainName = `${name}.${rootName}`

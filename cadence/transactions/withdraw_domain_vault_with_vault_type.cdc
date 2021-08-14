@@ -2,7 +2,7 @@ import Flowns from 0xFlowns
 import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import FlowToken from 0xFlowToken
-
+// key will be 'A.0ae53cb6e3f42a79.FlowToken.Vault' for flowtoken
 transaction(nameHash: String, key: String, amount: UFix64) {
   var domain: &{Domains.DomainPrivate}
   var vaultRef: &FlowToken.Vault

@@ -634,7 +634,7 @@ pub contract Domains: NonFungibleToken {
       )
 
       let oldSubdomain <- self.subdomains[nameHash] <- subdomain
-      Domains.totalSupply = Domains.totalSupply + (1 as UInt64)
+      // Domains.totalSupply = Domains.totalSupply + (1 as UInt64)
       self.subdomainCount = self.subdomainCount + (1 as UInt64)
       
       emit SubDomainCreated(id: self.subdomainCount, hash: nameHash)
@@ -646,7 +646,7 @@ pub contract Domains: NonFungibleToken {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
       }
-      Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
+      // Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
       self.subdomainCount = self.subdomainCount - (1 as UInt64)
       let oldToken <- self.subdomains.remove(key: nameHash) ?? panic("missing subdomain")
 

@@ -69,6 +69,7 @@ export const paths = {
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',
+    registerDomainWithFUSD: '../cadence/transactions/register_domain_with_fusd.cdc',
     renewDomain: '../cadence/transactions/renew_domain.cdc',
     mintSubdomain: '../cadence/transactions/mint_subdomain.cdc',
     removeSubdomain: '../cadence/transactions/remove_subdomain.cdc',

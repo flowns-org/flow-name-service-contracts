@@ -8,7 +8,7 @@ transaction(domainId: UInt64, name: String, nameHash: String, duration: UFix64, 
   let vault: @FungibleToken.Vault
   prepare(account: AuthAccount) {
     self.collectionCap = account.getCapability<&{NonFungibleToken.Receiver}>(Domains.CollectionPublicPath)
-    let vaultRef = account.borrow<&FungibleToken.Vault>(from: /storage/flowTokenVault)
+    let vaultRef = account.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
           ?? panic("Could not borrow owner's Vault reference")
     self.vault <- vaultRef.withdraw(amount: amount)
   }
