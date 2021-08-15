@@ -146,10 +146,8 @@ pub contract Flowns {
 
     // Renew domain
     pub fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
-      
-      let deprecatedRecorrds = Domains.deprecated[domain.nameHash]
-      if deprecatedRecorrds != nil && deprecatedRecorrds![domain.id] != nil {
-        panic("Domain already deprecated ...")
+      pre {
+        !Domains.isDeprecated(nameHash: domain.nameHash, domainId: domain.id) : "Domain already deprecated ..."
       }
       // When domain name longer than 10, the price will set by 10 price
       var len = domain.name.length
@@ -557,13 +555,7 @@ pub contract Flowns {
     if Domains.records[nameHash] == nil {
       return true
     }
-
-    let expiredTime =  Domains.expired[nameHash]
-    let currentTimestamp =  getCurrentBlock().timestamp
-    if currentTimestamp >= expiredTime! {
-      return true
-    }
-    return false
+    return Domains.isExpired(nameHash)
   }
 
   pub fun getRentPrices(domainId: UInt64): {Int: UFix64} {

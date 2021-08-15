@@ -66,6 +66,8 @@ export const paths = {
     queryRootDomainVaultBalance: buildPath('query_root_vault_balance.cdc', 'script'),
     queryFUSDBalance: buildPath('query_fusd_balance.cdc', 'script'),
     calcDomainHash: buildPath('calc_domain_hash.cdc', 'script'),
+    queryDomainDeprecated: buildPath('query_domain_deprecated.cdc', 'script'),
+    getCurrentBlockTimestamp: buildPath('get_block_timestamp.cdc', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',

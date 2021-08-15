@@ -8,7 +8,7 @@ import {
   flowTokenAddr,
   flowFungibleAddr,
   KibbleTokenAddr,
-  FUSDTokenAddr
+  FUSDTokenAddr,
 } from '../config/constants.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -82,6 +82,10 @@ export const buildAndExecScript = async (key, args = []) => {
 export const readCode = async (path) => {
   const data = fs.readFileSync(resolve(__dirname, path), 'utf-8')
   return data
+}
+
+export const sleep = async (time) => {
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 export default {}

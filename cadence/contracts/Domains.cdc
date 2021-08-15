@@ -24,6 +24,7 @@ pub contract Domains: NonFungibleToken {
   pub let deprecated: {String: {UInt64: DomainDeprecatedInfo}}
 
   pub let domainExpiredTip: String
+  pub let domainDeprecatedTip: String
 
 
   // Events
@@ -60,6 +61,7 @@ pub contract Domains: NonFungibleToken {
     pub let nameHash: String
     pub let parentName: String
     pub let deprecatedAt: UFix64
+    pub let trigger: Address
 
 
      init(
@@ -69,6 +71,7 @@ pub contract Domains: NonFungibleToken {
       nameHash: String, 
       parentName: String,
       deprecatedAt: UFix64,
+      trigger: Address
     ) {
       self.id = id
       self.owner = owner
@@ -76,6 +79,7 @@ pub contract Domains: NonFungibleToken {
       self.nameHash = nameHash
       self.parentName = parentName
       self.deprecatedAt = deprecatedAt
+      self.trigger = trigger
     }   
   }
 
@@ -434,36 +438,27 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun getText(key: String): String {
-      pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
+      
       return self.texts[key]!
     }
 
     pub fun getAddress(chainType: UInt64): String {
-        pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
+     
       return self.addresses[chainType]!
     }
 
     pub fun getAllTexts():{String: String}{
-        pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
       return self.texts
     }
 
     pub fun getAllAddresses():{UInt64: String}{
-        pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
       return self.addresses
     }
 
     pub fun setText(key: String, value: String){
-        pre {
+      pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       self.texts[key] = value
 
@@ -471,8 +466,9 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun setAddress(chainType: UInt64, address: String){
-        pre {
+      pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       self.addresses[chainType] = address
 
@@ -483,6 +479,7 @@ pub contract Domains: NonFungibleToken {
     pub fun removeText(key: String){
         pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
 
       self.texts.remove(key: key)
@@ -493,6 +490,7 @@ pub contract Domains: NonFungibleToken {
     pub fun removeAddress(chainType: UInt64){
         pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
 
       self.addresses.remove(key: chainType)
@@ -503,6 +501,7 @@ pub contract Domains: NonFungibleToken {
     pub fun setSubdomainText(nameHash: String, key: String, value: String){
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.subdomains[nameHash] != nil : "Subdomain not exsit..."
       }
 
@@ -513,6 +512,7 @@ pub contract Domains: NonFungibleToken {
     pub fun setSubdomainAddress(nameHash: String, chainType: UInt64, address: String){
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.subdomains[nameHash] != nil : "Subdomain not exsit..."
       }
 
@@ -523,6 +523,7 @@ pub contract Domains: NonFungibleToken {
     pub fun removeSubdomainText(nameHash: String, key: String) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.subdomains[nameHash] != nil : "Subdomain not exsit..."
       }
       let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
@@ -532,6 +533,7 @@ pub contract Domains: NonFungibleToken {
     pub fun removeSubdomainAddress(nameHash: String, chainType: UInt64) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.subdomains[nameHash] != nil : "Subdomain not exsit..."
       }
       let subdomain = &self.subdomains[nameHash] as &{SubdomainPrivate}
@@ -539,9 +541,7 @@ pub contract Domains: NonFungibleToken {
     }
     
     pub fun getDetail(): DomainDetail {
-      pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
+
       let owner = Domains.records[self.nameHash]!
       let expired = Domains.expired[self.nameHash]!
       
@@ -604,6 +604,7 @@ pub contract Domains: NonFungibleToken {
     access(account) fun setRecord(address: Address){
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       Domains.records[self.nameHash] = address
       emit DomainRecordChanged(name: self.name, resolver: address)
@@ -620,6 +621,7 @@ pub contract Domains: NonFungibleToken {
     pub fun createSubDomain(name: String, nameHash: String){
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       
       if self.subdomains[nameHash] != nil {
@@ -645,6 +647,7 @@ pub contract Domains: NonFungibleToken {
     pub fun removeSubDomain(nameHash: String){
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       // Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
       self.subdomainCount = self.subdomainCount - (1 as UInt64)
@@ -659,6 +662,7 @@ pub contract Domains: NonFungibleToken {
     pub fun depositVault(from: @FungibleToken.Vault) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.receivable : "Domain is not receivable"
       }
       let typeKey = from.getType().identifier
@@ -676,7 +680,6 @@ pub contract Domains: NonFungibleToken {
 
     pub fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault {
       pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         self.vaults[key] != nil : "Vault not exsit..."
       }
       let vaultRef = &self.vaults[key] as! auth &FungibleToken.Vault
@@ -692,6 +695,7 @@ pub contract Domains: NonFungibleToken {
     pub fun addCollection(collection: @NonFungibleToken.Collection) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
         self.receivable : "Domain is not receivable"
       }
       let typeKey = collection.getType().identifier
@@ -706,9 +710,6 @@ pub contract Domains: NonFungibleToken {
     }
 
     pub fun checkCollection(key: String): Bool {
-      pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-      }
       return self.collections[key] != nil
     }
 
@@ -716,6 +717,7 @@ pub contract Domains: NonFungibleToken {
       pre {
         self.collections[key] != nil : "Collection not exsit..."
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection
       collectionRef.deposit(token: <- token)
@@ -724,7 +726,6 @@ pub contract Domains: NonFungibleToken {
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
       pre {
         self.collections[key] != nil : "Collection not exsit..."
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
       }
       let collectionRef = &self.collections[key] as! auth &NonFungibleToken.Collection
 
@@ -736,6 +737,7 @@ pub contract Domains: NonFungibleToken {
     pub fun setReceivable(_ flag: Bool) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       self.receivable = flag
       if flag == false {
@@ -862,11 +864,14 @@ pub contract Domains: NonFungibleToken {
           name: deprecatedDomain!.name,
           nameHash:deprecatedDomain!.nameHash,
           parentName: deprecatedDomain!.parent,
-          deprecatedAt: getCurrentBlock().timestamp
+          deprecatedAt: getCurrentBlock().timestamp,
+          trigger: receiver.address
         )
         var deprecatedRecords:{UInt64: DomainDeprecatedInfo} = Domains.deprecated[nameHash] ?? {}
 
         deprecatedRecords[deprecatedDomain!.id] = deprecatedInfo
+
+        Domains.deprecated[nameHash] = deprecatedRecords
         // todo update records and expired
         Domains.updateRecords(nameHash: nameHash, address: nil)
 
@@ -909,14 +914,18 @@ pub contract Domains: NonFungibleToken {
   }
 
   // Get domain's expired statu
-  pub fun isExpired(_ nameHash: String): Bool {
+  pub fun isExpired(_ nameHash: String): Bool {    
     let currentTimestamp = getCurrentBlock().timestamp
     let expiredTime =  Domains.expired[nameHash]
     if expiredTime != nil {
-      // make one day buffer 
-      return (currentTimestamp - 86400.00) > expiredTime!
-    } 
+      return currentTimestamp >= expiredTime!
+    }
     return false
+  }
+
+  pub fun isDeprecated(nameHash: String, domainId:UInt64): Bool {
+    let deprecatedRecords = Domains.deprecated[nameHash] ?? {}
+    return deprecatedRecords[domainId] != nil
   }
 
   // Get domain's owner address
@@ -940,7 +949,8 @@ pub contract Domains: NonFungibleToken {
     self.CollectionPublicPath =/public/fnsDomainCollection
     self.CollectionStoragePath =/storage/fnsDomainCollection
     self.CollectionPrivatePath =/private/fnsDomainCollection
-    self.domainExpiredTip =  "Domain is expired please renew your parent domain."
+    self.domainExpiredTip =  "Domain expired, please renew it."
+    self.domainDeprecatedTip =  "Domain deprecated."
     self.records = {}
     self.expired = {}
     self.deprecated = {}
