@@ -15,7 +15,7 @@ transaction(domainNameHash: String, subdomainNameHash: String, chainType: UInt64
 
     for id in ids {
       let item = collection.borrowDomain(id: id)
-      if item.nameHash == domainNameHash {
+      if item.nameHash == domainNameHash && !Domains.isDeprecated(nameHash:domainNameHash, domainId: id) {
         domainRef = collectionPrivate.borrowDomainPrivate(id)
       } 
     }

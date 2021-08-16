@@ -10,7 +10,7 @@ pub fun main(nameHash: String): Domains.DomainDetail? {
   
   for id in ids {
     let domain = collection.borrowDomain(id: id)
-    if domain.nameHash == nameHash {
+    if domain.nameHash == nameHash && !Domains.isDeprecated(nameHash:nameHash, domainId: id) {
       detail = domain.getDetail()
     }
    

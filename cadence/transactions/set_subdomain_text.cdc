@@ -13,7 +13,7 @@ transaction(domainNameHash: String, subdomainNameHash: String, key: String, valu
 
     for id in ids {
       let domain = collection.borrowDomain(id: id)
-      if domain!.nameHash == domainNameHash {
+      if domain!.nameHash == domainNameHash && !Domains.isDeprecated(nameHash:domainNameHash, domainId: id) {
        domainRef = collectionPrivate.borrowDomainPrivate(id)
       }
     }

@@ -132,6 +132,7 @@ pub contract Domains: NonFungibleToken {
     pub let vaultBalances: {String: UFix64}
     pub let collections: {String: [UInt64]}
     pub let receivable: Bool
+    pub let deprecated: Bool
 
 
     init(
@@ -148,7 +149,8 @@ pub contract Domains: NonFungibleToken {
       createdAt: UFix64,
       vaultBalances: {String: UFix64},
       collections: {String: [UInt64]}
-      receivable: Bool
+      receivable: Bool,
+      deprecated: Bool
     ) {
       self.id = id
       self.owner = owner
@@ -164,6 +166,7 @@ pub contract Domains: NonFungibleToken {
       self.vaultBalances = vaultBalances
       self.collections = collections
       self.receivable = receivable
+      self.deprecated = deprecated
     } 
   }
 
@@ -584,7 +587,8 @@ pub contract Domains: NonFungibleToken {
         createdAt: self.createdAt,
         vaultBalances: vaultBalances,
         collections: collections,
-        receivable: self.receivable
+        receivable: self.receivable,
+        deprecated: Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id)
       )
       return detail
     }

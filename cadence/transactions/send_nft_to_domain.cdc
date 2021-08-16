@@ -17,7 +17,7 @@ transaction(nameHash: String, itemId: UInt64) {
     let ids = userCollection.getIDs()
     for id in ids {
       var item = userCollection.borrowDomain(id: id)
-      if item.nameHash == nameHash {
+      if item.nameHash == nameHash && !Domains.isDeprecated(nameHash: nameHash, domainId: id) {
         domain = item
       } 
     }

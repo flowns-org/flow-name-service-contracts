@@ -25,6 +25,10 @@ const test2DomainName = 'tes2'
 let test2FnsDomainNamHash = hash.hash(`${test2DomainName}.${fnsName}`)
 const deprecatedDomainName = 'depr'
 const deprecatedDomainNameHash = hash.hash(`${deprecatedDomainName}.${flowName}`)
+const deprecatedSubDomain = 'sub'
+const deprecatedSubDomainHash = hash.hash(
+  `${deprecatedSubDomain}.${deprecatedDomainName}.${flowName}`,
+)
 // const devDomainName = 'dev'
 // let devDomainNameHash = hash.hash(`${devDomainName}.${flowName}`)
 
@@ -143,7 +147,6 @@ export const userTest = () =>
     })
 
     test('domain deprecated test case ', async () => {
-
       const mintRes = await buildAndSendTrx('mintDomain', [
         fcl.arg(flowDomainId, t.UInt64),
         fcl.arg(deprecatedDomainName, t.String),
@@ -163,7 +166,7 @@ export const userTest = () =>
         fcl.arg('0xcea5e66bec5193e5ec0b049a3fe5d7dd896fd480', t.String),
       ])
       // await sleep(1000)
-      
+
       await buildAndSendTrx('setDomainAddress', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(1, t.UInt64),
@@ -181,7 +184,7 @@ export const userTest = () =>
         fcl.arg(test1Addr, t.Address),
       ])
       console.log(test1Bal, 'test1 flow bal')
-      
+
       const regRes = await registerDomain(
         flowDomainId,
         deprecatedDomainName,
@@ -206,8 +209,13 @@ export const userTest = () =>
     })
 
     test('Deprecated domain change and renew fail ', async () => {
-      
-      const renewRes = await renewDomain(flowDomainId, deprecatedDomainName, flowName, oneYear.toFixed(2), '6.5')
+      const renewRes = await renewDomain(
+        flowDomainId,
+        deprecatedDomainName,
+        flowName,
+        oneYear.toFixed(2),
+        '6.5',
+      )
 
       expect(renewRes).toBeNull()
 
@@ -217,8 +225,208 @@ export const userTest = () =>
         fcl.arg('0xcea5e66bec5193e5ec0b049a3fe5d7dd896fd480', t.String),
       ])
       expect(setRes).toBeNull()
-
-      
     })
 
+    test('Deprecated domain transfer fail ', async () => {
+      const transferRes = await buildAndSendTrx('transferDomainWithId', [
+        fcl.arg(1, t.UInt64),
+        fcl.arg(test2Addr, t.Address),
+      ])
+      expect(transferRes).toBeNull()
+    })
+
+    test('Transfer renew domains to deprecate account', async () => {
+      const transferRes = await buildAndSendTrx(
+        'transferDomainWithId',
+        [fcl.arg(3, t.UInt64), fcl.arg(accountAddr, t.Address)],
+        test1Authz(),
+      )
+      expect(transferRes).not.toBeNull()
+      expect(transferRes.status).toBe(4)
+    })
+
+    test('Deprecate account manage domain and subdomain with same hash name', async () => {
+      const setTextRes = await buildAndSendTrx('setDomainText', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg('text', t.String),
+        fcl.arg('value', t.String),
+      ])
+      expect(setTextRes).not.toBeNull()
+      expect(setTextRes.status).toBe(4)
+
+      const subRes = await buildAndSendTrx('mintSubdomain', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomain, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+      ])
+
+      expect(subRes).not.toBeNull()
+      expect(subRes.status).toBe(4)
+
+      const setAddressRes = await buildAndSendTrx('setDomainAddress', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(0, t.UInt64),
+        fcl.arg('0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480', t.String),
+      ])
+      expect(setAddressRes).not.toBeNull()
+      expect(setAddressRes.status).toBe(4)
+
+      const setRes = await buildAndSendTrx('setDomainAddress', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(0, t.UInt64),
+        fcl.arg('0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480', t.String),
+      ])
+      expect(setRes).not.toBeNull()
+      expect(setRes.status).toBe(4)
+
+      const setSubText = await buildAndSendTrx('setSubdomainText', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+        fcl.arg('subText', t.String),
+        fcl.arg('subValue', t.String),
+      ])
+      expect(setSubText).not.toBeNull()
+      expect(setSubText.status).toBe(4)
+
+      const setSubAddr = await buildAndSendTrx('setSubdomainAddress', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+        fcl.arg(1, t.UInt64),
+        fcl.arg('123', t.String),
+      ])
+      expect(setSubAddr).not.toBeNull()
+      expect(setSubAddr.status).toBe(4)
+
+      const domainQuery = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+
+      expect(domainQuery.subdomainCount).toBe(1)
+      expect(domainQuery.texts['text']).toBe('value')
+      expect(domainQuery.addresses[0]).toBe('0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480')
+
+      const subdomains = await buildAndExecScript('queryUsersAllSubDomain', [
+        fcl.arg(accountAddr, t.Address),
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+
+      const subdomainInfo = subdomains[0]
+
+      expect(subdomainInfo).not.toBeNull()
+      expect(subdomainInfo.texts['subText']).toBe('subValue')
+      expect(subdomainInfo.addresses[1]).toBe('123')
+
+      const removeSubTextRes = await buildAndSendTrx('removeSubdomainText', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+        fcl.arg('subText', t.String),
+      ])
+
+      expect(removeSubTextRes).not.toBeNull()
+      expect(removeSubTextRes.status).toBe(4)
+
+      const removeSubAddrRes = await buildAndSendTrx('removeSubdomainAddress', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+        fcl.arg(1, t.UInt64),
+      ])
+
+      expect(removeSubAddrRes).not.toBeNull()
+      expect(removeSubAddrRes.status).toBe(4)
+
+      const subdomainsAfter = await buildAndExecScript('queryUsersAllSubDomain', [
+        fcl.arg(accountAddr, t.Address),
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+      const subdomainInfo2 = subdomainsAfter[0]
+
+      expect(subdomainInfo2).not.toBeNull()
+      expect(subdomainInfo2.texts['subText']).toBe(undefined)
+      expect(subdomainInfo2.addresses[1]).toBe(undefined)
+
+      const removeSubdomain = await buildAndSendTrx('removeSubdomain', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(deprecatedSubDomainHash, t.String),
+      ])
+
+      expect(removeSubdomain).not.toBeNull()
+      expect(removeSubdomain.status).toBe(4)
+
+      const domainQueryAfter = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+
+      expect(domainQueryAfter.subdomainCount).toBe(0)
+
+      const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+
+      expect(domainsQuery.length).toBe(3)
+      console.log(domainsQuery, '=======')
+    })
+
+    test('deposit flow to domain', async () => {
+      const flowVaultType = 'A.0ae53cb6e3f42a79.FlowToken.Vault'
+      const collectionType = 'A.f8d6e0586b0a20c7.Domains.Collection'
+      const test1FlowBal = await buildAndExecScript('queryFlowTokenBalance', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+      const depositRes = await buildAndSendTrx('depositDomainVaultWithFlow', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg('50.0', t.UFix64),
+      ])
+      expect(depositRes).not.toBeNull()
+      expect(depositRes.status).toBe(4)
+
+      const test1FlowBalAfter = await buildAndExecScript('queryFlowTokenBalance', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+
+      expect(Number(test1FlowBalAfter)).toBe(test1FlowBal - 50)
+
+      const sendNFTRes = await buildAndSendTrx('sendNFTToDomain', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(0, t.UInt64),
+      ])
+      expect(sendNFTRes).not.toBeNull()
+      expect(sendNFTRes.status).toBe(4)
+
+     
+      const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+      expect(domainsQuery.length).toBe(2)
+
+
+      const domainInfo = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+
+      expect(domainInfo.vaultBalances[flowVaultType]).not.toBeNull()
+      expect(domainInfo.collections[collectionType]).not.toBeNull()
+
+      await buildAndSendTrx('withdrawVaultWithVaultType', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(flowVaultType, t.String),
+        fcl.arg('30.0', t.UFix64)
+      ])
+
+      await buildAndSendTrx('withdrawNFTFromDomain', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+        fcl.arg(collectionType, t.String),
+        fcl.arg(0, t.UInt64)
+      ])
+
+      const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+      expect(domainsQueryAfter.length).toBe(3)
+
+      const test1FlowBalLast = await buildAndExecScript('queryFlowTokenBalance', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+
+      expect(Number(test1FlowBalLast)).toBe(test1FlowBal - 50 + 30)
+    })
   })

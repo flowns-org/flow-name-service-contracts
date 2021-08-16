@@ -15,7 +15,7 @@ transaction(domainNameHash: String, subdomainName: String, subdomainNameHash: St
 
     for id in ids {
       var item = collection.borrowDomain(id: id)
-      if item.nameHash == domainNameHash {
+      if item.nameHash == domainNameHash && !Domains.isDeprecated(nameHash:domainNameHash, domainId: id) {
         domain = collectionPrivate.borrowDomainPrivate(id)
       } 
     }

@@ -88,9 +88,11 @@ export const paths = {
     createFUSDVault: '../cadence/transactions/create_fusd_vault.cdc',
     changeRootDomainVaultWithFusd: '../cadence/transactions/change_root_domain_vault_with_fusd.cdc',
     setFlownsPauseStatus: '../cadence/transactions/set_flowns_pause_status.cdc',
-    depositeDomainVaultWithFlow: '../cadence/transactions/deposit_domain_vault_with_flow.cdc',
+    depositDomainVaultWithFlow: '../cadence/transactions/deposit_domain_vault_with_flow.cdc',
     withdrawVaultWithVaultType: '../cadence/transactions/withdraw_domain_vault_with_vault_type.cdc',
     sendNFTToDomain: '../cadence/transactions/send_nft_to_domain.cdc',
     withdrawNFTFromDomain: '../cadence/transactions/withdraw_nft_from_domain.cdc',
+    transferDomainWithId: '../cadence/transactions/transfer_domain_with_id.cdc',
+    transferDomainWithHashName: '../cadence/transactions/transfer_domain_with_hash_name.cdc',
   },
 }
