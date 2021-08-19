@@ -15,13 +15,13 @@ pub contract Domains: NonFungibleToken {
 
   // Domain records to store the owner of Domains.Domain resource
   // When domain resource transfer to another user, the records will be update in the deposite func
-  pub let records: {String: Address}
+  access(self) let records: {String: Address}
 
   // Expired records for Domains to check the domain's validity, will change at register and renew
-  pub let expired: {String: UFix64}
+  access(self) let expired: {String: UFix64}
 
   // Store the expired and deprecated domain records 
-  pub let deprecated: {String: {UInt64: DomainDeprecatedInfo}}
+  access(self) let deprecated: {String: {UInt64: DomainDeprecatedInfo}}
 
   pub let domainExpiredTip: String
   pub let domainDeprecatedTip: String
@@ -175,8 +175,6 @@ pub contract Domains: NonFungibleToken {
     pub let id: UInt64
     pub let name: String
     pub let nameHash: String
-    pub let addresses:  {UInt64: String}
-    pub let texts: {String: String}
     pub let parent: String
     pub var subdomains: @{String: Subdomain}
     pub var receivable: Bool
@@ -211,8 +209,6 @@ pub contract Domains: NonFungibleToken {
     pub let id: UInt64
     pub let name: String
     pub let nameHash: String
-    pub let addresses:  {UInt64: String}
-    pub let texts: {String: String}
     pub let parent: String
     pub let createdAt: UFix64 
 
@@ -243,8 +239,6 @@ pub contract Domains: NonFungibleToken {
 
   // Domain private for Domain resource owner manage domain and subdomain
   pub resource interface DomainPrivate {
-    pub var vaults: @{String: FungibleToken.Vault}
-    pub var collections: @{String: NonFungibleToken.Collection}
 
     pub fun setText(key: String, value: String)
 
@@ -258,7 +252,9 @@ pub contract Domains: NonFungibleToken {
 
     pub fun removeSubDomain(nameHash: String)
 
-    access(account) fun setRecord(address: Address)
+    // access(account) fun setRecord(_ address: Address)
+
+    // access(account) fun setExpired(_ expiredAt: UFix64)
     
     pub fun setSubdomainText(nameHash: String, key: String, value: String)
 
@@ -282,11 +278,11 @@ pub contract Domains: NonFungibleToken {
     pub let id: UInt64
     pub let name: String
     pub let nameHash: String
-    pub let addresses:  {UInt64: String}
-    pub let texts: {String: String}
     pub let parent: String
     pub let parentNameHash: String
-    pub let createdAt: UFix64 
+    pub let createdAt: UFix64
+    access(self) let addresses:  {UInt64: String}
+    access(self) let texts: {String: String} 
 
 
     init(id: UInt64, name: String, nameHash: String, parent: String, parentNameHash: String) {
@@ -344,7 +340,7 @@ pub contract Domains: NonFungibleToken {
         !Domains.isExpired(self.parentNameHash) : Domains.domainExpiredTip
       }
 
-      let owner = Domains.records[self.parentNameHash]!
+      let owner = Domains.getRecords(self.parentNameHash)!
 
       let detail = SubdomainDetail(
         id: self.id,
@@ -407,16 +403,18 @@ pub contract Domains: NonFungibleToken {
     pub let id: UInt64
     pub let name: String
     pub let nameHash: String
-    pub let addresses:  {UInt64: String}
-    pub let texts: {String: String}
+    
     pub var subdomains: @{String: Subdomain}
     pub let createdAt: UFix64
     // parent domain name
     pub let parent: String
     pub var subdomainCount: UInt64
-    pub var vaults: @{String: FungibleToken.Vault}
-    pub var collections: @{String: NonFungibleToken.Collection}
+
     pub var receivable: Bool
+    access(self) let addresses:  {UInt64: String}
+    access(self) let texts: {String: String}
+    access(self) var vaults: @{String: FungibleToken.Vault}
+    access(self) var collections: @{String: NonFungibleToken.Collection}
 
     init(id: UInt64, name: String, nameHash: String, parent: String) {
       self.id = id
@@ -435,9 +433,7 @@ pub contract Domains: NonFungibleToken {
     
     // get domain full name with root domain
     pub fun getDomainName(): String {
-
-      let domainName = ""
-      return domainName.concat(self.name).concat(".").concat(self.parent)
+      return self.name.concat(".").concat(self.parent)
     }
 
     pub fun getText(key: String): String {
@@ -545,8 +541,8 @@ pub contract Domains: NonFungibleToken {
     
     pub fun getDetail(): DomainDetail {
 
-      let owner = Domains.records[self.nameHash]!
-      let expired = Domains.expired[self.nameHash]!
+      let owner = Domains.getRecords(self.nameHash) ?? panic("Cannot got owner")
+      let expired = Domains.getExpiredTime(self.nameHash) ?? panic("Cannot got expired time")
       
       let subdomainKeys = self.subdomains.keys
       var subdomains: {String: SubdomainDetail} = {}
@@ -605,21 +601,22 @@ pub contract Domains: NonFungibleToken {
     }
 
     // set domain record
-    access(account) fun setRecord(address: Address){
-      pre {
-        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
-      }
-      Domains.records[self.nameHash] = address
-      emit DomainRecordChanged(name: self.name, resolver: address)
-    }
+    // access(account) fun setRecord(_ address: Address){
+    //   pre {
+    //     !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+    //     !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
+    //   }
+    //   // Domains.updateRecords(nameHash: self.nameHash, address: address)
+    //   Domains.records[self.nameHash] = address
+    //   emit DomainRecordChanged(name: self.name, resolver: address)
+    // }
 
-    // set domain expired
-    access(account) fun setExpired(expiredAt: UFix64){
-      
-      Domains.expired[self.nameHash] = expiredAt
-      emit DomainExpiredChanged(name: self.name, expiredAt: expiredAt)
-    }
+    // // set domain expired
+    // access(account) fun setExpired(_ expiredAt: UFix64){
+    //   // Domains.updateExpired(nameHash: self.nameHash, time: expiredAt)
+    //   Domains.expired[self.nameHash] = expiredAt
+    //   emit DomainExpiredChanged(name: self.name, expiredAt: expiredAt)
+    // }
 
     // create subdomain with domain
     pub fun createSubDomain(name: String, nameHash: String){
@@ -640,7 +637,6 @@ pub contract Domains: NonFungibleToken {
       )
 
       let oldSubdomain <- self.subdomains[nameHash] <- subdomain
-      // Domains.totalSupply = Domains.totalSupply + (1 as UInt64)
       self.subdomainCount = self.subdomainCount + (1 as UInt64)
       
       emit SubDomainCreated(id: self.subdomainCount, hash: nameHash)
@@ -653,7 +649,6 @@ pub contract Domains: NonFungibleToken {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
-      // Domains.totalSupply = Domains.totalSupply - (1 as UInt64)
       self.subdomainCount = self.subdomainCount - (1 as UInt64)
       let oldToken <- self.subdomains.remove(key: nameHash) ?? panic("missing subdomain")
 
@@ -709,7 +704,6 @@ pub contract Domains: NonFungibleToken {
         emit DomainCollectionAdded(collectionType: typeKey, to: address )
       } else {
         destroy collection
-        panic("Collection already exist...")
       }
     }
 
@@ -719,7 +713,7 @@ pub contract Domains: NonFungibleToken {
 
     pub fun depositNFT(key: String, token: @NonFungibleToken.NFT) {
       pre {
-        self.collections[key] != nil : "Collection not exsit..."
+        self.collections[key] != nil : "Cannot find NFT collection..."
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
@@ -729,7 +723,7 @@ pub contract Domains: NonFungibleToken {
 
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
       pre {
-        self.collections[key] != nil : "Collection not exsit..."
+        self.collections[key] != nil : "Cannot find NFT collection..."
       }
       let collectionRef = &self.collections[key] as! auth &NonFungibleToken.Collection
 
@@ -804,7 +798,8 @@ pub contract Domains: NonFungibleToken {
       let nameHash = token.nameHash
 
       // update the owner record for new domain owner
-      token.setRecord(address: self.owner?.address!)
+      // token.setRecord(self.owner?.address!)
+      Domains.updateRecords(nameHash: nameHash, address: self.owner?.address!)
       
       // add the new token to the dictionary which removes the old one
       let oldToken <- self.ownedNFTs[id] <- token
@@ -841,13 +836,13 @@ pub contract Domains: NonFungibleToken {
 
     access(account) fun mintDomain(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       
-      if Domains.records[nameHash] != nil {
+      if Domains.getRecords(nameHash) != nil {
         let isExpired = Domains.isExpired(nameHash)
 
         if isExpired == false {
           panic("The domain is not available")
         }
-        let currentOwnerAddr = Domains.records[nameHash]!
+        let currentOwnerAddr = Domains.getRecords(nameHash)!
         let account = getAccount(currentOwnerAddr)
         let collection = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath).borrow() ?? panic("Can not borrow domain collection.")
         let ids = collection.getIDs()
@@ -871,14 +866,14 @@ pub contract Domains: NonFungibleToken {
           deprecatedAt: getCurrentBlock().timestamp,
           trigger: receiver.address
         )
-        var deprecatedRecords:{UInt64: DomainDeprecatedInfo} = Domains.deprecated[nameHash] ?? {}
+        var deprecatedRecords: {UInt64: DomainDeprecatedInfo} = Domains.getDeprecatedRecords(nameHash) ?? {}
 
         deprecatedRecords[deprecatedDomain!.id] = deprecatedInfo
 
-        Domains.deprecated[nameHash] = deprecatedRecords
+        Domains.updateDeprecatedRecords(nameHash: nameHash, records: deprecatedRecords)
         // todo update records and expired
-        Domains.updateRecords(nameHash: nameHash, address: nil)
-
+        // Domains.updateRecords(nameHash: nameHash, address: nil)
+        // Domains.updateExpired(nameHash: nameHash, time: nil)
       }
 
       let domain <- create Domains.NFT(
@@ -888,10 +883,13 @@ pub contract Domains: NonFungibleToken {
         parent: parentName,
       )
       let nft <- domain
-      Domains.expired[nameHash] = expiredAt
-
+      
       // set records for new domain
-      nft.setRecord(address: receiver.address)
+      // nft.setRecord(receiver.address)
+      // nft.setExpired(expiredAt)
+      Domains.updateRecords(nameHash: nameHash, address: receiver.address)
+      Domains.updateExpired(nameHash: nameHash, time: expiredAt)
+      
       Domains.totalSupply = Domains.totalSupply + 1 as UInt64
       receiver.borrow()!.deposit(token: <- nft)
 
@@ -911,16 +909,14 @@ pub contract Domains: NonFungibleToken {
   }
 
   // Get domain's expired time in timestamp 
-  pub fun domainExpiredTime(_ nameHash: String) : UFix64? {
-
-    let expiredTime = Domains.expired[nameHash]
-    return expiredTime
+  pub fun getExpiredTime(_ nameHash: String) : UFix64? {
+    return self.expired[nameHash]
   }
 
   // Get domain's expired statu
   pub fun isExpired(_ nameHash: String): Bool {    
     let currentTimestamp = getCurrentBlock().timestamp
-    let expiredTime =  Domains.expired[nameHash]
+    let expiredTime =  self.expired[nameHash]
     if expiredTime != nil {
       return currentTimestamp >= expiredTime!
     }
@@ -928,23 +924,31 @@ pub contract Domains: NonFungibleToken {
   }
 
   pub fun isDeprecated(nameHash: String, domainId:UInt64): Bool {
-    let deprecatedRecords = Domains.deprecated[nameHash] ?? {}
+    let deprecatedRecords = self.deprecated[nameHash] ?? {}
     return deprecatedRecords[domainId] != nil
   }
 
   // Get domain's owner address
-  pub fun domainRecord(_ nameHash: String) : Address? {
-    let address = Domains.records[nameHash]
+  pub fun getRecords(_ nameHash: String) : Address? {
+    let address = self.records[nameHash]
     return address
+  }
+
+  pub fun getDeprecatedRecords(_ nameHash: String): {UInt64: DomainDeprecatedInfo}? {
+    return self.deprecated[nameHash]
+  }
+
+  access(account) fun updateDeprecatedRecords(nameHash: String, records: {UInt64: DomainDeprecatedInfo}) {
+    self.deprecated[nameHash] = records
   }
 
   // update records in case domain name not match hash
   access(account) fun updateRecords(nameHash: String, address: Address?) {
-    if Domains.records[nameHash] == nil {
-      panic("name hash not exist ...")
-    }
-    Domains.records[nameHash] = address
-    Domains.expired[nameHash] = nil
+    self.records[nameHash] = address
+  }
+
+  access(account) fun updateExpired(nameHash: String, time: UFix64) {
+    self.expired[nameHash] = time
   }
 
 	init() {

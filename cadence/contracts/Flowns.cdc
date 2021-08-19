@@ -7,7 +7,7 @@ import Domains from "./Domains.cdc"
 // Flowns is the core contract of FNS, Flowns define Root domain and admin resource
 pub contract Flowns {
   // paths
-  pub let FlownsAdminPublicPath: PublicPath
+  pub let FlownsAdminPrivatePath: PrivatePath
   pub let FlownsAdminStoragePath: StoragePath
   pub let CollectionStoragePath: StoragePath
   pub let CollectionPublicPath: PublicPath
@@ -16,8 +16,7 @@ pub contract Flowns {
   // variables
   pub var totalRootDomains: UInt64
   // status that set register pause or not
-  pub var isPause: Bool
-
+  priv var isPause: Bool
   // events
   pub event RootDomainDestroyed(id: UInt64)
 
@@ -46,17 +45,20 @@ pub contract Flowns {
     pub let name: String
     pub let nameHash: String
     pub let domainCount: UInt64
+    pub let minRentDuration: UFix64
 
     init(
       id: UInt64,
       name: String,
       nameHash: String,
       domainCount: UInt64,
+      minRentDuration: UFix64
     ) {
       self.id = id
       self.name = name
       self.nameHash = nameHash
       self.domainCount = domainCount
+      self.minRentDuration = minRentDuration
     }
   }
 
@@ -80,7 +82,9 @@ pub contract Flowns {
     // Here is the prices store for domain rent fee
     // When user register or renew a domain ,the rent price is get from here, and price store by {domains length: flow per second}
     // If cannot get price, then register will not open
-    pub var prices:{Int: UFix64}
+    priv var prices:{Int: UFix64}
+
+    priv var minRentDuration: UFix64
 
     // Server store the collection private resource to manage the domains
     // Server need to init before open register
@@ -94,6 +98,7 @@ pub contract Flowns {
       self.domainVault <- vault
       self.prices = {}
       self.server = nil
+      self.minRentDuration = 3153600.00
     }
 
     // Set CollectionPrivate to RootDomain resource
@@ -114,7 +119,8 @@ pub contract Flowns {
         id: self.id,
         name: self.name,
         nameHash: self.nameHash,
-        domainCount: self.domainCount
+        domainCount: self.domainCount,
+        minRentDuration: self.minRentDuration
       )
     }
 
@@ -124,6 +130,10 @@ pub contract Flowns {
         self.domainVault != nil : "Vault not init yet..."
       }
       return self.domainVault.balance
+    }
+
+    pub fun getPrices(): {Int: UFix64} {
+      return self.prices
     }
 
     // Mint domain
@@ -144,6 +154,10 @@ pub contract Flowns {
       emit RootDomainPriceChanged(name: self.name, key: key, price: price)
     }
 
+    pub fun setMinRentDuration(_ duration: UFix64) {
+      self.minRentDuration = duration
+    }
+
     // Renew domain
     pub fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
       pre {
@@ -154,15 +168,15 @@ pub contract Flowns {
       if len > 10 {
         len = 10
       }
-      let price = self.prices[len]
+      let price = self.getPrices()[len]
 
       if domain.parent != self.name {
         panic("domain not root domain's sub domain")
       }
-      // Renew duration need longer than one year 60 * 60 * 24 * 365 = 3153600 second
-      if duration < 3153600.0 {
-        panic("duration must geater than 3153600 ")
+      if duration < self.minRentDuration {
+        panic("Duration must geater than min rent duration")
       }
+     
       if price == 0.0 {
         panic("Can not renew domain")
       }
@@ -180,9 +194,9 @@ pub contract Flowns {
       // Receive rent fee
       self.domainVault.deposit(from: <- feeTokens)
 
-      let expiredAt = Domains.expired[domain.nameHash]! + UFix64(duration)
+      let expiredAt = Domains.getExpiredTime(domain.nameHash)! + UFix64(duration)
       // Update domain's expire time with Domains expired mapping
-      domain.setExpired(expiredAt: expiredAt)
+      Domains.updateExpired(nameHash: domain.nameHash, time: expiredAt )
 
       emit RenewDomain(name: domain.name, nameHash: domain.nameHash, duration: duration, price: rentFee )
 
@@ -200,10 +214,11 @@ pub contract Flowns {
         len = 10
       }
 
-      let price = self.prices[len]
+      let price = self.getPrices()[len]
       // limit the register and renew time longer than one year
-      if duration < 3153600.0 {
-        panic("duration must geater than 3153600")
+
+      if duration < self.minRentDuration {
+        panic("Duration must geater than min rent duration")
       }
       if price == 0.0 || price == nil {
         panic("Can not register domain")
@@ -260,7 +275,7 @@ pub contract Flowns {
 
 
   // Root domain public interface for fns user
-  pub resource interface RootDomainPublic {
+  pub resource interface RootDomainCollectionPublic {
 
     pub fun getDomainInfo(domainId: UInt64) : RootDomainInfo
 
@@ -277,7 +292,7 @@ pub contract Flowns {
   }
 
   // Manager resource
-  pub resource interface DomainAdmin {
+  pub resource interface RootDomainCollectionAdmin {
 
     access(account) fun createRootDomain(
       name: String, 
@@ -290,12 +305,14 @@ pub contract Flowns {
     access(account) fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault)
 
     access(account) fun setPrices(domainId: UInt64, len: Int, price: UFix64)
+
+    access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64)
     
     access(account) fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
   }
 
   // Root domain Collection 
-  pub resource RootDomainCollection: RootDomainPublic, DomainAdmin {
+  pub resource RootDomainCollection: RootDomainCollectionPublic, RootDomainCollectionAdmin {
     // Root domains
     access(account) var domains: @{UInt64: RootDomain}
 
@@ -386,6 +403,10 @@ pub contract Flowns {
       self.getRootDomain(domainId).setPrices(key: len, price: price)
     }
 
+    access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64){
+      self.getRootDomain(domainId).setMinRentDuration(duration)
+    }
+
     // get domain reference
     access(contract) fun getRootDomain(_ domainId: UInt64) : &RootDomain {
       pre {
@@ -401,7 +422,7 @@ pub contract Flowns {
 
     // Query root domain's rent price
     pub fun getPrices(domainId: UInt64): {Int: UFix64} {
-      return self.getRootDomain(domainId).prices
+      return self.getRootDomain(domainId).getPrices()
     }
 
 
@@ -411,7 +432,7 @@ pub contract Flowns {
   }
 
   // Admin interface resource
-  pub resource interface AdminPublic {
+  pub resource interface AdminPrivate {
 
     pub fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
 
@@ -427,13 +448,13 @@ pub contract Flowns {
     
     pub fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
 
-    pub fun updateRecords(nameHash: String, address: Address?) 
-
     pub fun setPause(_ flag: Bool)
+
+    pub fun setMinRentDuration(domainId: UInt64, duration: UFix64)
   }
 
 
-  pub resource Admin: AdminPublic {
+  pub resource Admin: AdminPrivate {
 
     access(self) var server: Capability<&Flowns.RootDomainCollection>?
 
@@ -477,6 +498,14 @@ pub contract Flowns {
       self.server!.borrow()!.setPrices(domainId: domainId, len: len, price: price)
     }
 
+    pub fun setMinRentDuration(domainId: UInt64, duration: UFix64) {
+      pre {
+        self.server != nil : "Your client has not been linked to the server"
+      }
+
+      self.server!.borrow()!.setMinRentDuration(domainId: domainId, duration: duration)
+    }
+
     // Withdraw vault 
     pub fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
       pre {
@@ -484,11 +513,6 @@ pub contract Flowns {
       }
 
       self.server!.borrow()!.withdrawVault(domainId: domainId, receiver: receiver, amount: amount)
-    }
-
-    // update records 
-    pub fun updateRecords(nameHash: String, address: Address?) {
-      Domains.updateRecords(nameHash: nameHash, address: address)
     }
 
     // Withdraw vault 
@@ -528,11 +552,11 @@ pub contract Flowns {
     emit FlownsAdminCreated()
     return <- create Admin()
   }
-  
+
   // Query root domain
-  pub fun getRootDomainInfo(domainId: UInt64) : RootDomainInfo? {
+  pub fun getRootDomainInfo(domainId: UInt64): RootDomainInfo? {
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     if let collection = rootCollectionCap.borrow()  {
       return collection.getDomainInfo(domainId: domainId)
     }
@@ -542,7 +566,7 @@ pub contract Flowns {
   pub fun getAllRootDomains(): {UInt64: RootDomainInfo}? {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     if let collection = rootCollectionCap.borrow()  {
         return collection.getAllDomains()
     }
@@ -552,7 +576,7 @@ pub contract Flowns {
   // Check domain available 
   pub fun available(nameHash: String): Bool {
 
-    if Domains.records[nameHash] == nil {
+    if Domains.getRecords(nameHash) == nil {
       return true
     }
     return Domains.isExpired(nameHash)
@@ -561,7 +585,7 @@ pub contract Flowns {
   pub fun getRentPrices(domainId: UInt64): {Int: UFix64} {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     if let collection = rootCollectionCap.borrow()  {
       return collection.getPrices(domainId: domainId)
     }
@@ -571,7 +595,7 @@ pub contract Flowns {
   pub fun getRootVaultBalance(domainId: UInt64): UFix64 {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow()?? panic("Could not borrow collection ")
     let balance = collection.getVaultBalance(domainId: domainId)
     return balance
@@ -582,7 +606,7 @@ pub contract Flowns {
       Flowns.isPause == false : "Register pause"
     }
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
     collection.registerDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver)
   }
@@ -592,7 +616,7 @@ pub contract Flowns {
       Flowns.isPause == false : "Renewer pause"
     }
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainPublic}>(self.CollectionPublicPath)
+    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
     collection.renewDomain(domainId: domainId, domain: domain, duration: duration, feeTokens: <-feeTokens)
   }
@@ -602,7 +626,7 @@ pub contract Flowns {
     self.CollectionPublicPath = /public/flownsCollection
     self.CollectionPrivatePath = /private/flownsCollection
     self.CollectionStoragePath = /storage/flownsCollection
-    self.FlownsAdminPublicPath = /public/flownsAdmin
+    self.FlownsAdminPrivatePath = /private/flownsAdmin
     self.FlownsAdminStoragePath =/storage/flownsAdmin
 
     let account = self.account
@@ -614,8 +638,8 @@ pub contract Flowns {
     log("Setting up flowns capability")
     let collection <- create RootDomainCollection()
     account.save(<-collection, to: Flowns.CollectionStoragePath)
-    account.link<&{Flowns.RootDomainPublic}>(Flowns.CollectionPublicPath, target: Flowns.CollectionStoragePath)
+    account.link<&{Flowns.RootDomainCollectionPublic}>(Flowns.CollectionPublicPath, target: Flowns.CollectionStoragePath)
     account.link<&Flowns.RootDomainCollection>(Flowns.CollectionPrivatePath, target: Flowns.CollectionStoragePath)
-    account.link<&Flowns.Admin{Flowns.AdminPublic}>(Flowns.FlownsAdminPublicPath, target: Flowns.FlownsAdminStoragePath)
+    account.link<&Flowns.Admin{Flowns.AdminPrivate}>(Flowns.FlownsAdminPrivatePath, target: Flowns.FlownsAdminStoragePath)
   }
 }

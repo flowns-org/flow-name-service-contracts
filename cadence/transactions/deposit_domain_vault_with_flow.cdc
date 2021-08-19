@@ -6,7 +6,7 @@ transaction(domainNameHash: String, amount: UFix64) {
   var domain: &{Domains.DomainPublic}
   var vaultRef: &FlowToken.Vault
   prepare(account: AuthAccount) {
-    let address = Domains.records[domainNameHash] ?? panic("Domain not exsit")
+    let address = Domains.getRecords(domainNameHash) ?? panic("Domain not exsit")
     let collectionCap = getAccount(address).getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
     let collection = collectionCap.borrow()!
     var domain: &{Domains.DomainPublic}? = nil

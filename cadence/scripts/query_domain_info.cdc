@@ -1,7 +1,7 @@
 import Domains from 0xDomains
 
 pub fun main(nameHash: String): Domains.DomainDetail? {
-  let address = Domains.records[nameHash] ?? panic("Domain not exist")
+  let address = Domains.getRecords(nameHash) ?? panic("Domain not exist")
   let account = getAccount(address)
   let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
   let collection = collectionCap.borrow()!
@@ -13,7 +13,6 @@ pub fun main(nameHash: String): Domains.DomainDetail? {
     if domain.nameHash == nameHash && !Domains.isDeprecated(nameHash:nameHash, domainId: id) {
       detail = domain.getDetail()
     }
-   
   }
 
   return detail

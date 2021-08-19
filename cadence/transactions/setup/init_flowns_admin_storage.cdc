@@ -19,7 +19,7 @@ transaction() {
         log("Empty admin stored")
 
         // Create a public Receiver capability to the Vault
-        let adminRef = account.link<&Flowns.Admin{Flowns.AdminPublic}>(Flowns.FlownsAdminPublicPath, target: Flowns.FlownsAdminStoragePath)
+        let adminRef = account.link<&Flowns.Admin{Flowns.AdminPrivate}>(Flowns.FlownsAdminPrivatePath, target: Flowns.FlownsAdminStoragePath)
 
         log("References created")
     }

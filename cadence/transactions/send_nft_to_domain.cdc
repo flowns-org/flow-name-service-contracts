@@ -9,7 +9,7 @@ transaction(nameHash: String, itemId: UInt64) {
   var collection: @NonFungibleToken.Collection
   var NFT: @NonFungibleToken.NFT
   prepare(account: AuthAccount) {
-    let address = Domains.records[nameHash] ?? panic("Can not find domain ..")
+    let address = Domains.getRecords(nameHash) ?? panic("Can not find domain ..")
     let userCollection = getAccount(address).getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath).borrow()! 
 
     var domain: &{Domains.DomainPublic}? = nil
