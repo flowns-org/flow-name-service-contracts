@@ -5,6 +5,7 @@ import hash from 'eth-ens-namehash'
 import { fclInit, buildAndSendTrx, buildAndExecScript } from '../utils/index.js'
 import { accountAddr } from '../config/constants.js'
 import { registerDomain, renewDomain, mintDomain } from './buildTrxs.js'
+import { namehash, normalize } from '../utils/hash.js'
 
 const main = async () => {
   fclInit()
@@ -164,7 +165,6 @@ const main = async () => {
   // await buildAndSendTrx('sendNFTToDomain', [fcl.arg(nameHash, t.String), fcl.arg(3, t.UInt64)])
   // const info = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
 
-
   // await buildAndSendTrx('withdrawNFTFromDomain', [
   //   fcl.arg(nameHash, t.String),
   //   fcl.arg('A.f8d6e0586b0a20c7.Domains.Collection', t.String),
@@ -173,10 +173,24 @@ const main = async () => {
   // const info = await buildAndExecScript('queryDomainInfo', [fcl.arg(nameHash, t.String)])
   // console.dir(JSON.stringify(info))
 
-  const hashStr = await buildAndExecScript('calcDomainHash')
+  const hashStr = await buildAndExecScript('calcDomainHash', [
+    fcl.arg('caos', t.String),
+    fcl.arg('flow', t.String),
+  ])
   console.log(hashStr)
 
+  // console.log(hash.hash('flow'))
+
+  // const encoded = new TextEncoder().encode('flow')
+
+  // console.log(Sha3.sha3_256('caos.flow'))
+
+  // console.log(sha3_256(encoded))
+  console.log(namehash('caos'))
+
+  console.log(normalize('asdasd.123'))
 }
+
 
 main()
   .then(() => process.exit(0))

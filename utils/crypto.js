@@ -14,7 +14,7 @@ export const FLOW_ENCODED_SERVICE_KEY = encodeKey(
   1000,
 )
 
-const hashMsgHex = (msgHex) => {
+export const hashMsgHex = (msgHex) => {
   const sha = new sha3.SHA3(256)
   sha.update(Buffer.from(msgHex, 'hex'))
   return sha.digest()

@@ -5,7 +5,9 @@ import Crypto
   This script will check an address and print out its FT, NFT and Versus resources
  */
 
-pub fun main(name: String, parentName: String) : String {
+pub fun main(name:String) : String {
+  let nameUFT8Arr = name.utf8
+  
   let prefix = "0x"
   let emptyNode = "0000000000000000000000000000000000000000000000000000000000000000"
   let nameBytes = name.utf8
@@ -19,4 +21,5 @@ pub fun main(name: String, parentName: String) : String {
   let res = emptyNode.concat(String.encodeHex(test))
   let hash = HashAlgorithm.SHA3_256.hash(res.utf8)
   return prefix.concat(String.encodeHex(hash))
+
 }
