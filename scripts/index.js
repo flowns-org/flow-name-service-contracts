@@ -173,7 +173,7 @@ const main = async () => {
   // const info = await buildAndExecScript('queryDomainInfo', [fcl.arg(nameHash, t.String)])
   // console.dir(JSON.stringify(info))
 
-  const hashStr = await buildAndExecScript('calcDomainHash', [
+  const hashStr = await buildAndExecScript('calcDomainNameHash', [
     fcl.arg('caos', t.String),
     fcl.arg('flow', t.String),
   ])
@@ -186,7 +186,7 @@ const main = async () => {
   // console.log(Sha3.sha3_256('caos.flow'))
 
   // console.log(sha3_256(encoded))
-  console.log(namehash('caos'))
+  console.log(namehash('caos.flow'))
 
   console.log(normalize('asdasd.123'))
 }
