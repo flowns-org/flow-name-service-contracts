@@ -629,8 +629,9 @@ pub contract Domains: NonFungibleToken {
       }
     }
     
-      let domainHash = self.nameHash.slice(from: 2, upTo: 65)
-      let nameHash = "0x".concat(String.encodeHex(HashAlgorithm.SHA3_256.hash(domainHash.concat(name).utf8)))
+      let domainHash = self.nameHash.slice(from: 2, upTo: 66)
+      let nameSha = String.encodeHex(HashAlgorithm.SHA3_256.hash(name.utf8))
+      let nameHash = "0x".concat(String.encodeHex(HashAlgorithm.SHA3_256.hash(domainHash.concat(nameSha).utf8)))
       
       if self.subdomains[nameHash] != nil {
         panic("Subdomain already existed.")

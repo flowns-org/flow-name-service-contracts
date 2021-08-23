@@ -174,8 +174,8 @@ const main = async () => {
   // console.dir(JSON.stringify(info))
 
   const hashStr = await buildAndExecScript('getDomainNameHash', [
-    fcl.arg('caos', t.String),
-    fcl.arg('flow', t.String),
+    fcl.arg('depr', t.String),
+    fcl.arg(namehash('flow'), t.String),
   ])
   console.log(hashStr)
 
@@ -188,11 +188,11 @@ const main = async () => {
   // console.log(Sha3.sha3_256('caos.flow'))
 
   // console.log(sha3_256(encoded))
-  console.log(namehash('caos.flow'))
+  console.log(namehash('sub.depr.flow'))
 
   const hashStr1 = await buildAndExecScript('calcHash', [
     fcl.arg('', t.String),
-    fcl.arg('flow', t.String),
+    fcl.arg('sub', t.String),
   ])
   console.log('=====')
   console.log(hashStr1)

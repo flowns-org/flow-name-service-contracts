@@ -278,7 +278,7 @@ export const userTest = () =>
       ])
       expect(setSubText).not.toBeNull()
       expect(setSubText.status).toBe(4)
-
+      // todo test
       const setSubAddr = await buildAndSendTrx('setSubdomainAddress', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(deprecatedSubDomainHash, t.String),

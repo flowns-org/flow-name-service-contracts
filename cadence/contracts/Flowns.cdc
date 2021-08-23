@@ -158,7 +158,7 @@ pub contract Flowns {
       pre {
         self.server != nil : "Domains collection has not been linked to the server"
       }
-      let nameHash = Flowns.getDomainNameHash(name: name, parentName: self.name)
+      let nameHash = Flowns.getDomainNameHash(name: name, parentNameHash: self.nameHash)
     
       let expiredTime = getCurrentBlock().timestamp + duration
 
@@ -238,7 +238,7 @@ pub contract Flowns {
         name.length <= self.maxDomainLength : "Domain name can not exceed max length"
       }
 
-      let nameHash = Flowns.getDomainNameHash(name: name, parentName: self.name)
+      let nameHash = Flowns.getDomainNameHash(name: name, parentNameHash: self.nameHash)
     
       if Flowns.available(nameHash: nameHash) == false {
         panic("Domain not available")
@@ -619,7 +619,7 @@ pub contract Flowns {
     return <- create Admin()
   }
 
-  pub fun getDomainNameHash(name: String, parentName: String): String {
+  pub fun getDomainNameHash(name: String, parentNameHash: String): String {
     
     let prefix = "0x"
     // let forbidenChars: [UInt8] = Flowns.forbidChars.utf8
@@ -631,8 +631,9 @@ pub contract Flowns {
     //   }
     // }
 
-    let parentNameHash = Flowns.hash(node: "", lable: parentName)
-    let domainNameHash = Flowns.hash(node:parentNameHash, lable:name )
+    // let parentNameHash = Flowns.hash(node: "", lable: parentName)
+
+    let domainNameHash = Flowns.hash(node: parentNameHash.slice(from: 2, upTo: 66), lable:name )
     return prefix.concat(domainNameHash)
   }
 
