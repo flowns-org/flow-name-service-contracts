@@ -873,6 +873,7 @@ pub contract Domains: NonFungibleToken {
           deprecatedAt: getCurrentBlock().timestamp,
           trigger: receiver.address
         )
+        
         var deprecatedRecords: {UInt64: DomainDeprecatedInfo} = Domains.getDeprecatedRecords(nameHash) ?? {}
 
         deprecatedRecords[deprecatedDomain!.id] = deprecatedInfo

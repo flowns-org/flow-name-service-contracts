@@ -9,7 +9,7 @@ import { test1Authz, test2Authz, test1Addr, test2Addr } from '../../utils/authz'
 import { buildAndExecScript, buildSetupTrx, fclInit, buildAndSendTrx } from '../../utils/index'
 import { mintDomain, registerDomain } from '../../scripts/buildTrxs'
 
-const oneYear = 60 * 60 * 24 * 265
+const oneYear = 60 * 60 * 24 * 365
 const oneMonth = 60 * 60 * 24 * 30
 
 const flowName = 'flow'
@@ -17,7 +17,7 @@ const flowNameHash = namehash(flowName)
 let flowDomainId = 0
 const fnsName = 'fns'
 const fnsNameHash = namehash(fnsName)
-let fnsDomainId = 0
+let fnsDomainId = 1
 
 const caosDomainName = 'caos'
 let caosDomainNameHash = namehash(`${caosDomainName}.${flowName}`)
@@ -204,7 +204,7 @@ export const setupTest = () =>
         fnsDomainId,
         caosDomainName,
         oneYear.toFixed(2),
-        '3.10',
+        '6.10',
       )
 
       expect(registerSuccessRes).not.toBeNull()
@@ -222,7 +222,7 @@ export const setupTest = () =>
       const balanceQuery = await buildAndExecScript('queryRootDomainVaultBalance', [
         fcl.arg(fnsDomainId, t.UInt64),
       ])
-      expect(Number(balanceQuery)).toBe(3.1)
+      expect(Number(balanceQuery)).toBe(6.1)
 
       const changeVaultRes = await buildAndSendTrx('changeRootDomainVaultWithFusd', [
         fcl.arg(fnsDomainId, t.UInt64),
@@ -231,7 +231,7 @@ export const setupTest = () =>
 
       const withdrawRes = await buildAndSendTrx('withdrawRootVault', [
         fcl.arg(fnsDomainId, t.UInt64),
-        fcl.arg('3.10', t.UFix64),
+        fcl.arg('6.10', t.UFix64),
       ])
       expect(withdrawRes).not.toBeNull()
       expect(withdrawRes.status).toBe(4)

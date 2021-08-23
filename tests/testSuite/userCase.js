@@ -140,7 +140,7 @@ export const userTest = () =>
       expect(regRes).toBeNull()
     })
 
-    test('domain deprecated test case ', async () => {
+    test('domain deprecated test case', async () => {
       const mintRes = await buildAndSendTrx('mintDomain', [
         fcl.arg(flowDomainId, t.UInt64),
         fcl.arg(deprecatedDomainName, t.String),
@@ -182,7 +182,7 @@ export const userTest = () =>
         flowDomainId,
         deprecatedDomainName,
         oneYear.toFixed(2),
-        '6.5',
+        '10.0',
         test1Authz(),
       )
       expect(regRes).not.toBeNull()
@@ -190,7 +190,7 @@ export const userTest = () =>
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
-      expect(Number(test1BalAfter)).toBe(test1Bal - 6.5)
+      expect(Number(test1BalAfter)).toBe(test1Bal - 10)
 
       const deprRes = await buildAndExecScript('queryDomainDeprecated', [
         fcl.arg(deprecatedDomainNameHash, t.String),
@@ -206,7 +206,7 @@ export const userTest = () =>
         deprecatedDomainName,
         flowName,
         oneYear.toFixed(2),
-        '6.5',
+        '10',
       )
 
       expect(renewRes).toBeNull()
