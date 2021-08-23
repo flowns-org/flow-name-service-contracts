@@ -17,7 +17,11 @@ pub contract Flowns {
   pub var totalRootDomains: UInt64
   // status that set register pause or not
   priv var isPause: Bool
+  // for domain name on-chain validator 
+  priv var forbidChars: String
   // events
+
+
   pub event RootDomainDestroyed(id: UInt64)
 
   pub event RootDomainCreated(name: String, nameHash: String, id: UInt64)
@@ -38,6 +42,12 @@ pub contract Flowns {
 
   pub event FlownsActivated()
 
+  pub event FlownsForbidCharsUpdated(before: String, after: String)
+
+  pub event RootDomainMaxLengthUpdated(domainId: UInt64, before: Int, after: Int)
+
+  pub event RootDomainMintDurationUpdated(domainId: UInt64, before: UFix64, after: UFix64)
+
 
   // structs 
   pub struct RootDomainInfo {
@@ -46,19 +56,22 @@ pub contract Flowns {
     pub let nameHash: String
     pub let domainCount: UInt64
     pub let minRentDuration: UFix64
+    pub let maxDomainLength: Int
 
     init(
       id: UInt64,
       name: String,
       nameHash: String,
       domainCount: UInt64,
-      minRentDuration: UFix64
+      minRentDuration: UFix64,
+      maxDomainLength: Int
     ) {
       self.id = id
       self.name = name
       self.nameHash = nameHash
       self.domainCount = domainCount
       self.minRentDuration = minRentDuration
+      self.maxDomainLength = maxDomainLength
     }
   }
 
@@ -86,6 +99,8 @@ pub contract Flowns {
 
     priv var minRentDuration: UFix64
 
+    priv var maxDomainLength: Int
+
     // Server store the collection private resource to manage the domains
     // Server need to init before open register
     access(self) var server: Capability<&Domains.Collection>?
@@ -99,6 +114,7 @@ pub contract Flowns {
       self.prices = {}
       self.server = nil
       self.minRentDuration = 3153600.00
+      self.maxDomainLength = 30
     }
 
     // Set CollectionPrivate to RootDomain resource
@@ -120,7 +136,8 @@ pub contract Flowns {
         name: self.name,
         nameHash: self.nameHash,
         domainCount: self.domainCount,
-        minRentDuration: self.minRentDuration
+        minRentDuration: self.minRentDuration,
+        maxDomainLength: self.maxDomainLength
       )
     }
 
@@ -137,12 +154,14 @@ pub contract Flowns {
     }
 
     // Mint domain
-    access(account) fun mintDomain(name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
+    access(account) fun mintDomain(name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       pre {
         self.server != nil : "Domains collection has not been linked to the server"
       }
-
+      let nameHash = Flowns.getDomainNameHash(name: name, parentName: self.name)
+    
       let expiredTime = getCurrentBlock().timestamp + duration
+
       self.server!.borrow()!.mintDomain(id: self.domainCount, name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
       self.domainCount = self.domainCount + (1 as UInt64)
 
@@ -154,8 +173,18 @@ pub contract Flowns {
       emit RootDomainPriceChanged(name: self.name, key: key, price: price)
     }
 
-    pub fun setMinRentDuration(_ duration: UFix64) {
+    access(account) fun setMinRentDuration(_ duration: UFix64) {
+      let oldDuration = self.minRentDuration
       self.minRentDuration = duration
+
+      emit RootDomainMintDurationUpdated(domainId: self.id, before: oldDuration, after: duration)
+    }
+
+    access(account) fun setMaxDomainLength(_ length: Int) {
+      let oldLength = self.maxDomainLength
+      self.maxDomainLength = length
+
+      emit RootDomainMaxLengthUpdated(domainId: self.id, before: oldLength, after: length)
     }
 
     // Renew domain
@@ -203,11 +232,18 @@ pub contract Flowns {
     }
 
     // Register domain
-    pub fun registerDomain(name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+    pub fun registerDomain(name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       pre {
         self.server != nil : "Your client has not been linked to the server"
-        Flowns.available(nameHash: nameHash) == true : "Domain not available"
+        name.length <= self.maxDomainLength : "Domain name can not exceed max length"
       }
+
+      let nameHash = Flowns.getDomainNameHash(name: name, parentName: self.name)
+    
+      if Flowns.available(nameHash: nameHash) == false {
+        panic("Domain not available")
+      }
+
       // same as renew domain
       var len = name.length
       if len > 10 {
@@ -283,7 +319,7 @@ pub contract Flowns {
 
     pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault)
 
-    pub fun registerDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
+    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
 
     pub fun getPrices(domainId: UInt64): {Int: UFix64}
 
@@ -296,7 +332,6 @@ pub contract Flowns {
 
     access(account) fun createRootDomain(
       name: String, 
-      nameHash: String,
       vault: @FungibleToken.Vault
     )
 
@@ -307,8 +342,10 @@ pub contract Flowns {
     access(account) fun setPrices(domainId: UInt64, len: Int, price: UFix64)
 
     access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64)
+
+    access(account) fun setMaxDomainLength(domainId: UInt64, length: Int)
     
-    access(account) fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+    access(account) fun mintDomain(domainId: UInt64, name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
   }
 
   // Root domain Collection 
@@ -324,14 +361,16 @@ pub contract Flowns {
     // Create root domain
     access(account) fun createRootDomain(
       name: String, 
-      nameHash: String,
       vault: @FungibleToken.Vault
     ) {
+      
+      let nameHash = Flowns.hash(node:"", lable: name)
+      let prefix = "0x"
 
       let rootDomain  <- create RootDomain(
         id: Flowns.totalRootDomains,
         name: name,
-        nameHash: nameHash,
+        nameHash: prefix.concat(nameHash),
         vault: <- vault
       )
 
@@ -350,12 +389,12 @@ pub contract Flowns {
       root.renewDomain(domain: domain, duration: duration, feeTokens: <- feeTokens)
     }
 
-    pub fun registerDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
       let root = self.getRootDomain(domainId)
-      root.registerDomain(name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver )
+      root.registerDomain(name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver )
     }
 
     pub fun getVaultBalance(domainId: UInt64): UFix64 {
@@ -381,12 +420,12 @@ pub contract Flowns {
       self.getRootDomain(domainId).changeRootDomainVault(vault: <- vault)
     }
 
-    access(account) fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>) {
+    access(account) fun mintDomain(domainId: UInt64, name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>) {
         pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
       let root = self.getRootDomain(domainId)
-      root.mintDomain(name: name, nameHash: nameHash, duration: duration, receiver: receiver)
+      root.mintDomain(name: name, duration: duration, receiver: receiver)
     }
 
     // Get all root domains
@@ -405,6 +444,10 @@ pub contract Flowns {
 
     access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64){
       self.getRootDomain(domainId).setMinRentDuration(duration)
+    }
+
+    access(account) fun setMaxDomainLength(domainId: UInt64, length: Int){
+      self.getRootDomain(domainId).setMaxDomainLength(length)
     }
 
     // get domain reference
@@ -438,7 +481,7 @@ pub contract Flowns {
 
     pub fun addRootDomainCapability(domainId: UInt64, cap: Capability<&Domains.Collection>)
 
-    pub fun createRootDomain(name: String, nameHash: String, vault: @FungibleToken.Vault)
+    pub fun createRootDomain(name: String, vault: @FungibleToken.Vault)
 
     pub fun setRentPrice(domainId: UInt64, len: Int, price: UFix64)
 
@@ -446,11 +489,16 @@ pub contract Flowns {
 
     pub fun changeRootDomainVault(domainId: UInt64, vault: @FungibleToken.Vault)
     
-    pub fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+    pub fun mintDomain(domainId: UInt64, name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+
+    pub fun setMinRentDuration(domainId: UInt64, duration: UFix64)
+
+    pub fun setMaxDomainLength(domainId: UInt64, length: Int)
+
+    pub fun setDomainForbidChars(_ chars: String)
 
     pub fun setPause(_ flag: Bool)
 
-    pub fun setMinRentDuration(domainId: UInt64, duration: UFix64)
   }
 
 
@@ -481,12 +529,12 @@ pub contract Flowns {
     }
 
     // Create root domain with admin
-    pub fun createRootDomain(name: String, nameHash: String, vault: @FungibleToken.Vault) {
+    pub fun createRootDomain(name: String, vault: @FungibleToken.Vault) {
       pre {
         self.server != nil : "Your client has not been linked to the server"
       }
 
-      self.server!.borrow()!.createRootDomain(name: name, nameHash: nameHash, vault: <- vault)
+      self.server!.borrow()!.createRootDomain(name: name, vault: <- vault)
     }
 
     // Set rent price
@@ -505,6 +553,16 @@ pub contract Flowns {
 
       self.server!.borrow()!.setMinRentDuration(domainId: domainId, duration: duration)
     }
+
+     pub fun setMaxDomainLength(domainId: UInt64, length: Int) {
+      pre {
+        self.server != nil : "Your client has not been linked to the server"
+      }
+
+      self.server!.borrow()!.setMaxDomainLength(domainId: domainId, length: length)
+    }
+    
+    
 
     // Withdraw vault 
     pub fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
@@ -525,12 +583,12 @@ pub contract Flowns {
     }
 
     // Mint domain with root domain
-    pub fun mintDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64,receiver: Capability<&{NonFungibleToken.Receiver}>) {
+    pub fun mintDomain(domainId: UInt64, name: String, duration: UFix64,receiver: Capability<&{NonFungibleToken.Receiver}>) {
       pre {
         self.server != nil : "Your client has not been linked to the server"
       }
 
-      self.server!.borrow()!.mintDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, receiver: receiver)
+      self.server!.borrow()!.mintDomain(domainId: domainId, name: name, duration: duration, receiver: receiver)
     }
 
     pub fun setPause(_ flag: Bool) {
@@ -545,6 +603,14 @@ pub contract Flowns {
       }
     }
 
+    pub fun setDomainForbidChars(_ chars: String) {
+      let oldChars = Flowns.forbidChars
+      Flowns.forbidChars = chars
+      
+      emit FlownsForbidCharsUpdated(before: oldChars, after: chars)
+    }
+
+
   }
 
   // Create admin resource
@@ -552,6 +618,46 @@ pub contract Flowns {
     emit FlownsAdminCreated()
     return <- create Admin()
   }
+
+  pub fun getDomainNameHash(name: String, parentName: String): String {
+    
+    let prefix = "0x"
+    let forbidenChars: [UInt8] = Flowns.forbidChars.utf8
+    let nameASCII = name.utf8
+
+    // for char in nameASCII {
+    //   if forbidenChars.contains(char) {
+    //     panic("Domain name illegal ...")
+    //   }
+    // }
+    // for char in parentNameASCII {
+    //   if forbidenChars.contains(char) {
+    //     panic("Domain name illegal ...")
+    //   }
+    // }
+    for char in forbidenChars {
+      if nameASCII.contains(char) {
+        panic("Domain name illegal ...")
+      }
+    }
+
+    let parentNameHash = Flowns.hash(node: "", lable: parentName)
+    let domainNameHash = Flowns.hash(node:parentNameHash, lable:name )
+    return prefix.concat(domainNameHash)
+  }
+
+  // calc hash with node and lable
+  pub fun hash(node: String, lable: String): String {
+    var prefixNode = node
+    if node.length == 0 {
+      prefixNode = "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+    let lableHash = String.encodeHex(HashAlgorithm.SHA3_256.hash(lable.utf8))
+    let hash = String.encodeHex(HashAlgorithm.SHA3_256.hash(prefixNode.concat(lableHash).utf8))
+
+    return hash
+  }
+
 
   // Query root domain
   pub fun getRootDomainInfo(domainId: UInt64): RootDomainInfo? {
@@ -601,14 +707,14 @@ pub contract Flowns {
     return balance
   }
 
-  pub fun registerDomain(domainId: UInt64, name: String, nameHash: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+  pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
     pre {
       Flowns.isPause == false : "Register pause"
     }
     let account = Flowns.account
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
-    collection.registerDomain(domainId: domainId, name: name, nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, receiver: receiver)
+    collection.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver)
   }
   
   pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
@@ -635,7 +741,8 @@ pub contract Flowns {
     account.save<@Flowns.Admin>(<-admin, to: Flowns.FlownsAdminStoragePath)
     self.totalRootDomains = 0
     self.isPause = true
-    log("Setting up flowns capability")
+    self.forbidChars = "!@#$%^&*()<>? ./"
+
     let collection <- create RootDomainCollection()
     account.save(<-collection, to: Flowns.CollectionStoragePath)
     account.link<&{Flowns.RootDomainCollectionPublic}>(Flowns.CollectionPublicPath, target: Flowns.CollectionStoragePath)

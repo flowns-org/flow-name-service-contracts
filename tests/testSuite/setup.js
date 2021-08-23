@@ -1,6 +1,6 @@
 import t from '@onflow/types'
 import fcl from '@onflow/fcl'
-import hash from 'eth-ens-namehash'
+import { namehash, normalize } from '../../utils/hash.js'
 import dotenv from 'dotenv'
 import moment from 'moment'
 import { accountAddr } from '../../config/constants.js'
@@ -13,17 +13,17 @@ const oneYear = 60 * 60 * 24 * 265
 const oneMonth = 60 * 60 * 24 * 30
 
 const flowName = 'flow'
-const flowNameHash = hash.hash(flowName)
+const flowNameHash = namehash(flowName)
 let flowDomainId = 0
 const fnsName = 'fns'
-const fnsNameHash = hash.hash(fnsName)
+const fnsNameHash = namehash(fnsName)
 let fnsDomainId = 0
 
 const caosDomainName = 'caos'
-let caosDomainNameHash = hash.hash(`${caosDomainName}.${flowName}`)
-let caosFnsDomainNamHash = hash.hash(`${caosDomainName}.${fnsName}`)
+let caosDomainNameHash = namehash(`${caosDomainName}.${flowName}`)
+let caosFnsDomainNamHash = namehash(`${caosDomainName}.${fnsName}`)
 const devDomainName = 'dev'
-let devDomainNameHash = hash.hash(`${devDomainName}.${flowName}`)
+let devDomainNameHash = namehash(`${devDomainName}.${flowName}`)
 
 export const setupTest = () =>
   describe('Contract setup test cases', () => {
@@ -48,10 +48,7 @@ export const setupTest = () =>
     })
 
     test('create flow root domain', async () => {
-      const res = await buildSetupTrx('mintRootDomain', [
-        fcl.arg(flowName, t.String),
-        fcl.arg(flowNameHash, t.String),
-      ])
+      const res = await buildSetupTrx('mintRootDomain', [fcl.arg(flowName, t.String)])
       expect(res).not.toBeNull()
       const { status } = res
       expect(status).toBe(4)
@@ -68,10 +65,7 @@ export const setupTest = () =>
     })
 
     test('create fns root domain', async () => {
-      const res = await buildSetupTrx('mintRootDomain', [
-        fcl.arg(fnsName, t.String),
-        fcl.arg(fnsNameHash, t.String),
-      ])
+      const res = await buildSetupTrx('mintRootDomain', [fcl.arg(fnsName, t.String)])
       expect(res).not.toBeNull()
       const { status } = res
       expect(status).toBe(4)
@@ -93,15 +87,11 @@ export const setupTest = () =>
       ])
       expect(query).toBe(true)
       // set cap to flow root domain
-      const res = await buildSetupTrx('setupRootDomainServer', [
-        fcl.arg(0, t.UInt64),
-      ])
+      const res = await buildSetupTrx('setupRootDomainServer', [fcl.arg(0, t.UInt64)])
       expect(res).not.toBeNull()
       expect(res.status).toBe(4)
       // set cap to fns root domain
-      const res1 = await buildSetupTrx('setupRootDomainServer', [
-        fcl.arg(1, t.UInt64),
-      ])
+      const res1 = await buildSetupTrx('setupRootDomainServer', [fcl.arg(1, t.UInt64)])
       expect(res1).not.toBeNull()
       expect(res1.status).toBe(4)
     })
@@ -121,7 +111,7 @@ export const setupTest = () =>
 
     test('create domain with admin account', async () => {
       const timestamp = moment.now() / 1000
-      const res = await mintDomain(flowDomainId, caosDomainName, flowName, oneMonth.toFixed(2))
+      const res = await mintDomain(flowDomainId, caosDomainName, oneMonth.toFixed(2))
       expect(res).not.toBeNull()
       expect(res.status).toBe(4)
       const query = await buildAndExecScript('queryRootDomainsById', [
@@ -199,7 +189,6 @@ export const setupTest = () =>
       const registerFailRes = await registerDomain(
         fnsDomainId,
         caosDomainName,
-        fnsName,
         oneYear.toFixed(2),
         '3.10',
       )
@@ -214,7 +203,6 @@ export const setupTest = () =>
       const registerSuccessRes = await registerDomain(
         fnsDomainId,
         caosDomainName,
-        fnsName,
         oneYear.toFixed(2),
         '3.10',
       )
@@ -268,7 +256,6 @@ export const setupTest = () =>
       const registerAgainRes = await registerDomain(
         fnsDomainId,
         'fail',
-        fnsName,
         oneYear.toFixed(2),
         '3.10',
       )

@@ -69,6 +69,8 @@ export const paths = {
     calcDomainNameHash: buildPath('calc_domain_name_hash.cdc', 'script'),
     queryDomainDeprecated: buildPath('query_domain_deprecated.cdc', 'script'),
     getCurrentBlockTimestamp: buildPath('get_block_timestamp.cdc', 'script'),
+    getDomainNameHash: buildPath('get_domain_name_hash.cdc', 'script'),
+    calcHash: buildPath('calc_hash.cdc', 'script'),
   },
   transactions: {
     registerDomain: '../cadence/transactions/register_domain.cdc',

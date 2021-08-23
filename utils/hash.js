@@ -9,7 +9,7 @@ export function namehash(inputName) {
     node += '00'
   }
 
-  name = normalize(inputName)
+  let name = normalize(inputName)
 
   if (name) {
     var labels = name.split('.')

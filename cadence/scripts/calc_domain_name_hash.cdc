@@ -41,7 +41,7 @@ pub fun main(name:String, parentName: String) : String {
   // let test = HashAlgorithm.SHA3_256.hash(name.utf8)
   // let res = emptyNode.concat(String.encodeHex(test))
   // let hash = HashAlgorithm.SHA3_256.hash(res.utf8)
-  return prefix.concat(nameHash)
+  return prefix.concat(parentNameHash)
 
 }
 

@@ -1,6 +1,6 @@
 import t from '@onflow/types'
 import fcl from '@onflow/fcl'
-import hash from 'eth-ens-namehash'
+import { namehash, normalize } from '../../utils/hash.js'
 import dotenv from 'dotenv'
 import moment from 'moment'
 import { accountAddr } from '../../config/constants.js'
@@ -13,24 +13,24 @@ const oneYear = 60 * 60 * 24 * 365
 const oneMonth = 60 * 60 * 24 * 30
 
 const flowName = 'flow'
-const flowNameHash = hash.hash(flowName)
+const flowNameHash = namehash(flowName)
 let flowDomainId = 0
 const fnsName = 'fns'
-const fnsNameHash = hash.hash(fnsName)
+const fnsNameHash = namehash(fnsName)
 let fnsDomainId = 1
 
 const test1DomainName = 'tes1'
-let test1DomainNameHash = hash.hash(`${test1DomainName}.${flowName}`)
+let test1DomainNameHash = namehash(`${test1DomainName}.${flowName}`)
 const test2DomainName = 'tes2'
-let test2FnsDomainNamHash = hash.hash(`${test2DomainName}.${fnsName}`)
+let test2FnsDomainNamHash = namehash(`${test2DomainName}.${fnsName}`)
 const deprecatedDomainName = 'depr'
-const deprecatedDomainNameHash = hash.hash(`${deprecatedDomainName}.${flowName}`)
+const deprecatedDomainNameHash = namehash(`${deprecatedDomainName}.${flowName}`)
 const deprecatedSubDomain = 'sub'
-const deprecatedSubDomainHash = hash.hash(
+const deprecatedSubDomainHash = namehash(
   `${deprecatedSubDomain}.${deprecatedDomainName}.${flowName}`,
 )
 // const devDomainName = 'dev'
-// let devDomainNameHash = hash.hash(`${devDomainName}.${flowName}`)
+// let devDomainNameHash = namehash(`${devDomainName}.${flowName}`)
 
 // user test case ,must init env with run node scripts/setupEnv.js first
 export const userTest = () =>
@@ -56,7 +56,6 @@ export const userTest = () =>
       const res = await registerDomain(
         flowDomainId,
         'tes1',
-        flowName,
         '86400.00',
         '6.4',
         test1Authz(),
@@ -69,7 +68,6 @@ export const userTest = () =>
       const res = await registerDomain(
         flowDomainId,
         'tes1',
-        flowName,
         oneYear.toFixed(2),
         '3.2',
         test1Authz(),
@@ -82,7 +80,6 @@ export const userTest = () =>
       const res = await registerDomain(
         flowDomainId,
         'test1',
-        flowName,
         oneYear.toFixed(2),
         '1',
         test1Authz(),
@@ -99,7 +96,6 @@ export const userTest = () =>
       const test1Reg = await registerDomain(
         flowDomainId,
         test1DomainName,
-        flowName,
         oneYear.toFixed(2),
         '6.4',
         test1Authz(),
@@ -108,7 +104,6 @@ export const userTest = () =>
       const test2Reg = await registerDomain(
         fnsDomainId,
         test2DomainName,
-        fnsName,
         oneYear.toFixed(2),
         '3.2',
         test2Authz(),
@@ -138,7 +133,6 @@ export const userTest = () =>
       const regRes = await registerDomain(
         flowDomainId,
         'tes1',
-        flowName,
         oneYear.toFixed(2),
         '6.5',
         test2Authz(),
@@ -150,7 +144,6 @@ export const userTest = () =>
       const mintRes = await buildAndSendTrx('mintDomain', [
         fcl.arg(flowDomainId, t.UInt64),
         fcl.arg(deprecatedDomainName, t.String),
-        fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg('1.00', t.UFix64),
       ])
       expect(mintRes).not.toBeNull()
@@ -188,7 +181,6 @@ export const userTest = () =>
       const regRes = await registerDomain(
         flowDomainId,
         deprecatedDomainName,
-        flowName,
         oneYear.toFixed(2),
         '6.5',
         test1Authz(),
@@ -257,7 +249,6 @@ export const userTest = () =>
       const subRes = await buildAndSendTrx('mintSubdomain', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(deprecatedSubDomain, t.String),
-        fcl.arg(deprecatedSubDomainHash, t.String),
       ])
 
       expect(subRes).not.toBeNull()

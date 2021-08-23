@@ -3,7 +3,7 @@ import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 
-transaction(domainNameHash: String, subdomainName: String, subdomainNameHash: String) {
+transaction(domainNameHash: String, subdomainName: String) {
   var domain: &{Domains.DomainPrivate}
   prepare(account: AuthAccount) {
     let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
@@ -22,6 +22,6 @@ transaction(domainNameHash: String, subdomainName: String, subdomainNameHash: St
     self.domain = domain!
   }
   execute {
-    self.domain.createSubDomain(name: subdomainName, nameHash: subdomainNameHash)
+    self.domain.createSubDomain(name: subdomainName)
   }
 }

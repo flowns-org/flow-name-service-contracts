@@ -2,7 +2,7 @@ import Flowns from 0xFlowns
 import FlowToken from 0xFlowToken
 import FungibleToken from 0xFungibleToken
 
-transaction(name:String, nameHash:String) {
+transaction(name:String) {
   let client: &Flowns.Admin
   let vault: @FungibleToken.Vault
   prepare(account: AuthAccount) {
@@ -10,6 +10,6 @@ transaction(name:String, nameHash:String) {
       self.vault <- FlowToken.createEmptyVault()
   }
   execute {
-    self.client.createRootDomain(name: name, nameHash: nameHash, vault: <- self.vault)
+    self.client.createRootDomain(name: name, vault: <- self.vault)
   }
 }

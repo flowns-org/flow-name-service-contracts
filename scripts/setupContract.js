@@ -13,10 +13,7 @@ const main = async () => {
   // setup admin cap
   await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
   // mint flow root domain
-  await buildSetupTrx('mintRootDomain', [
-    fcl.arg('flow', t.String),
-    fcl.arg('0x9f1a2c1ae3169a570d1045fe9fc6cb93e68bcc86c545e8dda83ee4aeda090469', t.String),
-  ])
+  await buildSetupTrx('mintRootDomain', [fcl.arg('flow', t.String)])
 
   await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
   // setup root domain
@@ -44,7 +41,6 @@ const main = async () => {
   const res1 = await buildAndSendTrx('mintSubdomain', [
     fcl.arg(nameHash, t.String),
     fcl.arg('blog', t.String),
-    fcl.arg(subdomainHash, t.String),
   ])
 
   // set domain
