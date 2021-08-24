@@ -631,8 +631,6 @@ pub contract Flowns {
     //   }
     // }
 
-    // let parentNameHash = Flowns.hash(node: "", lable: parentName)
-
     let domainNameHash = Flowns.hash(node: parentNameHash.slice(from: 2, upTo: 66), lable:name )
     return prefix.concat(domainNameHash)
   }
