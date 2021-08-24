@@ -4,7 +4,7 @@ import fcl from '@onflow/fcl'
 
 import { buildAndSendTrx, buildAndExecScript } from '../utils/index.js'
 
-export const registerDomain = async (domainId, name, duration, amount, authz = null, token = 'flow') => {
+export const registerDomain = async (domainId, name, duration, amount, authz = null, token = 'flow', limit=600) => {
 
   const res = await buildAndSendTrx(
     token == 'flow' ?'registerDomain':'registerDomainWithFUSD',
@@ -15,6 +15,7 @@ export const registerDomain = async (domainId, name, duration, amount, authz = n
       fcl.arg(amount, t.UFix64),
     ],
     authz ? authz : undefined,
+    limit
   )
   return res
 }

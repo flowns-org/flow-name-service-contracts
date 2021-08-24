@@ -28,7 +28,7 @@ export const fclInit = () => {
     .put('0xFUSD', FUSDTokenAddr)
 }
 
-export const sendTrx = async (CODE, args, auth = null) => {
+export const sendTrx = async (CODE, args, auth = null, limit = 200) => {
   const authFunc = auth || authz
   const txId = await fcl
     .send([
@@ -37,7 +37,7 @@ export const sendTrx = async (CODE, args, auth = null) => {
       fcl.proposer(authFunc),
       fcl.payer(authFunc),
       fcl.authorizations([authFunc]),
-      fcl.limit(200),
+      fcl.limit(limit),
     ])
     .then(fcl.decode)
 
@@ -48,10 +48,10 @@ export const execScript = async (script, args = []) => {
   return await fcl.send([fcl.script`${script}`, fcl.args(args)]).then(fcl.decode)
 }
 
-export const buildAndSendTrx = async (key, args = [], authFunc = null) => {
+export const buildAndSendTrx = async (key, args = [], authFunc = null, limit) => {
   try {
     const trxScript = await readCode(transactions[key])
-    const trxId = await sendTrx(trxScript, args, authFunc)
+    const trxId = await sendTrx(trxScript, args, authFunc, limit)
     const txStatus = await fcl.tx(trxId).onceSealed()
     return txStatus
   } catch (error) {

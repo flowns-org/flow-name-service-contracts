@@ -622,14 +622,14 @@ pub contract Flowns {
   pub fun getDomainNameHash(name: String, parentNameHash: String): String {
     
     let prefix = "0x"
-    // let forbidenChars: [UInt8] = Flowns.forbidChars.utf8
-    // let nameASCII = name.utf8
+    let forbidenChars: [UInt8] = Flowns.forbidChars.utf8
+    let nameASCII = name.utf8
 
-    // for char in forbidenChars {
-    //   if nameASCII.contains(char) {
-    //     panic("Domain name illegal ...")
-    //   }
-    // }
+    for char in forbidenChars {
+      if nameASCII.contains(char) {
+        panic("Domain name illegal ...")
+      }
+    }
 
     let domainNameHash = Flowns.hash(node: parentNameHash.slice(from: 2, upTo: 66), lable:name )
     return prefix.concat(domainNameHash)
