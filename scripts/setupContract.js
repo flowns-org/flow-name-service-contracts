@@ -73,6 +73,9 @@ const main = async () => {
   console.log(checkCollection)
   const prices = await buildAndExecScript('queryDomainRentPrice', [fcl.arg(0, t.UInt64)])
   console.log(prices)
+
+  const prices2 = await buildAndExecScript('queryDomainRentPrice', [fcl.arg(1, t.UInt64)])
+  console.log(prices2)
 }
 
 main()

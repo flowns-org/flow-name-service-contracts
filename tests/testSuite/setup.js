@@ -146,6 +146,16 @@ export const setupTest = () =>
       expect(res).not.toBeNull()
       expect(res.status).toBe(4)
 
+      const flowPriceRes = await buildSetupTrx('setupDomainRentPrice', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg(10, t.Int),
+        fcl.arg('0.00000011', t.UFix64),
+      ])
+
+      expect(flowPriceRes).not.toBeNull()
+      expect(flowPriceRes.status).toBe(4)
+      
+
       const query = await buildAndExecScript('queryDomainRentPrice', [
         fcl.arg(flowDomainId, t.UInt64),
       ])
@@ -162,6 +172,16 @@ export const setupTest = () =>
 
       expect(fnsRes).not.toBeNull()
       expect(fnsRes.status).toBe(4)
+
+
+      const fnsPriceRes = await buildSetupTrx('setupDomainRentPrice', [
+        fcl.arg(fnsDomainId, t.UInt64),
+        fcl.arg(10, t.Int),
+        fcl.arg('0.00000001', t.UFix64),
+      ])
+
+      expect(fnsPriceRes).not.toBeNull()
+      expect(fnsPriceRes.status).toBe(4)
 
       const fnsQuery = await buildAndExecScript('queryDomainRentPrice', [
         fcl.arg(fnsDomainId, t.UInt64),

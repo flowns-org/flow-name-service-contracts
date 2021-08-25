@@ -12,8 +12,8 @@ const main = async () => {
   // fcl init and load config
   fclInit()
   // mint token 50000
-  await mintFlowToken(test1Addr, '100.00000000')
-  await mintFlowToken(test2Addr, '100.00000000')
+  await mintFlowToken(test1Addr, '1000.00000000')
+  await mintFlowToken(test2Addr, '1000.00000000')
   const balance = await buildAndExecScript('queryFlowTokenBalance', [fcl.arg(test2Addr, t.Address)])
   console.log(balance)
 
@@ -32,8 +32,8 @@ const main = async () => {
     fcl.arg('100.00', t.UFix64),
   ])
   await buildSetupTrx('createFUSDMinter', [])
-  await buildSetupTrx('mintFUSD', [fcl.arg(test1Addr, t.Address), fcl.arg('100.00', t.UFix64)])
-  await buildSetupTrx('mintFUSD', [fcl.arg(test2Addr, t.Address), fcl.arg('100.00', t.UFix64)])
+  await buildSetupTrx('mintFUSD', [fcl.arg(test1Addr, t.Address), fcl.arg('1000.00', t.UFix64)])
+  await buildSetupTrx('mintFUSD', [fcl.arg(test2Addr, t.Address), fcl.arg('1000.00', t.UFix64)])
 
 
   // await buildSetupTrx('initDomainCollection', [], test1Authz())

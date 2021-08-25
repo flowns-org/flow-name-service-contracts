@@ -95,7 +95,7 @@ pub contract Flowns {
     // Here is the prices store for domain rent fee
     // When user register or renew a domain ,the rent price is get from here, and price store by {domains length: flow per second}
     // If cannot get price, then register will not open
-    priv var prices:{Int: UFix64}
+    priv var prices: {Int: UFix64}
 
     priv var minRentDuration: UFix64
 
@@ -203,11 +203,11 @@ pub contract Flowns {
         panic("domain not root domain's sub domain")
       }
       if duration < self.minRentDuration {
-        panic("Duration must geater than min rent duration")
+        panic("Duration must geater than min rent duration".concat(self.minRentDuration.toString()))
       }
      
-      if price == 0.0 {
-        panic("Can not renew domain")
+      if price == 0.0 || price == nil {
+        panic("Can not renew domain, rent price not set yet")
       }
       
       // Calc rent price
@@ -235,7 +235,7 @@ pub contract Flowns {
     pub fun registerDomain(name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
       pre {
         self.server != nil : "Your client has not been linked to the server"
-        name.length <= self.maxDomainLength : "Domain name can not exceed max length"
+        name.length <= self.maxDomainLength : "Domain name can not exceed max length: ".concat(self.maxDomainLength.toString())
       }
 
       let nameHash = Flowns.getDomainNameHash(name: name, parentNameHash: self.nameHash)
@@ -254,10 +254,10 @@ pub contract Flowns {
       // limit the register and renew time longer than one year
 
       if duration < self.minRentDuration {
-        panic("Duration must geater than min rent duration")
+        panic("Duration must geater than min rent duration, expect: ".concat(self.minRentDuration.toString()))
       }
       if price == 0.0 || price == nil {
-        panic("Can not register domain")
+        panic("Can not register domain, rent price not set yet".concat(name).concat(len.toString()))
       }
 
       let rentPrice = price! * duration 
@@ -265,7 +265,7 @@ pub contract Flowns {
       let rentFee = feeTokens.balance
 
       if rentFee < rentPrice {
-         panic("Not enough fee to rent your domain.")
+         panic("Not enough fee to rent your domain, expect: ".concat(rentPrice.toString()))
       }
 
       let expiredTime = getCurrentBlock().timestamp + UFix64(duration)

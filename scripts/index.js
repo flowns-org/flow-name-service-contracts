@@ -203,6 +203,13 @@ const main = async () => {
   // console.log(normalize('你好'))
 
 
+  const res10 = await buildAndExecScript('getAllDomainRecords', [])
+  const res11 = await buildAndExecScript('getAllDomainExpiredRecords', [])
+  const res12 = await buildAndExecScript('getAllDomainDeprecatedRecords', [])
+
+  console.log(res10)
+  console.log(res11)
+  console.log(res12)
 }
 
 

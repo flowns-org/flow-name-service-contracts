@@ -53,13 +53,7 @@ export const userTest = () =>
 
     test('register domain with less one year', async () => {
       // check resource
-      const res = await registerDomain(
-        flowDomainId,
-        'tes1',
-        '86400.00',
-        '6.4',
-        test1Authz(),
-      )
+      const res = await registerDomain(flowDomainId, 'tes1', '86400.00', '6.4', test1Authz())
       expect(res).toBeNull()
     })
 
@@ -77,13 +71,7 @@ export const userTest = () =>
 
     test('register domain with not price set', async () => {
       // check resource
-      const res = await registerDomain(
-        flowDomainId,
-        'test1',
-        oneYear.toFixed(2),
-        '1',
-        test1Authz(),
-      )
+      const res = await registerDomain(flowDomainId, 'test1', oneYear.toFixed(2), '1', test1Authz())
       expect(res).toBeNull()
     })
 
@@ -383,12 +371,10 @@ export const userTest = () =>
       expect(sendNFTRes).not.toBeNull()
       expect(sendNFTRes.status).toBe(4)
 
-     
       const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
       ])
       expect(domainsQuery.length).toBe(2)
-
 
       const domainInfo = await buildAndExecScript('queryDomainInfo', [
         fcl.arg(deprecatedDomainNameHash, t.String),
@@ -400,13 +386,13 @@ export const userTest = () =>
       await buildAndSendTrx('withdrawVaultWithVaultType', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(flowVaultType, t.String),
-        fcl.arg('30.0', t.UFix64)
+        fcl.arg('30.0', t.UFix64),
       ])
 
       await buildAndSendTrx('withdrawNFTFromDomain', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(collectionType, t.String),
-        fcl.arg(0, t.UInt64)
+        fcl.arg(0, t.UInt64),
       ])
 
       const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
@@ -419,5 +405,194 @@ export const userTest = () =>
       ])
 
       expect(Number(test1FlowBalLast)).toBe(test1FlowBal - 50 + 30)
+    })
+
+    test('test fns root domain forbid chars', async () => {
+      const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('. abc', t.String)])
+
+      expect(setRes).not.toBeNull()
+      expect(setRes.status).toBe(4)
+
+      const res1 = await registerDomain(
+        fnsDomainId,
+        'testflownamewitha',
+        oneYear.toFixed(2),
+        '100.0',
+        test1Authz(),
+        'FUSD',
+      )
+      expect(res1).toBeNull()
+
+      const res2 = await registerDomain(
+        fnsDomainId,
+        'abcd',
+        oneYear.toFixed(2),
+        '100.0',
+        test1Authz(),
+        'FUSD',
+      )
+      expect(res2).toBeNull()
+
+      const res3 = await registerDomain(
+        fnsDomainId,
+        'nil!',
+        oneYear.toFixed(2),
+        '10.0',
+        test1Authz(),
+        'FUSD',
+      )
+      expect(res3).not.toBeNull()
+      expect(res3.status).toBe(4)
+
+      const res4 = await registerDomain(
+        fnsDomainId,
+        'nil?',
+        oneYear.toFixed(2),
+        '10.0',
+        test1Authz(),
+        'FUSD',
+      )
+      expect(res4).not.toBeNull()
+      expect(res4.status).toBe(4)
+    })
+
+    test('test domain length ', async () => {
+      const res = await registerDomain(
+        flowDomainId,
+        'thisisolen',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+
+      expect(res).not.toBeNull()
+      expect(res.status).toBe(4)
+
+      const res1 = await registerDomain(
+        flowDomainId,
+        'thisisolenthisisolenthisisolen',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res1).not.toBeNull()
+      expect(res1.status).toBe(4)
+
+      const res2 = await registerDomain(
+        flowDomainId,
+        'thisisolenthisisolenthisisolen1',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res2).toBeNull()
+
+      const setRes = await buildAndSendTrx('setRootDomainMaxLength', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg(32, t.Int),
+      ])
+
+      expect(setRes).not.toBeNull()
+      expect(setRes.status).toBe(4)
+
+      const res3 = await registerDomain(
+        flowDomainId,
+        'thisisolenthisisolenthisisolen1',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res3).not.toBeNull()
+      expect(res3.status).toBe(4)
+
+      const setRes2 = await buildAndSendTrx('setRootDomainMaxLength', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg(9, t.Int),
+      ])
+
+      expect(setRes2).not.toBeNull()
+      expect(setRes2.status).toBe(4)
+
+      const res4 = await registerDomain(
+        flowDomainId,
+        'thisisolen',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res4).toBeNull()
+
+      await buildAndSendTrx('setRootDomainMaxLength', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg(20, t.Int),
+      ])
+    })
+
+    test('test fns root domain forbid chars', async () => {
+      const setRes = await buildAndSendTrx('setRootDomainMinRentDuration', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg('15768000.0', t.UFix64),
+      ])
+
+      expect(setRes).not.toBeNull()
+      expect(setRes.status).toBe(4)
+
+      const res = await registerDomain(
+        flowDomainId,
+        'thisisolen1',
+        (oneYear / 3).toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res).toBeNull()
+
+      const res1 = await registerDomain(
+        flowDomainId,
+        'thisisolen1',
+        (oneYear / 2 - 1).toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+
+      expect(res1).toBeNull()
+
+      const res2 = await registerDomain(
+        flowDomainId,
+        'thisisolen1',
+        oneYear.toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+      expect(res2).not.toBeNull()
+      expect(res2.status).toBe(4)
+
+      const setRes1 = await buildAndSendTrx('setRootDomainMinRentDuration', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg(oneYear.toFixed(2), t.UFix64),
+      ])
+
+      expect(setRes1).not.toBeNull()
+      expect(setRes1.status).toBe(4)
+
+      const res3 = await registerDomain(
+        flowDomainId,
+        'thisisolen2',
+        (oneYear - 2).toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+
+      expect(res3).toBeNull()
+
+      const res4 = await registerDomain(
+        flowDomainId,
+        'thisisolen2',
+        (oneYear).toFixed(2),
+        '3.47',
+        test1Authz(),
+      )
+
+      expect(res4).not.toBeNull()
+      expect(res4.status).toBe(4)
     })
   })
