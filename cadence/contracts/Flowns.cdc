@@ -227,7 +227,7 @@ pub contract Flowns {
         panic("domain not root domain's sub domain")
       }
       if duration < self.minRentDuration {
-        panic("Duration must geater than min rent duration".concat(self.minRentDuration.toString()))
+        panic("Duration must greater than min rent duration ".concat(self.minRentDuration.toString()))
       }
      
       if price == 0.0 || price == nil {
