@@ -273,6 +273,13 @@ export const setupTest = () =>
         fcl.arg('0.0000001', t.UFix64),
       ])
 
+      await buildSetupTrx('setupDomainRentPrice', [
+        fcl.arg(fnsDomainId, t.UInt64),
+        fcl.arg(10, t.Int),
+        fcl.arg('0.0000001', t.UFix64),
+      ])
+
+
       const registerAgainRes = await registerDomain(
         fnsDomainId,
         'fail',

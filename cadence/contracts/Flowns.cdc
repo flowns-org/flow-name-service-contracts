@@ -46,7 +46,11 @@ pub contract Flowns {
 
   pub event RootDomainMaxLengthUpdated(domainId: UInt64, before: Int, after: Int)
 
+  pub event RootDomainCommissionRateUpdated(domainId: UInt64, before: UFix64, after: UFix64)
+
   pub event RootDomainMintDurationUpdated(domainId: UInt64, before: UFix64, after: UFix64)
+
+  pub event DomainRegisterCommissionAllocated(domainId: UInt64, nammeHash: String, amount: UFix64, commissionAmount: UFix64, refer: Address)
 
 
   // structs 
@@ -57,6 +61,9 @@ pub contract Flowns {
     pub let domainCount: UInt64
     pub let minRentDuration: UFix64
     pub let maxDomainLength: Int
+    pub let prices: {Int: UFix64}
+    pub let commissionRate: UFix64
+
 
     init(
       id: UInt64,
@@ -64,7 +71,9 @@ pub contract Flowns {
       nameHash: String,
       domainCount: UInt64,
       minRentDuration: UFix64,
-      maxDomainLength: Int
+      maxDomainLength: Int,
+      prices: {Int: UFix64},
+      commissionRate: UFix64
     ) {
       self.id = id
       self.name = name
@@ -72,6 +81,8 @@ pub contract Flowns {
       self.domainCount = domainCount
       self.minRentDuration = minRentDuration
       self.maxDomainLength = maxDomainLength
+      self.prices = prices
+      self.commissionRate = commissionRate
     }
   }
 
@@ -101,6 +112,8 @@ pub contract Flowns {
 
     priv var maxDomainLength: Int
 
+    priv var commissionRate: UFix64
+
     // Server store the collection private resource to manage the domains
     // Server need to init before open register
     access(self) var server: Capability<&Domains.Collection>?
@@ -115,6 +128,7 @@ pub contract Flowns {
       self.server = nil
       self.minRentDuration = 3153600.00
       self.maxDomainLength = 30
+      self.commissionRate = 0.0
     }
 
     // Set CollectionPrivate to RootDomain resource
@@ -137,7 +151,10 @@ pub contract Flowns {
         nameHash: self.nameHash,
         domainCount: self.domainCount,
         minRentDuration: self.minRentDuration,
-        maxDomainLength: self.maxDomainLength
+        maxDomainLength: self.maxDomainLength,
+        prices: self.prices,
+        commissionRate: self.commissionRate
+
       )
     }
 
@@ -187,6 +204,13 @@ pub contract Flowns {
       emit RootDomainMaxLengthUpdated(domainId: self.id, before: oldLength, after: length)
     }
 
+    access(account) fun setCommissionRate(_ rate: UFix64) {
+      let oldRate = self.commissionRate
+      self.commissionRate = rate
+
+      emit RootDomainCommissionRateUpdated(domainId: self.id, before: oldRate, after: rate)
+    }
+
     // Renew domain
     pub fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {
       pre {
@@ -232,7 +256,7 @@ pub contract Flowns {
     }
 
     // Register domain
-    pub fun registerDomain(name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+    pub fun registerDomain(name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}>, refer: Address? ){
       pre {
         self.server != nil : "Your client has not been linked to the server"
         name.length <= self.maxDomainLength : "Domain name can not exceed max length: ".concat(self.maxDomainLength.toString())
@@ -257,7 +281,7 @@ pub contract Flowns {
         panic("Duration must geater than min rent duration, expect: ".concat(self.minRentDuration.toString()))
       }
       if price == 0.0 || price == nil {
-        panic("Can not register domain, rent price not set yet".concat(name).concat(len.toString()))
+        panic("Can not register domain, rent price not set yet")
       }
 
       let rentPrice = price! * duration 
@@ -270,6 +294,26 @@ pub contract Flowns {
 
       let expiredTime = getCurrentBlock().timestamp + UFix64(duration)
 
+      // distribution of commission
+      if self.commissionRate > 0.0 && refer != nil {
+        let commissionFee  = rentFee * self.commissionRate
+        
+        let referAcc = getAccount(refer!)
+
+        let collectionCap = referAcc.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
+        let collection = collectionCap.borrow()
+        if collection != nil {
+          let ids = collection!.getIDs()
+          if ids.length > 0 {
+            // default domains as a receiver
+            let id = ids[0]
+            let domain: &{Domains.DomainPublic} = collection!.borrowDomain(id: id)
+            domain.depositVault(from: <- feeTokens.withdraw(amount: commissionFee))
+            emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!)
+          }
+        }
+      }
+
       self.domainVault.deposit(from: <- feeTokens)
 
       self.server!.borrow()!.mintDomain(id: self.domainCount, name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
@@ -277,6 +321,7 @@ pub contract Flowns {
       self.domainCount = self.domainCount + (1 as UInt64)
 
     }
+
     // Withdraw vault fee 
     access(account) fun withdrawVault(receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
       let vault = receiver.borrow()!
@@ -319,7 +364,7 @@ pub contract Flowns {
 
     pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault)
 
-    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> )
+    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}>,  refer: Address? )
 
     pub fun getPrices(domainId: UInt64): {Int: UFix64}
 
@@ -344,6 +389,8 @@ pub contract Flowns {
     access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64)
 
     access(account) fun setMaxDomainLength(domainId: UInt64, length: Int)
+
+    access(account) fun setCommissionRate(domainId: UInt64, rate: UFix64)
     
     access(account) fun mintDomain(domainId: UInt64, name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
   }
@@ -389,12 +436,12 @@ pub contract Flowns {
       root.renewDomain(domain: domain, duration: duration, feeTokens: <- feeTokens)
     }
 
-    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+    pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}>, refer: Address?){
       pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
       let root = self.getRootDomain(domainId)
-      root.registerDomain(name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver )
+      root.registerDomain(name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver, refer: refer )
     }
 
     pub fun getVaultBalance(domainId: UInt64): UFix64 {
@@ -443,11 +490,24 @@ pub contract Flowns {
     }
 
     access(account) fun setMinRentDuration(domainId: UInt64, duration: UFix64){
+      pre {
+        duration >= 604800.00 : "Duration must be greater than one week"
+      }
       self.getRootDomain(domainId).setMinRentDuration(duration)
     }
 
     access(account) fun setMaxDomainLength(domainId: UInt64, length: Int){
+      pre {
+        length > 0 && length < 50 : "Domain length must greater than 0 and smaller than 50"
+      }
       self.getRootDomain(domainId).setMaxDomainLength(length)
+    }
+
+    access(account) fun setCommissionRate(domainId: UInt64, rate: UFix64){
+      pre {
+        rate >= 0.0 && rate <= 1.0 : "Commission rate not valid"
+      }
+      self.getRootDomain(domainId).setCommissionRate(rate)
     }
 
     // get domain reference
@@ -494,6 +554,8 @@ pub contract Flowns {
     pub fun setMinRentDuration(domainId: UInt64, duration: UFix64)
 
     pub fun setMaxDomainLength(domainId: UInt64, length: Int)
+
+    pub fun setCommissionRate(domainId: UInt64, rate: UFix64)
 
     pub fun setDomainForbidChars(_ chars: String)
 
@@ -554,12 +616,21 @@ pub contract Flowns {
       self.server!.borrow()!.setMinRentDuration(domainId: domainId, duration: duration)
     }
 
-     pub fun setMaxDomainLength(domainId: UInt64, length: Int) {
+    pub fun setMaxDomainLength(domainId: UInt64, length: Int) {
       pre {
         self.server != nil : "Your client has not been linked to the server"
       }
 
       self.server!.borrow()!.setMaxDomainLength(domainId: domainId, length: length)
+    }
+
+    
+    pub fun setCommissionRate(domainId: UInt64, rate: UFix64) {
+      pre {
+        self.server != nil : "Your client has not been linked to the server"
+      }
+
+      self.server!.borrow()!.setCommissionRate(domainId: domainId, rate: rate)
     }
     
     
@@ -695,14 +766,14 @@ pub contract Flowns {
     return balance
   }
 
-  pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}> ){
+  pub fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @FungibleToken.Vault, receiver: Capability<&{NonFungibleToken.Receiver}>, refer: Address? ){
     pre {
       Flowns.isPause == false : "Register pause"
     }
     let account = Flowns.account
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
-    collection.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver)
+    collection.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver, refer: refer)
   }
   
   pub fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @FungibleToken.Vault) {

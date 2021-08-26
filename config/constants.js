@@ -97,6 +97,7 @@ export const paths = {
     setDomainForbidChars: '../cadence/transactions/set_domain_forbid_chars.cdc',
     setRootDomainMinRentDuration: '../cadence/transactions/set_root_domain_min_rent_duration.cdc',
     setRootDomainMaxLength: '../cadence/transactions/set_root_domain_max_length.cdc',
+    setRootDomainCommissionRate: '../cadence/transactions/set_root_domain_commission_rate.cdc',
     depositDomainVaultWithFlow: '../cadence/transactions/deposit_domain_vault_with_flow.cdc',
     withdrawVaultWithVaultType: '../cadence/transactions/withdraw_domain_vault_with_vault_type.cdc',
     sendNFTToDomain: '../cadence/transactions/send_nft_to_domain.cdc',

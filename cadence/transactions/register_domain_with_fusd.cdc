@@ -3,7 +3,7 @@ import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 
-transaction(domainId: UInt64, name: String, duration: UFix64, amount: UFix64) {
+transaction(domainId: UInt64, name: String, duration: UFix64, amount: UFix64, refer: Address) {
   let collectionCap: Capability<&{NonFungibleToken.Receiver}>
   let vault: @FungibleToken.Vault
   prepare(account: AuthAccount) {
@@ -14,6 +14,6 @@ transaction(domainId: UInt64, name: String, duration: UFix64, amount: UFix64) {
   }
 
   execute {
-    Flowns.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <- self.vault, receiver: self.collectionCap)
+    Flowns.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <- self.vault, receiver: self.collectionCap, refer: refer)
   }
 }

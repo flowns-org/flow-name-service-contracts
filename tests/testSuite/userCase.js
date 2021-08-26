@@ -495,6 +495,13 @@ export const userTest = () =>
       expect(setRes).not.toBeNull()
       expect(setRes.status).toBe(4)
 
+      const domainQuery1 = await buildAndExecScript('queryRootDomainsById', [
+        fcl.arg(flowDomainId, t.UInt64),
+      ])
+
+      expect(Number(domainQuery1.maxDomainLength)).toBe(32)
+
+
       const res3 = await registerDomain(
         flowDomainId,
         'thisisolenthisisolenthisisolen1',
@@ -513,6 +520,13 @@ export const userTest = () =>
       expect(setRes2).not.toBeNull()
       expect(setRes2.status).toBe(4)
 
+      const domainQuery2 = await buildAndExecScript('queryRootDomainsById', [
+        fcl.arg(flowDomainId, t.UInt64),
+      ])
+
+      expect(Number(domainQuery2.maxDomainLength)).toBe(9)
+
+
       const res4 = await registerDomain(
         flowDomainId,
         'thisisolen',
@@ -528,7 +542,7 @@ export const userTest = () =>
       ])
     })
 
-    test('test fns root domain forbid chars', async () => {
+    test('test fns root domain duration', async () => {
       const setRes = await buildAndSendTrx('setRootDomainMinRentDuration', [
         fcl.arg(flowDomainId, t.UInt64),
         fcl.arg('15768000.0', t.UFix64),
@@ -536,6 +550,13 @@ export const userTest = () =>
 
       expect(setRes).not.toBeNull()
       expect(setRes.status).toBe(4)
+
+      const domainQuery = await buildAndExecScript('queryRootDomainsById', [
+        fcl.arg(flowDomainId, t.UInt64),
+      ])
+
+      expect(Number(domainQuery.minRentDuration)).toBe(15768000)
+
 
       const res = await registerDomain(
         flowDomainId,
@@ -587,12 +608,74 @@ export const userTest = () =>
       const res4 = await registerDomain(
         flowDomainId,
         'thisisolen2',
-        (oneYear).toFixed(2),
+        oneYear.toFixed(2),
         '3.47',
         test1Authz(),
       )
 
       expect(res4).not.toBeNull()
       expect(res4.status).toBe(4)
+    })
+
+    test('test fns root domain commissionRate', async () => {
+      const flowVaultType = 'A.0ae53cb6e3f42a79.FlowToken.Vault'
+
+      const setRes = await buildAndSendTrx('setRootDomainCommissionRate', [
+        fcl.arg(flowDomainId, t.UInt64),
+        fcl.arg('0.1', t.UFix64),
+      ])
+
+      expect(setRes).not.toBeNull()
+      expect(setRes.status).toBe(4)
+
+      const rootQuery = await buildAndExecScript('queryRootDomainsById', [
+        fcl.arg(flowDomainId, t.UInt64),
+      ])
+
+      expect(Number(rootQuery.commissionRate)).toBe(0.1)
+
+      const domainRes = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(namehash('tes2.fns'), t.String),
+      ])
+      const balanceBefore = domainRes.vaultBalances[flowVaultType] || 0
+
+      const reg = await registerDomain(
+        flowDomainId,
+        'thisisolen10',
+        oneYear.toFixed(2),
+        '10.0',
+        test1Authz(),
+        'flow',
+        '0x179b6b1cb6755e31',
+      )
+
+      expect(reg).not.toBeNull()
+      expect(reg.status).toBe(4)
+
+      const domainRes2 = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(namehash('tes2.fns'), t.String),
+      ])
+      const balanceAfter = domainRes2.vaultBalances[flowVaultType]
+
+      expect(Number(balanceBefore)).toBe(Number(balanceAfter)-1)
+
+      const reg2 = await registerDomain(
+        fnsDomainId,
+        'thisisolen10',
+        oneYear.toFixed(2),
+        '10.0',
+        test1Authz(),
+        'FUSD',
+      )
+      expect(reg2).not.toBeNull()
+      expect(reg2.status).toBe(4)
+
+      const domainRes3 = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(namehash('tes2.fns'), t.String),
+      ])
+      const balance = domainRes3.vaultBalances[flowVaultType]
+
+      expect(Number(balanceBefore)).toBe(Number(balance)-1)
+
     })
   })

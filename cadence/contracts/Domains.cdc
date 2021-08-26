@@ -604,24 +604,6 @@ pub contract Domains: NonFungibleToken {
       return subdomains
     }
 
-    // set domain record
-    // access(account) fun setRecord(_ address: Address){
-    //   pre {
-    //     !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
-    //     !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
-    //   }
-    //   // Domains.updateRecords(nameHash: self.nameHash, address: address)
-    //   Domains.records[self.nameHash] = address
-    //   emit DomainRecordChanged(name: self.name, resolver: address)
-    // }
-
-    // // set domain expired
-    // access(account) fun setExpired(_ expiredAt: UFix64){
-    //   // Domains.updateExpired(nameHash: self.nameHash, time: expiredAt)
-    //   Domains.expired[self.nameHash] = expiredAt
-    //   emit DomainExpiredChanged(name: self.name, expiredAt: expiredAt)
-    // }
-
     // create subdomain with domain
     pub fun createSubDomain(name: String){
       pre {
@@ -814,7 +796,7 @@ pub contract Domains: NonFungibleToken {
       let nameHash = token.nameHash
 
       // update the owner record for new domain owner
-      // token.setRecord(self.owner?.address!)
+      
       Domains.updateRecords(nameHash: nameHash, address: self.owner?.address!)
       
       // add the new token to the dictionary which removes the old one

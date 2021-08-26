@@ -1,7 +1,7 @@
 import t from '@onflow/types'
 import { fclInit, buildSetupTrx, buildAndExecScript, buildAndSendTrx } from '../utils/index.js'
 import fcl from '@onflow/fcl'
-import hash from 'eth-ens-namehash'
+import { namehash } from '../utils/hash.js'
 import { accountAddr } from '../config/constants.js'
 import { registerDomain, renewDomain } from './buildTrxs.js'
 
@@ -28,16 +28,16 @@ const main = async () => {
     fcl.arg('0.0000002', t.UFix64),
   ])
 
-  const nameHash = hash.hash('caoss.flow')
-  const result = await registerDomain(0, 'caoss', 'flow', '3153600.00000000', '5.00000000')
+  const nameHash = namehash('caoss.flow')
+  const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')
   // renew
-  await renewDomain(0, 'caoss', 'flow', '3153600.00000000', '0.70000000')
+  await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
 
-  await registerDomain(0, 'testt', 'flow', '3153600.00000000', '5.00000000')
-  await registerDomain(0, 'caosa', 'flow', '3153600.00000000', '5.00000000')
-  await registerDomain(0, 'caosb', 'flow', '3153600.00000000', '5.00000000')
+  await registerDomain(0, 'testt', '3153600.00000000', '5.00000000')
+  await registerDomain(0, 'caosa', '3153600.00000000', '5.00000000')
+  await registerDomain(0, 'caosb', '3153600.00000000', '5.00000000')
 
-  const subdomainHash = hash.hash('blog.caoss.flow')
+  const subdomainHash = namehash('blog.caoss.flow')
   const res1 = await buildAndSendTrx('mintSubdomain', [
     fcl.arg(nameHash, t.String),
     fcl.arg('blog', t.String),

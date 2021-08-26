@@ -4,6 +4,7 @@ import hash from 'eth-ens-namehash'
 
 import { fclInit, buildAndSendTrx, buildAndExecScript } from '../utils/index.js'
 import { accountAddr } from '../config/constants.js'
+import { test2Addr } from '../utils/authz.js'
 import { registerDomain, renewDomain, mintDomain } from './buildTrxs.js'
 import { namehash, normalize } from '../utils/hash.js'
 
@@ -145,7 +146,7 @@ const main = async () => {
     fcl.arg('10.0', t.UFix64),
   ])
 
-  const res5 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+  const res5 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(test2Addr, t.Address)])
   console.log(res5)
 
   console.log('withdraw 10 flow token')
@@ -179,8 +180,6 @@ const main = async () => {
   ])
   console.log(hashStr)
 
-
- 
   // console.log(hash.hash('flow'))
 
   // const encoded = new TextEncoder().encode('flow')
@@ -202,16 +201,33 @@ const main = async () => {
   // console.log(normalize(emoji))
   // console.log(normalize('你好'))
 
+  // const res10 = await buildAndExecScript('getAllDomainRecords', [])
+  // const res11 = await buildAndExecScript('getAllDomainExpiredRecords', [])
+  // const res12 = await buildAndExecScript('getAllDomainDeprecatedRecords', [])
 
-  const res10 = await buildAndExecScript('getAllDomainRecords', [])
-  const res11 = await buildAndExecScript('getAllDomainExpiredRecords', [])
-  const res12 = await buildAndExecScript('getAllDomainDeprecatedRecords', [])
+  // console.log(res10)
+  // console.log(res11)
+  // console.log(res12)
 
-  console.log(res10)
-  console.log(res11)
-  console.log(res12)
+  // const setRes = await buildAndSendTrx('setRootDomainCommissionRate', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg('0.1', t.UFix64),
+  // ])
+
+  // console.log(JSON.stringify(setRes))
+
+  const res5 = await buildAndExecScript('queryDomainInfo', [
+    fcl.arg(namehash('depr.flow'), t.String),
+  ])
+  console.log(res5)
+  console.log(res5.vaultBalances)
+
+  const rootQuery = await buildAndExecScript('queryRootDomainsById', [fcl.arg(1, t.UInt64)])
+  console.log(rootQuery)
+
+  const res4 = await buildAndExecScript('queryUsersAllDomain', [fcl.arg(accountAddr, t.Address)])
+  console.log(res4)
 }
-
 
 main()
   .then(() => process.exit(0))
