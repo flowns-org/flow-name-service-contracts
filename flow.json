@@ -6,7 +6,12 @@
     }
   },
   "contracts": {
-    "NonFungibleToken": "./cadence/contracts/standard/NonFungibleToken.cdc",
+    "NonFungibleToken": {
+      "source": "./cadence/contracts/standard/NonFungibleToken.cdc",
+      "aliases": {
+        "testnet": "0x631e88ae7f1d7c20"
+      }
+    },
     "Domains": "./cadence/contracts/Domains.cdc",
     "Flowns": "./cadence/contracts/Flowns.cdc",
     "FungibleToken": {
@@ -54,6 +59,10 @@
     "test2": {
       "address": "179b6b1cb6755e31",
       "keys": "5f10a1fd823113cff24e49d780d2103d31a6d92f9ebe7680c12a71d238688967"
+    },
+    "test": {
+      "address": "0ce7a444df0a142b",
+      "keys": "6572f7eaf386eeb52f2fcd319fa98bb0c022791a1e177bfb11acec334528b099"
     }
   },
   "deployments": {
@@ -67,6 +76,12 @@
       ],
       "test1": [],
       "test2": []
+    },
+    "testnet": {
+      "test": [
+        "Domains",
+        "Flowns"
+      ]
     }
   }
 }
