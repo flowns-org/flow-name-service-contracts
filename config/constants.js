@@ -18,6 +18,8 @@ export const KibbleTokenAddr = process.env.KIBBLE_TOKEN_ADDRESS
 
 export const flowFungibleAddr = process.env.FLOW_FUNGIBLE_ADDRESS
 
+export const flowNonFungibleAddr = process.env.FLOW_NONFUNGIBLE_ADDRESS
+
 export const publicKey = process.env.FLOW_ACCOUNT_PUBLIC_KEY
 
 const buildPath = (fileName, type) => {

@@ -8,14 +8,17 @@ import { registerDomain, renewDomain } from './buildTrxs.js'
 const main = async () => {
   // fcl init and load config
   fclInit()
-  // init admin storage
-  // await buildSetupTrx('initFlownsAdminStorage')
+
+  
+  
   // setup admin cap
   await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
   // mint flow root domain
-  await buildSetupTrx('mintRootDomain', [fcl.arg('flow', t.String)])
+  // await buildSetupTrx('mintRootDomain', [fcl.arg('flow', t.String)])
 
-  await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
+
+
+
   // setup root domain
   await buildSetupTrx('setupRootDomainServer', [
     fcl.arg(accountAddr, t.Address),
@@ -25,8 +28,11 @@ const main = async () => {
   await buildSetupTrx('setupDomainRentPrice', [
     fcl.arg(0, t.UInt64),
     fcl.arg(5, t.Int),
-    fcl.arg('0.0000002', t.UFix64),
+    fcl.arg('0.00000001', t.UFix64),
   ])
+
+
+  await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
 
   const nameHash = namehash('caoss.flow')
   const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')

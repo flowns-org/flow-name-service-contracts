@@ -28,9 +28,8 @@ export const registerDomain = async (
   return res
 }
 
-export const renewDomain = async (domainId, name, rootName, duration, amount, authz = null) => {
-  const domainName = `${name}.${rootName}`
-  const nameHash = hash.hash(domainName)
+export const renewDomain = async (domainId, nameHash, duration, amount, authz = null) => {
+  
 
   const res = await buildAndSendTrx(
     'renewDomain',

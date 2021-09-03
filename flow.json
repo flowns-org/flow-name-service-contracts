@@ -32,7 +32,7 @@
       "source": "./cadence/contracts/tokens/FUSD.cdc",
       "aliases": {
         "testnet": "0xe223d8a629e49c68",
-        "emulator": "0x01cf0e2f2f715450"
+        "emulator": "0xf8d6e0586b0a20c7"
       }
     },
     "Kibble": {

@@ -9,6 +9,7 @@ import {
   flowFungibleAddr,
   KibbleTokenAddr,
   FUSDTokenAddr,
+  flowNonFungibleAddr
 } from '../config/constants.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -21,7 +22,7 @@ export const fclInit = () => {
     .put('accessNode.api', nodeUrl)
     .put('0xDomains', accountAddr)
     .put('0xFlowns', accountAddr)
-    .put('0xNonFungibleToken', accountAddr)
+    .put('0xNonFungibleToken', flowNonFungibleAddr)
     .put('0xFungibleToken', flowFungibleAddr)
     .put('0xFlowToken', flowTokenAddr)
     .put('0xKibble', KibbleTokenAddr)
