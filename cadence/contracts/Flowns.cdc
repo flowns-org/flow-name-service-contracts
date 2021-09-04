@@ -179,7 +179,7 @@ pub contract Flowns {
     
       let expiredTime = getCurrentBlock().timestamp + duration
 
-      self.server!.borrow()!.mintDomain(id: self.domainCount, name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
+      self.server!.borrow()!.mintDomain(name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
       self.domainCount = self.domainCount + (1 as UInt64)
 
     }
@@ -316,7 +316,7 @@ pub contract Flowns {
 
       self.domainVault.deposit(from: <- feeTokens)
 
-      self.server!.borrow()!.mintDomain(id: self.domainCount, name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
+      self.server!.borrow()!.mintDomain(name: name, nameHash: nameHash, parentName: self.name, expiredAt: expiredTime, receiver: receiver)
 
       self.domainCount = self.domainCount + (1 as UInt64)
 

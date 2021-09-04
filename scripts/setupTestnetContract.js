@@ -17,8 +17,8 @@ const main = async () => {
 
 
   // setup admin cap
-  const setupRes = await buildSetupTrx('setupAdminServer', [])
-  console.log(setupRes)
+  // const setupRes = await buildSetupTrx('setupAdminServer', [])
+  // console.log(setupRes)
   // mint root domain
   const flowRes = await buildSetupTrx('mintRootDomain', [fcl.arg(flowName, t.String)])
   console.log('mint flow root name', flowRes)

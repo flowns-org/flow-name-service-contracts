@@ -70,6 +70,7 @@ export const paths = {
     calcDomainHash: buildPath('calc_domain_hash.cdc', 'script'),
     calcDomainNameHash: buildPath('calc_domain_name_hash.cdc', 'script'),
     queryDomainDeprecated: buildPath('query_domain_deprecated.cdc', 'script'),
+    queryIsDeprecated: buildPath('query_domain_is_deprecated.cdc', 'script'),
     getCurrentBlockTimestamp: buildPath('get_block_timestamp.cdc', 'script'),
     getDomainNameHash: buildPath('get_domain_name_hash.cdc', 'script'),
     getAllDomainRecords: buildPath('get_all_domain_records.cdc', 'script'),

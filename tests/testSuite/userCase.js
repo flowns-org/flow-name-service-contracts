@@ -208,8 +208,10 @@ export const userTest = () =>
     })
 
     test('Deprecated domain transfer fail ', async () => {
-      const transferRes = await buildAndSendTrx('transferDomainWithId', [
-        fcl.arg(1, t.UInt64),
+
+
+      const transferRes = await buildAndSendTrx('transferDomainWithHashName', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(test2Addr, t.Address),
       ])
       expect(transferRes).toBeNull()
@@ -217,12 +219,14 @@ export const userTest = () =>
 
     test('Transfer renew domains to deprecate account', async () => {
       const transferRes = await buildAndSendTrx(
-        'transferDomainWithId',
-        [fcl.arg(3, t.UInt64), fcl.arg(accountAddr, t.Address)],
+        'transferDomainWithHashName',
+        [fcl.arg(deprecatedDomainNameHash, t.String), fcl.arg(accountAddr, t.Address)],
         test1Authz(),
       )
       expect(transferRes).not.toBeNull()
       expect(transferRes.status).toBe(4)
+
+
     })
 
     test('Deprecate account manage domain and subdomain with same hash name', async () => {
@@ -341,7 +345,7 @@ export const userTest = () =>
         fcl.arg(accountAddr, t.Address),
       ])
 
-      expect(domainsQuery.length).toBe(3)
+      expect(domainsQuery.length).toBe(4)
       console.log(domainsQuery, '=======')
     })
 
@@ -374,7 +378,7 @@ export const userTest = () =>
       const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
       ])
-      expect(domainsQuery.length).toBe(2)
+      expect(domainsQuery.length).toBe(3)
 
       const domainInfo = await buildAndExecScript('queryDomainInfo', [
         fcl.arg(deprecatedDomainNameHash, t.String),
@@ -398,7 +402,7 @@ export const userTest = () =>
       const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
       ])
-      expect(domainsQueryAfter.length).toBe(3)
+      expect(domainsQueryAfter.length).toBe(4)
 
       const test1FlowBalLast = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(accountAddr, t.Address),

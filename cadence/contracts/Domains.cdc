@@ -764,7 +764,7 @@ pub contract Domains: NonFungibleToken {
   // return the content for this NFT
   pub resource interface CollectionPrivate {
 
-    access(account) fun mintDomain(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
+    access(account) fun mintDomain(name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
 
     pub fun borrowDomainPrivate(_ id: UInt64): &Domains.NFT
 
@@ -832,7 +832,7 @@ pub contract Domains: NonFungibleToken {
       return ref as! &Domains.NFT
     }
 
-    access(account) fun mintDomain(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
+    access(account) fun mintDomain(name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       
       if Domains.getRecords(nameHash) != nil {
         let isExpired = Domains.isExpired(nameHash)
@@ -874,7 +874,7 @@ pub contract Domains: NonFungibleToken {
       }
 
       let domain <- create Domains.NFT(
-        id: id,
+        id: Domains.totalSupply,
         name: name,
         nameHash: nameHash,
         parent: parentName,
@@ -886,11 +886,11 @@ pub contract Domains: NonFungibleToken {
       // nft.setExpired(expiredAt)
       Domains.updateRecords(nameHash: nameHash, address: receiver.address)
       Domains.updateExpired(nameHash: nameHash, time: expiredAt)
-      
-      Domains.totalSupply = Domains.totalSupply + 1 as UInt64
-      receiver.borrow()!.deposit(token: <- nft)
 
-      emit DomainMinted(id: id, name: name, nameHash: nameHash, parentName: parentName, expiredAt: expiredAt, receiver: receiver.address)
+      Domains.totalSupply = Domains.totalSupply + 1 as UInt64
+
+      emit DomainMinted(id: nft.id, name: name, nameHash: nameHash, parentName: parentName, expiredAt: expiredAt, receiver: receiver.address)
+      receiver.borrow()!.deposit(token: <- nft)
 
     }
 
@@ -920,7 +920,7 @@ pub contract Domains: NonFungibleToken {
     return false
   }
 
-  pub fun isDeprecated(nameHash: String, domainId:UInt64): Bool {
+  pub fun isDeprecated(nameHash: String, domainId: UInt64): Bool {
     let deprecatedRecords = self.deprecated[nameHash] ?? {}
     return deprecatedRecords[domainId] != nil
   }
