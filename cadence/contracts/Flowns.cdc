@@ -308,8 +308,10 @@ pub contract Flowns {
             // default domains as a receiver
             let id = ids[0]
             let domain: &{Domains.DomainPublic} = collection!.borrowDomain(id: id)
-            domain.depositVault(from: <- feeTokens.withdraw(amount: commissionFee))
-            emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!)
+            if domain.receivable == true {
+              domain.depositVault(from: <- feeTokens.withdraw(amount: commissionFee))
+              emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!)
+            }
           }
         }
       }
