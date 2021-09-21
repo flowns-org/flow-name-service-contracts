@@ -77,6 +77,7 @@ export const paths = {
     getAllDomainExpiredRecords: buildPath('get_all_domain_expired_records.cdc', 'script'),
     getAllDomainDeprecatedRecords: buildPath('get_all_domain_deprecated_records.cdc', 'script'),
     calcHash: buildPath('calc_hash.cdc', 'script'),
+    queryDomaimPrice: buildPath('query_domain_price.cdc', 'script'),
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),
