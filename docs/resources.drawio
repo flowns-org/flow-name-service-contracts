@@ -1,0 +1,86 @@
+<mxfile host="65bd71144e">
+    <diagram id="067kmc8EleSCg6d-OjCm" name="第 1 页">
+        <mxGraphModel dx="1193" dy="849" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="17" value="Flowns contract resrouce" style="swimlane;startSize=20;horizontal=1;childLayout=treeLayout;horizontalTree=0;resizable=0;containerType=tree;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="120" width="740" height="640" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="Admin resource" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="297.5" y="40" width="145" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="RootDomainCollection" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="247.5" y="130" width="245" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" parent="17" source="18" target="19">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="25" source="19" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-137.5" y="210" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" value="RootDomain(NFT)" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="246.25" y="220" width="247.5" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="31" source="25" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-137.5" y="300" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="Domains.Collection" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="245" y="310" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="34" source="31" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-40" y="390.0000000000002" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="34" value="Domains.NFT(Domain)" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="197.5" y="400" width="345" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="36" source="34" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-40" y="479.9999999999998" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="36" value="Domains.Subdomain(NFT)" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="20" y="490" width="210" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="38" source="34" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-40" y="569.9999999999998" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="38" value="Vaults mapping" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="270" y="490" width="210" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="40" source="34" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="157.5" y="569.9999999999998" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="40" value="Ccollections&amp;nbsp; mapping" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="520" y="490" width="200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="42" source="38" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="410" y="479.9999999999998" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="42" value="Any&amp;nbsp;FungibleToken.Vault" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="270" y="580" width="210" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;html=1;rounded=0;" edge="1" target="44" source="40" parent="17">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="410" y="479.9999999999998" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="44" value="Any NonFungibleToken.Collection" style="whiteSpace=wrap;html=1;" vertex="1" parent="17">
+                    <mxGeometry x="520" y="580" width="200" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
