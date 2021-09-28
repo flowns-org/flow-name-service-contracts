@@ -95,6 +95,7 @@ export const paths = {
     removeSubdomainAddress: buildPath('remove_subdomain_address.cdc'),
     withdrawRootVault: buildPath('withdraw_root_vault.cdc'),
     mintDomain: buildPath('mint_domain.cdc'),
+    mintDomainBatch: buildPath('mint_domain_batch.cdc'),
     createFUSDVault: buildPath('create_fusd_vault.cdc'),
     changeRootDomainVaultWithFusd: buildPath('change_root_domain_vault_with_fusd.cdc'),
     setFlownsPauseStatus: buildPath('set_flowns_pause_status.cdc'),

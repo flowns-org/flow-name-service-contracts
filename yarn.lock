@@ -2009,6 +2009,11 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
+convert-csv-to-json@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/convert-csv-to-json/-/convert-csv-to-json-1.3.1.tgz#5d81cd6eb48a2b3e482799bf731a6a0799d37e7f"
+  integrity sha512-cKugcLmLHIdgxk1zSiq9ImPMszskp4zR3uJi8Ty9qx2/QhCozPVTk8A9v3b9ZEYnkbY6fbk7jEKyJzQZ49/p7A==
+
 convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.8.0.tgz#f3373c32d21b4d780dd8004514684fb791ca4369"
