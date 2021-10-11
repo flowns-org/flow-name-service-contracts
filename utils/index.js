@@ -29,7 +29,7 @@ export const fclInit = () => {
     .put('0xFUSD', FUSDTokenAddr)
 }
 
-export const sendTrx = async (CODE, args, auth = null, limit = 200) => {
+export const sendTrx = async (CODE, args, auth = null, limit = 9999) => {
   const authFunc = auth || authz
   const txId = await fcl
     .send([

@@ -910,7 +910,7 @@ pub contract Domains: NonFungibleToken {
     return self.expired[nameHash]
   }
 
-  // Get domain's expired statu
+  // Get domain's expired status
   pub fun isExpired(_ nameHash: String): Bool {    
     let currentTimestamp = getCurrentBlock().timestamp
     let expiredTime =  self.expired[nameHash]
