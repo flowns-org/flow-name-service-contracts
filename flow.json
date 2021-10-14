@@ -63,6 +63,18 @@
     "test": {
       "address": "0ce7a444df0a142b",
       "keys": "6572f7eaf386eeb52f2fcd319fa98bb0c022791a1e177bfb11acec334528b099"
+    },
+    "testnet1": {
+      "address": "d50084a1a43b1507",
+      "keys": "368083923398158fe8f6e31b7483e8d00c4a2c959900cc28cc173dbd5c78b6b4"
+    },
+    "testnet2": {
+      "address": "31673d7cb5c115d8",
+      "keys": "5f10a1fd823113cff24e49d780d2103d31a6d92f9ebe7680c12a71d238688967"
+    },
+    "testnet": {
+      "address": "b05b2abb42335e88",
+      "keys": "dbf01310a3f2fe3a244fc95aa624a865b8367fc2b93bb5edd3293c1cc2d1e006"
     }
   },
   "deployments": {
@@ -78,7 +90,7 @@
       "test2": []
     },
     "testnet": {
-      "test": [
+      "testnet": [
         "Domains",
         "Flowns"
       ]

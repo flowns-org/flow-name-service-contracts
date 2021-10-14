@@ -1,9 +1,6 @@
 
 import Crypto
 
-/*
-  This script will check an address and print out its FT, NFT and Versus resources
- */
 
 pub fun main(name:String, parentName: String) : String {
   let prefix = "0x"

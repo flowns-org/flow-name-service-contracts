@@ -10,14 +10,16 @@ transaction(nameHash: String, key: String, itemId: UInt64) {
     self.collection = account.borrow<&Domains.Collection>(from: Domains.CollectionStoragePath)?? panic("Can not borrow collection")
     var domain: &{Domains.DomainPrivate}? = nil
     let collectionPrivate = account.borrow<&{Domains.CollectionPrivate}>(from: Domains.CollectionStoragePath) ?? panic("Could not find your domain collection cap")
-    
-    let ids = self.collection.getIDs()
 
-    for id in ids {
-      var item = self.collection.borrowDomain(id: id)
-      if item.nameHash == nameHash && !Domains.isDeprecated(nameHash: nameHash, domainId: id) {
-        domain = collectionPrivate.borrowDomainPrivate(id)
-      } 
+    // for id in ids {
+    //   var item = self.collection.borrowDomain(id: id)
+    //   if item.nameHash == nameHash && !Domains.isDeprecated(nameHash: nameHash, domainId: id) {
+    //     domain = collectionPrivate.borrowDomainPrivate(id)
+    //   } 
+    // }
+    let id = Domains.getDomainId(nameHash)
+    if id !=nil {
+      domain = collectionPrivate.borrowDomainPrivate(id!)
     }
     self.domain = domain!
    

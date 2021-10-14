@@ -3,5 +3,5 @@ export default {
   verbose: true,
   coveragePathIgnorePatterns: ['/node_modules/'],
   transform: {},
-  testTimeout: 30000
+  testTimeout: 30000000
 }

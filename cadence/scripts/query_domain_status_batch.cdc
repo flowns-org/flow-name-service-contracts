@@ -1,7 +1,21 @@
 
 import Crypto
+import Flowns from 0xFlowns
 
-pub fun main(name: String, parentName: String) : String {
+pub fun main(rootName: String, names: [String]) : [Bool] {
+
+  var idx = 0
+  var results: [Bool] = []
+  while idx < names.length {
+    var nameHash = hash(name: names[idx], parentName: rootName)
+    var available = Flowns.available(nameHash: nameHash) 
+    results.append(available)
+    idx = idx + 1
+  }
+  return results
+}
+
+pub fun hash(name: String, parentName: String) : String {
   let prefix = "0x"
   let emptyNode = "0000000000000000000000000000000000000000000000000000000000000000"
   let nameBytes = name.utf8

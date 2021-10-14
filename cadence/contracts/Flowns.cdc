@@ -50,7 +50,7 @@ pub contract Flowns {
 
   pub event RootDomainMintDurationUpdated(domainId: UInt64, before: UFix64, after: UFix64)
 
-  pub event DomainRegisterCommissionAllocated(domainId: UInt64, nammeHash: String, amount: UFix64, commissionAmount: UFix64, refer: Address)
+  pub event DomainRegisterCommissionAllocated(domainId: UInt64, nammeHash: String, amount: UFix64, commissionAmount: UFix64, refer: Address, receiveId: UInt64)
 
 
   // structs 
@@ -126,7 +126,7 @@ pub contract Flowns {
       self.domainVault <- vault
       self.prices = {}
       self.server = nil
-      self.minRentDuration = 3153600.00
+      self.minRentDuration = 31536000.00
       self.maxDomainLength = 30
       self.commissionRate = 0.0
     }
@@ -308,9 +308,9 @@ pub contract Flowns {
             // default domains as a receiver
             let id = ids[0]
             let domain: &{Domains.DomainPublic} = collection!.borrowDomain(id: id)
-            if domain.receivable == true {
+            if domain.receivable == true && !Domains.isExpired(domain.nameHash) {
               domain.depositVault(from: <- feeTokens.withdraw(amount: commissionFee))
-              emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!)
+              emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!, receiveId: domain.id)
             }
           }
         }

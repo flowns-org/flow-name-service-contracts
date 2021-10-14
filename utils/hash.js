@@ -1,5 +1,6 @@
 import Sha3 from 'js-sha3'
 import uts46 from 'idna-uts46-hx'
+import emojiRegex from 'emoji-regex'
 
 export function namehash(inputName) {
   const sha3 = Sha3.sha3_256
@@ -8,9 +9,15 @@ export function namehash(inputName) {
   for (var i = 0; i < 32; i++) {
     node += '00'
   }
+  const regex = emojiRegex()
+  let name = ''
 
-  let name = normalize(inputName)
-
+  if (regex.test(inputName)) {
+    name = inputName
+  } else {
+    name = normalize(inputName)
+  }
+  // let name = inputName
   if (name) {
     var labels = name.split('.')
 
@@ -26,4 +33,3 @@ export function namehash(inputName) {
 export function normalize(name) {
   return name ? uts46.toAscii(name, { useStd3ASCII: true, transitional: false }) : name
 }
-

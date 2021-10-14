@@ -140,6 +140,13 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
       console.log(queryRes)
+      const deprecatedId = queryRes.id
+      const currentId = await buildAndExecScript('queryDomaimId', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+      expect(deprecatedId).toBe(currentId)
+
+
       await sleep(1000)
       await buildAndSendTrx('setDomainAddress', [
         fcl.arg(deprecatedDomainNameHash, t.String),
@@ -147,7 +154,6 @@ export const userTest = () =>
         fcl.arg('0xcea5e66bec5193e5ec0b049a3fe5d7dd896fd480', t.String),
       ])
       // await sleep(1000)
-
       await buildAndSendTrx('setDomainAddress', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(1, t.UInt64),
@@ -175,6 +181,10 @@ export const userTest = () =>
       )
       expect(regRes).not.toBeNull()
       expect(regRes.status).toBe(4)
+      const newId = await buildAndExecScript('queryDomaimId', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+      expect(deprecatedId+1).toBe(newId)
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
@@ -218,6 +228,13 @@ export const userTest = () =>
     })
 
     test('Transfer renew domains to deprecate account', async () => {
+
+      const beforeAddr = await buildAndExecScript('queryDomainRecord', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+      expect(beforeAddr).toBe(test1Addr)
+
+
       const transferRes = await buildAndSendTrx(
         'transferDomainWithHashName',
         [fcl.arg(deprecatedDomainNameHash, t.String), fcl.arg(accountAddr, t.Address)],
@@ -225,6 +242,11 @@ export const userTest = () =>
       )
       expect(transferRes).not.toBeNull()
       expect(transferRes.status).toBe(4)
+
+      const afterAddr = await buildAndExecScript('queryDomainRecord', [
+        fcl.arg(deprecatedDomainNameHash, t.String),
+      ])
+      expect(accountAddr).toBe(afterAddr)
 
 
     })
@@ -372,13 +394,13 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(0, t.UInt64),
       ])
-      expect(sendNFTRes).not.toBeNull()
-      expect(sendNFTRes.status).toBe(4)
+      expect(sendNFTRes).toBeNull()
+      // expect(sendNFTRes.status).toBe(4)
 
       const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
       ])
-      expect(domainsQuery.length).toBe(3)
+      expect(domainsQuery.length).toBe(4)
 
       const domainInfo = await buildAndExecScript('queryDomainInfo', [
         fcl.arg(deprecatedDomainNameHash, t.String),

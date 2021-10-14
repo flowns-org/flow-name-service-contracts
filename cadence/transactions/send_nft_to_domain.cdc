@@ -29,7 +29,7 @@ transaction(nameHash: String, itemId: UInt64) {
   }
   execute {
     let typeKey = self.collection.getType().identifier
-    log(typeKey)
+
     if self.domain!.checkCollection(key: typeKey) == false {
       let oldNFT <- self.collection.ownedNFTs[itemId] <- self.NFT
       self.domain.addCollection(collection: <- self.collection )

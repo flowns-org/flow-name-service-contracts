@@ -9,7 +9,8 @@ import {
   flowFungibleAddr,
   KibbleTokenAddr,
   FUSDTokenAddr,
-  flowNonFungibleAddr
+  flowNonFungibleAddr,
+  alchemyKey
 } from '../config/constants.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -26,7 +27,7 @@ export const fclInit = () => {
     .put('0xFungibleToken', flowFungibleAddr)
     .put('0xFlowToken', flowTokenAddr)
     .put('0xKibble', KibbleTokenAddr)
-    .put('0xFUSD', FUSDTokenAddr)
+    .put('0xFUSD', FUSDTokenAddr).put("grpc.metadata", {"api_key": alchemyKey})
 }
 
 export const sendTrx = async (CODE, args, auth = null, limit = 9999) => {
@@ -49,7 +50,7 @@ export const execScript = async (script, args = []) => {
   return await fcl.send([fcl.script`${script}`, fcl.args(args)]).then(fcl.decode)
 }
 
-export const buildAndSendTrx = async (key, args = [], authFunc = null, limit) => {
+export const buildAndSendTrx = async (key, args = [], authFunc = null, limit=9999) => {
   try {
     const trxScript = await readCode(transactions[key])
     const trxId = await sendTrx(trxScript, args, authFunc, limit)

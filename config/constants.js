@@ -22,6 +22,9 @@ export const flowNonFungibleAddr = process.env.FLOW_NONFUNGIBLE_ADDRESS
 
 export const publicKey = process.env.FLOW_ACCOUNT_PUBLIC_KEY
 
+export const alchemyKey = process.env.ALCHEMY_KEY
+
+
 const buildPath = (fileName, type) => {
   let filePath = ''
   switch (type) {
@@ -77,10 +80,13 @@ export const paths = {
     getAllDomainExpiredRecords: buildPath('get_all_domain_expired_records.cdc', 'script'),
     getAllDomainDeprecatedRecords: buildPath('get_all_domain_deprecated_records.cdc', 'script'),
     calcHash: buildPath('calc_hash.cdc', 'script'),
+    queryDomainAvailableBatch: buildPath('query_domain_status_batch.cdc', 'script'),
     queryDomaimPrice: buildPath('query_domain_price.cdc', 'script'),
+    queryDomaimId: buildPath('query_domain_id.cdc', 'script'),
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),
+    registerDomainBatch: buildPath('register_domain_batch.cdc'),
     registerDomainWithFUSD: buildPath('register_domain_with_fusd.cdc'),
     renewDomain: buildPath('renew_domain.cdc'),
     mintSubdomain: buildPath('mint_subdomain.cdc'),
