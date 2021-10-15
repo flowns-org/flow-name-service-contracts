@@ -23,7 +23,7 @@ pub contract Domains: NonFungibleToken {
   // Store the expired and deprecated domain records 
   access(self) let deprecated: {String: {UInt64: DomainDeprecatedInfo}}
 
-  // 
+  // Store the domains id with namehash key
   access(self) let idMap: {String: UInt64}
 
 
