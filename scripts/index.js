@@ -15,9 +15,9 @@ const main = async () => {
   // await buildSetupTrx('initDomainCollection', [], test2Authz())
 
   // const price = await buildSetupTrx('setupDomainRentPrice', [
-  //   fcl.arg(3, t.UInt64),
+  //   fcl.arg(0, t.UInt64),
   //   fcl.arg(10, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.00000003', t.UFix64),
   // ])
   // console.log(price)
   // const paus = await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
@@ -45,8 +45,8 @@ const main = async () => {
   // console.log(setRes2)
 
   // const setRes3 = await buildAndSendTrx('setRootDomainCommissionRate', [
-  //   fcl.arg(3, t.UInt64),
-  //   fcl.arg('0.2', t.UFix64),
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg('0.0', t.UFix64),
   // ])
   // console.log(setRes3)
 
@@ -59,12 +59,12 @@ const main = async () => {
   // register
   // const result = await registerDomain(0, 'caosa','flow' '3153600.00000000', '5.00000000')
   // renew - at last
-  const renew = await renewDomain(1, namehash('dpr.nft'), '31536000.00000000', '4.80')
-  console.log(renew)
+  // const renew = await renewDomain(0, namehash('depr4.flow'), '31536000.00000000', '0.10')
+  // console.log(renew)
   // const flowNamehash = namehash('caos.flow')
   // const fnsNameHash = namehash('caos.fns')
-  // const domains = await buildAndExecScript('queryRootDomains')
-  // console.log(domains)
+  const domains = await buildAndExecScript('queryRootDomains')
+  console.log(domains)
 
   // const id = await buildAndExecScript('queryDomaimId', [
   //   fcl.arg(namehash('testthedomainnameadd2.flow'), t.String),
@@ -80,12 +80,12 @@ const main = async () => {
 
   // const vault = await buildAndSendTrx('withdrawRootVault', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('7.42900000', t.UFix64),
+  //   fcl.arg(res, t.UFix64),
   // ])
   // console.log(vault)
 
   // const flowDetail = await buildAndExecScript('queryDomainInfo', [
-  //   fcl.arg(namehash('caos.nft'), t.String),
+  //   fcl.arg(namehash('depr4.flow'), t.String),
   // ])
   // console.log(flowDetail)
 
@@ -106,29 +106,29 @@ const main = async () => {
   // ])
   // const userDomain = await buildAndExecScript('queryDomainInfo', [fcl.arg(namehash('depr.flow'), t.String)])
 
-  const userDomain = await buildAndExecScript('queryUsersAllDomain', [
-    fcl.arg(test2Addr, t.Address),
-  ])
-  console.dir(userDomain)
+  // const userDomain = await buildAndExecScript('queryUsersAllDomain', [
+  //   fcl.arg(accountAddr, t.Address),
+  // ])
+  // console.dir(userDomain)
 
-  const deprId = await buildAndExecScript('queryDomaimId', [
-    fcl.arg(namehash('depr2.flow'), t.String),
-  ])
-  console.dir(deprId)
-  const depr1Id = await buildAndExecScript('queryDomaimId', [
-    fcl.arg(namehash('depr3.flow'), t.String),
-  ])
-  console.dir(depr1Id)
+  // const deprId = await buildAndExecScript('queryDomaimId', [
+  //   fcl.arg(namehash('depr2.flow'), t.String),
+  // ])
+  // console.dir(deprId)
+  // const depr1Id = await buildAndExecScript('queryDomaimId', [
+  //   fcl.arg(namehash('depr3.flow'), t.String),
+  // ])
+  // console.dir(depr1Id)
 
-  const deprInfo = await buildAndExecScript('queryDomainDeprecated', [
-    fcl.arg(namehash('depr2.flow'), t.String),
-  ])
-  console.dir(deprInfo)
+  // const deprInfo = await buildAndExecScript('queryDomainDeprecated', [
+  //   fcl.arg(namehash('depr2.flow'), t.String),
+  // ])
+  // console.dir(deprInfo)
 
-  const depr1Info = await buildAndExecScript('queryDomainDeprecated', [
-    fcl.arg(namehash('depr3.flow'), t.String),
-  ])
-  console.dir(depr1Info)
+  // const depr1Info = await buildAndExecScript('queryDomainDeprecated', [
+  //   fcl.arg(namehash('depr3.flow'), t.String),
+  // ])
+  // console.dir(depr1Info)
 
   // console.log(namehash('depr.flow'))
 
@@ -154,12 +154,11 @@ const main = async () => {
   // ])
   // console.log(test1Bal)
 
-  // const res1 = await renewDomain(1, 'caos', 'nft', '3153600.00000000', '5.70000000')
   // const res1 = await buildAndSendTrx('renewDomain', [
-  //   fcl.arg(1, t.UInt64),
-  //   fcl.arg(namehash('caos.nft'), t.String),
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(namehash('depr2.flow'), t.String),
   //   fcl.arg('31536000.00', t.UFix64),
-  //   fcl.arg('9.3', t.UFix64),
+  //   fcl.arg('4.8', t.UFix64),
   // ])
   // console.log(res1)
 
@@ -230,13 +229,23 @@ const main = async () => {
   // console.log(withdraw)
 
   // const mintRes = await buildAndSendTrx('mintSubdomain', [
-  //   fcl.arg(namehash('depr2.flow'), t.String),
-  //   fcl.arg('dev', t.String),
+  //   fcl.arg(namehash('depr4.flow'), t.String),
+  //   fcl.arg('test', t.String),
   // ])
   // console.log(mintRes)
+
+  // const removeSub = await buildAndSendTrx('removeSubdomain', [
+  //   fcl.arg(namehash('depr4.flow'), t.String),
+  //   fcl.arg(namehash('test.depr4.flow'), t.String),
+  // ])
+  // console.log(removeSub)
+  // console.log(namehash('test.depr4.flow'))
+  // console.log(namehash('dev.depr4.flow'))
+  // console.log(namehash('blog.depr4.flow'))
+
   // const subdomains = await buildAndExecScript('queryUsersAllSubDomain', [
   //   fcl.arg(accountAddr, t.Address),
-  //   fcl.arg(namehash('caos.flow'), t.String),
+  //   fcl.arg(namehash('depr4.flow'), t.String),
   // ])
 
   // console.log(subdomains)
@@ -256,8 +265,8 @@ const main = async () => {
 
   // const trxs = await buildAndSendTrx('mintDomain', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('depr3', t.String),
-  //   fcl.arg('60.0', t.UFix64),
+  //   fcl.arg('depr4', t.String),
+  //   fcl.arg('10.0', t.UFix64),
   // ])
 
   // console.log(trxs)
@@ -289,17 +298,31 @@ const main = async () => {
   // ])
   // console.log(setAddressRes)
 
-  // const setSubText = await buildAndSendTrx(
-  //   'setSubdomainText',
-  //   [
-  //     fcl.arg(namehash('depr3.flow'), t.String),
-  //     fcl.arg(namehash('dev.depr3.flow'), t.String),
-  //     fcl.arg('subText', t.String),
-  //     fcl.arg('subValue', t.String),
-  //   ],
-  //   test2Authz(),
-  // )
+  // const setSubText = await buildAndSendTrx('setSubdomainText', [
+  //   fcl.arg(namehash('depr4.flow'), t.String),
+  //   fcl.arg(namehash('blog.depr4.flow'), t.String),
+  //   fcl.arg('subText1', t.String),
+  //   fcl.arg('subValue', t.String),
+  // ])
   // console.log(setSubText)
+
+  // const setSubText = await buildAndSendTrx('removeSubdomainAddress', [
+  //   fcl.arg(namehash('depr4.flow'), t.String),
+  //   fcl.arg(namehash('blog.depr4.flow'), t.String),
+  //   fcl.arg(1, t.UInt64),
+  // ])
+  // console.log(setSubText)
+
+  // const setSubAddr = await buildAndSendTrx('setSubdomainAddress', [
+  //   fcl.arg(namehash('depr4.flow'), t.String),
+  //   fcl.arg(namehash('blog.depr4.flow'), t.String),
+  //   fcl.arg(3, t.UInt64),
+  //   fcl.arg('0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480', t.String),
+  // ])
+  // console.log(setSubAddr)
+
+  // const change = await buildAndSendTrx('changeRootDomainVaultWithFlow', [fcl.arg(0, t.UInt64)])
+  // console.log(change)
 }
 
 main()

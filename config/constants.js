@@ -104,6 +104,7 @@ export const paths = {
     mintDomainBatch: buildPath('mint_domain_batch.cdc'),
     createFUSDVault: buildPath('create_fusd_vault.cdc'),
     changeRootDomainVaultWithFusd: buildPath('change_root_domain_vault_with_fusd.cdc'),
+    changeRootDomainVaultWithFlow: buildPath('change_root_domain_vault_with_flow.cdc'),
     setFlownsPauseStatus: buildPath('set_flowns_pause_status.cdc'),
     setDomainForbidChars: buildPath('set_domain_forbid_chars.cdc'),
     setRootDomainMinRentDuration: buildPath('set_root_domain_min_rent_duration.cdc'),
