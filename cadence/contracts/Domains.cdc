@@ -769,7 +769,7 @@ pub contract Domains: NonFungibleToken {
     pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
     init () {
-        self.ownedNFTs <- {}
+      self.ownedNFTs <- {}
     }
 
     // withdraw removes an NFT from the collection and moves it to the caller
@@ -875,9 +875,6 @@ pub contract Domains: NonFungibleToken {
       )
       let nft <- domain
       
-      // set records for new domain
-      // nft.setRecord(receiver.address)
-      // nft.setExpired(expiredAt)
       Domains.updateRecords(nameHash: nameHash, address: receiver.address)
       Domains.updateExpired(nameHash: nameHash, time: expiredAt)
       Domains.updateIdMap(nameHash: nameHash, id: nft.id)
@@ -924,7 +921,7 @@ pub contract Domains: NonFungibleToken {
     return address
   }
 
-  // Get domain's owner address
+  // Get domain's id by namehash
   pub fun getDomainId(_ nameHash: String) : UInt64? {
     let id = self.idMap[nameHash]
     return id
