@@ -2,3 +2,6 @@
 node_modules
 .env
 .env.*
+reserve.csv
+scripts/validate.js
+scripts/index.js

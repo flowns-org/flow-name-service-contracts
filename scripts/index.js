@@ -22,11 +22,11 @@ const main = async () => {
   // console.log(price)
   // const paus = await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
   // console.log(paus)
-  // const flowRes = await buildSetupTrx('mintRootDomain', [fcl.arg('test', t.String)])
+  // const flowRes = await buildSetupTrx('mintRootDomain', [fcl.arg('fn', t.String)])
   // console.log('mint flow root name', flowRes)
 
   // setup flow root  domain
-  // const setup = await buildSetupTrx('setupRootDomainServer', [fcl.arg(3, t.UInt64)])
+  // const setup = await buildSetupTrx('setupRootDomainServer', [fcl.arg(1, t.UInt64)])
   // console.log(setup)
 
   // console.log(namehash('test'))
@@ -63,7 +63,10 @@ const main = async () => {
   // console.log(renew)
   // const flowNamehash = namehash('caos.flow')
   // const fnsNameHash = namehash('caos.fns')
+
+
   const domains = await buildAndExecScript('queryRootDomains')
+  
   console.log(domains)
 
   // const id = await buildAndExecScript('queryDomaimId', [
@@ -176,8 +179,8 @@ const main = async () => {
   // console.log(ress, '=====')
 
   // const res = await buildAndExecScript('queryDomainAvailableBatch', [
-  //   fcl.arg('flow', t.String),
-  //   fcl.arg(['test', 'case'], t.Array(t.String)),
+  //   fcl.arg('0xefb7a4262551cd31d13b61b814a5dc591766fdb2be1ab2df33c26700c4702c16', t.String),
+  //   fcl.arg(['f你💖', 'gfdgdsgfgga'], t.Array(t.String)),
   // ])
   // console.log(res)
 
@@ -191,13 +194,13 @@ const main = async () => {
   //   fcl.arg('0.01', t.UFix64),
   // ])
   // console.log(res1)
-  // const normName = normalize('🐈')
+  // const normName = normalize('你好.flow')
   // console.log(normName)
   // console.log(namehash(normName), 'norm---')
-  // console.log(namehash('👨‍💻.flow'))
+  // console.log(namehash('你好.flow'))
 
   // const hash = await buildAndExecScript('getDomainNameHash', [
-  //   fcl.arg('👨‍💻', t.String),
+  //   fcl.arg('你好', t.String),
   //   fcl.arg(namehash('flow'), t.String),
   // ])
   // console.log(hash, 'onchain')
@@ -265,12 +268,17 @@ const main = async () => {
 
   // const trxs = await buildAndSendTrx('mintDomain', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('depr4', t.String),
-  //   fcl.arg('10.0', t.UFix64),
+  //   fcl.arg('f你💖', t.String),
+  //   fcl.arg('1000000.0', t.UFix64),
   // ])
 
   // console.log(trxs)
 
+  console.log(namehash('flow'))
+  const ava = await buildAndExecScript('queryDomainAvailable', [
+    fcl.arg(namehash('f你💖.flow'), t.String),
+  ])
+  console.log(ava)
   // const mintRes1 = await buildAndSendTrx('mintSubdomain', [
   //   fcl.arg(namehash('depr3.flow'), t.String),
   //   fcl.arg('dev', t.String),
@@ -323,6 +331,8 @@ const main = async () => {
 
   // const change = await buildAndSendTrx('changeRootDomainVaultWithFlow', [fcl.arg(0, t.UInt64)])
   // console.log(change)
+  // const test = normalize('你好1.flow')
+  // console.log(test)
 }
 
 main()
