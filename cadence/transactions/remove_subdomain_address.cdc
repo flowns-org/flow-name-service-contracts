@@ -11,14 +11,12 @@ transaction(domainNameHash: String, subdomainNameHash: String, chainType: UInt64
     var domain: &{Domains.DomainPrivate}? = nil
     let collectionPrivate = account.borrow<&{Domains.CollectionPrivate}>(from: Domains.CollectionStoragePath) ?? panic("Could not find your domain collection cap")
     
-    let ids = collection.getIDs()
-
-    for id in ids {
-      var item = collection.borrowDomain(id: id)
-      if item.nameHash == domainNameHash && !Domains.isDeprecated(nameHash:domainNameHash, domainId: id) {
-        domain = collectionPrivate.borrowDomainPrivate(id)
-      } 
+    
+    let id = Domains.getDomainId(domainNameHash)
+    if id != nil && !Domains.isDeprecated(nameHash: domainNameHash, domainId: id!) {
+      domain = collectionPrivate.borrowDomainPrivate(id!)
     }
+
     self.domain = domain!
   }
   execute {

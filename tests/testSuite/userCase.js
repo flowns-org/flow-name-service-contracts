@@ -52,13 +52,13 @@ export const userTest = () =>
     })
 
     test('register domain with less one year', async () => {
-      // check resource
+
       const res = await registerDomain(flowDomainId, 'tes1', '86400.00', '6.4', test1Authz())
       expect(res).toBeNull()
     })
 
     test('register domain with not enough token', async () => {
-      // check resource
+
       const res = await registerDomain(
         flowDomainId,
         'tes1',
@@ -70,7 +70,7 @@ export const userTest = () =>
     })
 
     test('register domain with not price set', async () => {
-      // check resource
+
       const res = await registerDomain(flowDomainId, 'test1', oneYear.toFixed(2), '1', test1Authz())
       expect(res).toBeNull()
     })
@@ -80,7 +80,7 @@ export const userTest = () =>
         fcl.arg(test1Addr, t.Address),
       ])
       const test2Bal = await buildAndExecScript('queryFUSDBalance', [fcl.arg(test2Addr, t.Address)])
-      // check resource
+
       const test1Reg = await registerDomain(
         flowDomainId,
         test1DomainName,
