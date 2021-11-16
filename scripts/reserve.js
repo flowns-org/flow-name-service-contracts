@@ -16,13 +16,13 @@ const oneYear = 60 * 60 * 24 * 365
 const main = async () => {
   fclInit()
 
-  const records = csv.getJsonFromCsv(resolve(__dirname, '../reserve.csv'))
+  const records = csv.getJsonFromCsv(resolve(__dirname, '../cap.csv'))
   // console.log(records)
   const len = records.length
   console.log(len)
   let sumNum = 0
   let totalNum = 0
-  const range = 50
+  const range = 25
   const times = Math.ceil(len / range)
   // console.log(times)
   let namesArr = []
@@ -34,13 +34,15 @@ const main = async () => {
       if (records[j]) {
         let name = records[j].name
         name = name.split(',')[0]
+        name = name.toLowerCase()
         if (nameMaps[name] != true) {
           totalNum += 1
           if (name.indexOf('_') < 0) {
             // console.log(normalize(name), ' ', i * range + j)
           }
-
           names.push(name)
+
+          // names.push(namehash(`${name}.fn`))
           nameMaps[name] = true
         } else {
           console.log(name, 'multi')
@@ -57,26 +59,29 @@ const main = async () => {
   // console.log(namesArr.length)
   let currentIdx = 0
   try {
-    for (let i = 0; i < namesArr.length; i++) {
+    for (let i = 15; i < namesArr.length; i++) {
       currentIdx = i
-      console.log('start mint index', i, '===')
-      // const trxs = await buildAndSendTrx('mintDomainBatch', [
-      //   fcl.arg(0, t.UInt64),
+      console.log('start index', i, '===')
+      // console.log(namesArr[i])
+      const trxs = await buildAndSendTrx('mintDomainBatch', [
+        fcl.arg(0, t.UInt64),
+        fcl.arg(namesArr[i], t.Array(t.String)),
+        fcl.arg(oneYear.toFixed(2), t.UFix64),
+      ])
+      // let res = await buildAndExecScript('queryDomainAvailableBatch', [
       //   fcl.arg(namesArr[i], t.Array(t.String)),
-      //   fcl.arg(oneYear.toFixed(2), t.UFix64),
       // ])
       // const res = await buildAndExecScript('queryDomainAvailableBatch', [fcl.arg('0x9cadad6f0cd11110b00442613c677688b5928da1c50179f045148363c2e590d3', t.String), fcl.arg(namesArr[i], t.Array(t.String))])
-      // await sleep(1000)
+      await sleep(1000)
       // console.log(namesArr[i])
       // console.log(namesArr[i].length)
-      // console.log(trxs ? trxs.status : `error ${i} ${namesArr[i]} `)
-      console.log(res)
+      console.log(trxs ? trxs.status : `error ${i} ${namesArr[i]} `)
+      // console.log(res)
     }
   } catch (error) {
     console.log(error)
     console.log(currentIdx, '============')
   }
-
 }
 
 main()

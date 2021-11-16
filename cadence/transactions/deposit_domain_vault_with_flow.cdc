@@ -11,13 +11,10 @@ transaction(domainNameHash: String, amount: UFix64) {
     let collection = collectionCap.borrow()!
     var domain: &{Domains.DomainPublic}? = nil
 
-    let ids = collection.getIDs()
-
-    for id in ids {
-      var item = collection.borrowDomain(id: id)
-      if item.nameHash == domainNameHash && !Domains.isDeprecated(nameHash:domainNameHash, domainId: id) {
-        domain = item
-      } 
+   
+    let id = Domains.getDomainId(domainNameHash)
+    if id != nil && !Domains.isDeprecated(nameHash: domainNameHash, domainId: id!) {
+      domain = collection.borrowDomain(id: id!)
     }
     self.domain = domain!
     self.vaultRef = account.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
