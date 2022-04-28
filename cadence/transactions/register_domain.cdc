@@ -7,6 +7,16 @@ transaction(domainId: UInt64, name: String, duration: UFix64, amount: UFix64, re
   let collectionCap: Capability<&{NonFungibleToken.Receiver}>
   let vault: @FungibleToken.Vault
   prepare(account: AuthAccount) {
+    
+    if account.getCapability<&{NonFungibleToken.Receiver}>(Domains.CollectionPublicPath).check() == false {
+      if account.borrow<&Domains.Collection>(from: Domains.CollectionStoragePath) !=nil {
+        account.unlink(Domains.CollectionPublicPath)
+        account.link<&Domains.Collection{NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, Domains.CollectionPublic}>(Domains.CollectionPublicPath, target: Domains.CollectionStoragePath)
+      } else {
+        account.save(<- Domains.createEmptyCollection(), to: Domains.CollectionStoragePath)
+        account.link<&Domains.Collection{NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, Domains.CollectionPublic}>(Domains.CollectionPublicPath, target: Domains.CollectionStoragePath)
+      }
+    }
     self.collectionCap = account.getCapability<&{NonFungibleToken.Receiver}>(Domains.CollectionPublicPath)
     let vaultRef = account.borrow<&FungibleToken.Vault>(from: /storage/flowTokenVault)
           ?? panic("Could not borrow owner's Vault reference")

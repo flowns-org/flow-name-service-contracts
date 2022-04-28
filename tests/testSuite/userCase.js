@@ -85,7 +85,7 @@ export const userTest = () =>
         flowDomainId,
         test1DomainName,
         oneYear.toFixed(2),
-        '6.4',
+        '6.40',
         test1Authz(),
       )
 
@@ -93,7 +93,7 @@ export const userTest = () =>
         fnsDomainId,
         test2DomainName,
         oneYear.toFixed(2),
-        '3.2',
+        '3.20',
         test2Authz(),
         'FUSD',
       )
@@ -389,7 +389,12 @@ export const userTest = () =>
       ])
 
       expect(Number(test1FlowBalAfter)).toBe(test1FlowBal - 50)
-
+      const beforeQuery = await buildAndExecScript('queryUsersAllDomain', [
+        fcl.arg(accountAddr, t.Address),
+      ])
+      console.log(beforeQuery)
+      expect(beforeQuery.length).toBe(4)
+      
       const sendNFTRes = await buildAndSendTrx('sendNFTToDomain', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(0, t.UInt64),
@@ -409,13 +414,13 @@ export const userTest = () =>
       expect(domainInfo.vaultBalances[flowVaultType]).not.toBeNull()
       expect(domainInfo.collections[collectionType]).not.toBeNull()
 
-      await buildAndSendTrx('withdrawVaultWithVaultType', [
+      let withdrawRes = await buildAndSendTrx('withdrawVaultWithVaultType', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(flowVaultType, t.String),
         fcl.arg('30.0', t.UFix64),
       ])
 
-      await buildAndSendTrx('withdrawNFTFromDomain', [
+      let withdrawNFTRes = await buildAndSendTrx('withdrawNFTFromDomain', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(collectionType, t.String),
         fcl.arg(0, t.UInt64),

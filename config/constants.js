@@ -24,7 +24,6 @@ export const publicKey = process.env.FLOW_ACCOUNT_PUBLIC_KEY
 
 export const alchemyKey = process.env.ALCHEMY_KEY
 
-
 const buildPath = (fileName, type) => {
   let filePath = ''
   switch (type) {
@@ -44,15 +43,15 @@ export const paths = {
   setup: {
     initDomainCollection: buildPath('init_domains_collection.cdc', 'setup'),
     initFlownsAdminStorage: buildPath('init_flowns_admin_storage.cdc', 'setup'),
-    setupAdminServer:  buildPath('setup_admin_server.cdc','setup'),
-    mintRootDomain: buildPath('mint_root_domains.cdc','setup'),
-    setupRootDomainServer:buildPath('setup_root_domain_server.cdc','setup'),
-    setupDomainRentPrice: buildPath('setup_domain_rent_price.cdc','setup'),
-    mintFlowToken: buildPath('mint_flow_token.cdc','setup'),
-    mintKibbleToken: buildPath('mint_kibble_token.cdc','setup'),
-    initTokens: buildPath('init_tokens.cdc','setup'),
-    mintFUSD: buildPath('mint_fusd.cdc','setup'),
-    createFUSDMinter: buildPath('create_fusd_minter.cdc','setup'),
+    setupAdminServer: buildPath('setup_admin_server.cdc', 'setup'),
+    mintRootDomain: buildPath('mint_root_domains.cdc', 'setup'),
+    setupRootDomainServer: buildPath('setup_root_domain_server.cdc', 'setup'),
+    setupDomainRentPrice: buildPath('setup_domain_rent_price.cdc', 'setup'),
+    mintFlowToken: buildPath('mint_flow_token.cdc', 'setup'),
+    mintKibbleToken: buildPath('mint_kibble_token.cdc', 'setup'),
+    initTokens: buildPath('init_tokens.cdc', 'setup'),
+    mintFUSD: buildPath('mint_fusd.cdc', 'setup'),
+    createFUSDMinter: buildPath('create_fusd_minter.cdc', 'setup'),
   },
   scripts: {
     checkDomainCollection: buildPath('check_domain_collection.cdc', 'script'),
@@ -65,6 +64,7 @@ export const paths = {
     queryDomainExpiredTime: buildPath('query_domain_expired_time.cdc', 'script'),
     queryDomainExpired: buildPath('query_domain_is_expired.cdc', 'script'),
     queryDomainRecord: buildPath('query_domain_record.cdc', 'script'),
+    queryDomainRecordWithRaw: buildPath('query_domain_record_with_raw.cdc', 'script'),
     queryDomainInfo: buildPath('query_domain_info.cdc', 'script'),
     queryUsersAllDomain: buildPath('query_users_domains_info.cdc', 'script'),
     queryUsersDomainIds: buildPath('query_users_domain_ids.cdc', 'script'),
@@ -86,6 +86,7 @@ export const paths = {
     queryDomainAvailableBatch: buildPath('query_domain_available_batch.cdc', 'script'),
     queryDomaimPrice: buildPath('query_domain_price.cdc', 'script'),
     queryDomaimId: buildPath('query_domain_id.cdc', 'script'),
+    test: buildPath('test_script.cdc', 'script'),
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),
@@ -104,6 +105,7 @@ export const paths = {
     removeSubdomainAddress: buildPath('remove_subdomain_address.cdc'),
     withdrawRootVault: buildPath('withdraw_root_vault.cdc'),
     mintDomain: buildPath('mint_domain.cdc'),
+    mintDomainTo: buildPath('mint_domain_to.cdc'),
     mintDomainBatch: buildPath('mint_domain_batch.cdc'),
     createFUSDVault: buildPath('create_fusd_vault.cdc'),
     changeRootDomainVaultWithFusd: buildPath('change_root_domain_vault_with_fusd.cdc'),
@@ -120,5 +122,6 @@ export const paths = {
     transferDomainWithId: buildPath('transfer_domain_with_id.cdc'),
     transferDomainWithIdBatch: buildPath('transfer_domain_with_id_batch.cdc'),
     transferDomainWithHashName: buildPath('transfer_domain_with_hash_name.cdc'),
+    transferDomainWithHashNameP: buildPath('transfer_domain_with_hash_name_public.cdc'),
   },
 }

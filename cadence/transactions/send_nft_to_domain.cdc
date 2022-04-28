@@ -31,9 +31,8 @@ transaction(nameHash: String, itemId: UInt64) {
     let typeKey = self.collection.getType().identifier
 
     if self.domain!.checkCollection(key: typeKey) == false {
-      let oldNFT <- self.collection.ownedNFTs[itemId] <- self.NFT
+      self.collection.deposit(token: <- self.NFT) 
       self.domain.addCollection(collection: <- self.collection )
-      destroy oldNFT
     } else {
       self.domain!.depositNFT(key: typeKey, token: <- self.NFT)
       destroy self.collection 

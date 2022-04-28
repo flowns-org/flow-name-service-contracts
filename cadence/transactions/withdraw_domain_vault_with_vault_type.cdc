@@ -14,12 +14,11 @@ transaction(nameHash: String, key: String, amount: UFix64) {
     
     let ids = collection.getIDs()
 
-    for id in ids {
-      var item = collection.borrowDomain(id: id)
-      if item.nameHash == nameHash && !Domains.isDeprecated(nameHash: nameHash, domainId: id) {
-        domain = collectionPrivate.borrowDomainPrivate(id)
-      } 
+    let id = Domains.getDomainId(nameHash)
+    if id != nil && !Domains.isDeprecated(nameHash: nameHash, domainId: id!) {
+      domain = collectionPrivate.borrowDomainPrivate(id!)
     }
+
     self.domain = domain!
     self.vaultRef = account.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
     ?? panic("Could not borrow reference to the owner's Vault!")

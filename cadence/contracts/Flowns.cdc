@@ -50,7 +50,7 @@ pub contract Flowns {
 
   pub event RootDomainMintDurationUpdated(domainId: UInt64, before: UFix64, after: UFix64)
 
-  pub event DomainRegisterCommissionAllocated(domainId: UInt64, nammeHash: String, amount: UFix64, commissionAmount: UFix64, refer: Address, receiveId: UInt64)
+  pub event DomainRegisterCommissionAllocated(domainId: UInt64, nameHash: String, amount: UFix64, commissionAmount: UFix64, refer: Address, receiveId: UInt64)
 
 
   // structs 
@@ -310,7 +310,7 @@ pub contract Flowns {
             let domain: &{Domains.DomainPublic} = collection!.borrowDomain(id: id)
             if domain.receivable == true && !Domains.isExpired(domain.nameHash) {
               domain.depositVault(from: <- feeTokens.withdraw(amount: commissionFee))
-              emit DomainRegisterCommissionAllocated(domainId: self.id, nammeHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!, receiveId: domain.id)
+              emit DomainRegisterCommissionAllocated(domainId: self.id, nameHash: nameHash, amount: rentFee, commissionAmount: commissionFee, refer: refer!, receiveId: domain.id)
             }
           }
         }
@@ -450,9 +450,9 @@ pub contract Flowns {
         pre {
         self.domains[domainId] != nil : "Root domain not exist..."
       }
-      let rootRef = &self.domains[domainId] as? &RootDomain
+      let rootRef = &self.domains[domainId] as &RootDomain?
 
-      return rootRef.getVaultBalance()
+      return rootRef!.getVaultBalance()
     }
 
     access(account) fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
@@ -481,8 +481,8 @@ pub contract Flowns {
     pub fun getAllDomains(): {UInt64: RootDomainInfo} {
       var domainInfos: {UInt64: RootDomainInfo }= {}
       for id in self.domains.keys {
-        let itemRef = &self.domains[id] as? &RootDomain
-        domainInfos[id] = itemRef.getRootDomainInfo()
+        let itemRef = &self.domains[id] as &RootDomain?
+        domainInfos[id] = itemRef!.getRootDomainInfo()
       }
       return domainInfos
     }
@@ -517,9 +517,8 @@ pub contract Flowns {
       pre {
         self.domains[domainId] != nil: "domain doesn't exist"
       }
-      return &self.domains[domainId] as &RootDomain
+      return (&self.domains[domainId] as &RootDomain?)!
     }
-
     // get Root domain info
     pub fun getDomainInfo(domainId: UInt64): RootDomainInfo {
       return self.getRootDomain(domainId).getRootDomainInfo()
@@ -531,8 +530,8 @@ pub contract Flowns {
     }
 
 
-    destroy() {            
-        destroy self.domains
+    destroy() {
+      destroy self.domains
     }
   }
 

@@ -6,6 +6,7 @@ import { accountAddr } from '../config/constants.js'
 import { test1Addr, test2Addr, test1Authz, test2Authz } from '../utils/authz.js'
 import { namehash, normalize } from '../utils/hash.js'
 const oneYear = 60 * 60 * 24 * 365
+const oneHour = 60 * 20
 const flowVaultType = 'A.7e60df042a9c0868.FlowToken.Vault'
 const collectionType = 'A.b05b2abb42335e88.Domains.Collection'
 
@@ -16,14 +17,14 @@ const main = async () => {
 
   // const price = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(1, t.UInt64),
-  //   fcl.arg(6, t.Int),
+  //   fcl.arg(4, t.Int),
   //   fcl.arg('0.00000001', t.UFix64),
   // ])
   // console.log(price)
 
   // const price2 = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(1, t.UInt64),
-  //   fcl.arg(7, t.Int),
+  //   fcl.arg(5, t.Int),
   //   fcl.arg('0.00000001', t.UFix64),
   // ])
   // console.log(price2)
@@ -53,8 +54,8 @@ const main = async () => {
   // console.log(setRes2)
 
   // const setRes3 = await buildAndSendTrx('setRootDomainCommissionRate', [
-  //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('0.0', t.UFix64),
+  //   fcl.arg(1, t.UInt64),
+  //   fcl.arg('0.2', t.UFix64),
   // ])
   // console.log(setRes3)
 
@@ -117,7 +118,7 @@ const main = async () => {
   // const userDomain = await buildAndExecScript('queryDomainInfo', [fcl.arg(namehash('depr.flow'), t.String)])
 
   // const userDomain = await buildAndExecScript('queryUsersAllDomain', [
-  //   fcl.arg(accountAddr, t.Address),
+  //   fcl.arg('0x3c09a556ecca42dc', t.Address),
   // ])
   // console.dir(userDomain)
 
@@ -273,13 +274,14 @@ const main = async () => {
   // const allRes = await buildAndExecScript('getAllDomainRecords', [ ])
   // console.log(allRes)
 
-  // const trxs = await buildAndSendTrx('mintDomain', [
-  //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('f你💖', t.String),
-  //   fcl.arg('1000000.0', t.UFix64),
-  // ])
+  const trxs = await buildAndSendTrx('mintDomainTo', [
+    fcl.arg(2, t.UInt64),
+    fcl.arg('test', t.String),
+    fcl.arg(oneHour.toFixed(2), t.UFix64),
+    fcl.arg('0x9e8c2d008f9a814e', t.Address),
+  ])
 
-  // console.log(trxs)
+  console.log(trxs)
 
   // console.log(namehash('flow'))
   // const ava = await buildAndExecScript('queryDomainAvailable', [
@@ -346,15 +348,18 @@ const main = async () => {
 
   // console.log(namehash('te-st.fn'))
   // const hash = await buildAndExecScript('calcHashRaw', [
-  //   fcl.arg('te-st', t.String),
+  //   fcl.arg('cosine', t.String),
   //   fcl.arg('fn', t.String),
   // ])
   // console.log(hash)
 
-  const flowDetail = await buildAndExecScript('queryDomainInfo', [
-    fcl.arg(namehash('caos.fn'), t.String),
-  ])
-  console.log(flowDetail)
+  // const queryHash = namehash('cosine.fn')
+  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
+  // console.log(flowDetail)
+
+  // const record = await buildAndExecScript('queryDomainRecord', [fcl.arg(queryHash, t.String)])
+
+  // console.log(record)
 
   // const domains = await buildAndExecScript('queryRootDomains')
 
@@ -374,17 +379,21 @@ const main = async () => {
   // console.log(ress, '=====')
 
   // const userDomain = await buildAndExecScript('queryUsersAllDomain', [
-  //   fcl.arg(test2Addr, t.Address),
+  //   fcl.arg(accountAddr, t.Address),
   // ])
   // console.dir(userDomain)
 
+  // const hash = await buildAndExecScript('calcDomainNameHashLocal', [
+  //   fcl.arg('caos', t.String),
+  //   fcl.arg('fn', t.String),
+  // ])
+  // console.dir(hash)
 
-
-  const hash = await buildAndExecScript('calcDomainNameHashLocal', [
-    fcl.arg('caos', t.String),
-    fcl.arg('fn', t.String),
-  ])
-  console.dir(hash)
+  // const address = await buildAndExecScript('queryDomainRecordWithRaw', [
+  //   fcl.arg('caosbad', t.String),
+  //   fcl.arg('fn', t.String),
+  // ])
+  // console.dir(address)
 
   // const checkRes = await buildAndExecScript('checkDomainCollection', [
   //   fcl.arg('0x3c09a556ecca42dc', t.Address),
@@ -392,32 +401,43 @@ const main = async () => {
 
   // console.log(checkRes)
 
-  // const transferRes = await buildAndSendTrx(
-  //   'transferDomainWithId',
-  //   [fcl.arg(23371, t.UInt64), fcl.arg('0x3c09a556ecca42dc', t.Address)],
-  //   test2Authz(),
-  // )
-
+  // const transferRes = await buildAndSendTrx('transferDomainWithId', [
+  //   fcl.arg(2, t.UInt64),
+  //   fcl.arg('0x1df8d0f0f3ae2b07', t.Address),
+  // ])
+  // //
   // console.log(transferRes)
 
-  const cosineHash = namehash('caos.fn')
+  // const hash = namehash('caosbad.fn'.toLocaleLowerCase())
+  // console.log(hash)
+  // // // const setAddressRes = await buildAndSendTrx(
+  // //   'setDomainAddress',
+  // //   [
+  // //     fcl.arg(namehash('depr.flow'), t.String),
+  // //     fcl.arg(1, t.UInt64),
+  // //     fcl.arg('0x3c09a556ecca42dc', t.String),
+  // //   ],
+  // //   test2Authz(),
+  // // )
 
-  // const setAddressRes = await buildAndSendTrx(
-  //   'setDomainAddress',
-  //   [
-  //     fcl.arg(namehash('depr.flow'), t.String),
-  //     fcl.arg(1, t.UInt64),
-  //     fcl.arg('0x3c09a556ecca42dc', t.String),
-  //   ],
-  //   test2Authz(),
-  // )
+  // const id = await buildAndExecScript('queryDomaimId', [fcl.arg(hash, t.String)])
+  // console.log(id)
+  // // console.log(cosineHash)
+  // // console.log(setAddressRes)
 
-  console.log(cosineHash)
-  // console.log(setAddressRes)
+  // const userDomain = await buildAndExecScript('queryUsersAllDomain', [
+  //   fcl.arg('0xd5dab99b4e7301ce', t.Address),
+  // ])
+  // console.dir(userDomain)
 
+  // const hash = namehash('drep1.fn'.toLocaleLowerCase())
+  // console.log(hash)
 
-  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(cosineHash, t.String)])
+  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(hash, t.String)])
   // console.log(flowDetail)
+
+  // const testRes = await buildAndExecScript('test', [fcl.arg('0xc0597793abff95ba', t.Address)])
+  // console.log(testRes)
 }
 
 main()
