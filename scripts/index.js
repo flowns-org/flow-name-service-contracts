@@ -5,6 +5,7 @@ import { registerDomain, renewDomain } from './buildTrxs.js'
 import { accountAddr } from '../config/constants.js'
 import { test1Addr, test2Addr, test1Authz, test2Authz } from '../utils/authz.js'
 import { namehash, normalize } from '../utils/hash.js'
+import { query } from '../utils/index.js'
 const oneYear = 60 * 60 * 24 * 365
 const oneHour = 60 * 20
 const flowVaultType = 'A.7e60df042a9c0868.FlowToken.Vault'
@@ -274,14 +275,14 @@ const main = async () => {
   // const allRes = await buildAndExecScript('getAllDomainRecords', [ ])
   // console.log(allRes)
 
-  const trxs = await buildAndSendTrx('mintDomainTo', [
-    fcl.arg(2, t.UInt64),
-    fcl.arg('test', t.String),
-    fcl.arg(oneHour.toFixed(2), t.UFix64),
-    fcl.arg('0x9e8c2d008f9a814e', t.Address),
-  ])
+  // const trxs = await buildAndSendTrx('mintDomainTo', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg('soul', t.String),
+  //   fcl.arg(oneYear.toFixed(2), t.UFix64),
+  //   fcl.arg('0x8eb852196cb42b75', t.Address),
+  // ])
 
-  console.log(trxs)
+  // console.log(trxs)
 
   // console.log(namehash('flow'))
   // const ava = await buildAndExecScript('queryDomainAvailable', [
@@ -302,7 +303,7 @@ const main = async () => {
 
   // const trxs1 = await buildAndSendTrx('mintDomain', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('🐈', t.String),
+  //   fcl.arg('soul', t.String),
   //   fcl.arg(oneYear.toFixed(2), t.UFix64),
   // ])
 
@@ -353,7 +354,7 @@ const main = async () => {
   // ])
   // console.log(hash)
 
-  // const queryHash = namehash('cosine.fn')
+  // const queryHash = namehash('soul.fn')
   // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
   // console.log(flowDetail)
 
@@ -438,6 +439,21 @@ const main = async () => {
 
   // const testRes = await buildAndExecScript('test', [fcl.arg('0xc0597793abff95ba', t.Address)])
   // console.log(testRes)
+
+  // mint lilico
+  // const mintRes = await buildAndSendTrx('mintLilico', [
+  //   fcl.arg('lilico', t.String),
+  //   fcl.arg(test2Addr, t.Address),
+  // ])
+  // console.log(mintRes)
+
+  // console.log(await buildAndExecScript('queryUsersAllDomain', [fcl.arg(test1Addr, t.Address)]))
+  // console.log(
+  //   await buildAndExecScript('queryUsersAllDomain', [fcl.arg('0xe242ccfb4b8ea3e2', t.Address)]),
+  // )
+
+  // const res = await query('https://www.flowns.org/api/data/address/0x95c1afc355056c36')
+  // console.log(res.data)
 }
 
 main()

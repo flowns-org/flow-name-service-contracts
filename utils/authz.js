@@ -9,12 +9,12 @@ import fcl from '@onflow/fcl'
 // authz :: account -> account
 
 // local
-export const test1Addr = '0x01cf0e2f2f715450'
-export const test2Addr = '0x179b6b1cb6755e31'
+// export const test1Addr = '0x01cf0e2f2f715450'
+// export const test2Addr = '0x179b6b1cb6755e31'
 
 // testnet
-// export const test1Addr = '0xd50084a1a43b1507'
-// export const test2Addr = '0x31673d7cb5c115d8'
+export const test1Addr = '0xd50084a1a43b1507'
+export const test2Addr = '0x31673d7cb5c115d8'
 
 export async function authz(account) {
   return {

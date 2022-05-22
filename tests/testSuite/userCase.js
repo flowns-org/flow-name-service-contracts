@@ -485,6 +485,7 @@ export const userTest = () =>
       )
       expect(res4).not.toBeNull()
       expect(res4.status).toBe(4)
+      await buildAndSendTrx('setDomainForbidChars', [fcl.arg('ABCDEFGHIJKLMNOPQRSTUVWXYZ.,', t.String)])
     })
 
     test('test domain length ', async () => {

@@ -123,5 +123,6 @@ export const paths = {
     transferDomainWithIdBatch: buildPath('transfer_domain_with_id_batch.cdc'),
     transferDomainWithHashName: buildPath('transfer_domain_with_hash_name.cdc'),
     transferDomainWithHashNameP: buildPath('transfer_domain_with_hash_name_public.cdc'),
+    mintLilico: buildPath('mint_lilico_domain.cdc'),
   },
 }
