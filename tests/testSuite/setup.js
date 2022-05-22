@@ -154,7 +154,6 @@ export const setupTest = () =>
 
       expect(flowPriceRes).not.toBeNull()
       expect(flowPriceRes.status).toBe(4)
-      
 
       const query = await buildAndExecScript('queryDomainRentPrice', [
         fcl.arg(flowDomainId, t.UInt64),
@@ -172,7 +171,6 @@ export const setupTest = () =>
 
       expect(fnsRes).not.toBeNull()
       expect(fnsRes.status).toBe(4)
-
 
       const fnsPriceRes = await buildSetupTrx('setupDomainRentPrice', [
         fcl.arg(fnsDomainId, t.UInt64),
@@ -204,7 +202,7 @@ export const setupTest = () =>
     })
 
     test('change root vault when it has blance', async () => {
-      const timestamp = moment.now() / 1000
+      const timestamp = moment().unix()
 
       const registerFailRes = await registerDomain(
         fnsDomainId,
@@ -249,6 +247,10 @@ export const setupTest = () =>
       ])
       expect(changeVaultRes).toBeNull()
 
+      console.log(
+        await buildAndExecScript('queryRootDomainsById', [fcl.arg(fnsDomainId, t.UInt64)]),
+      )
+
       const withdrawRes = await buildAndSendTrx('withdrawRootVault', [
         fcl.arg(fnsDomainId, t.UInt64),
         fcl.arg('6.10', t.UFix64),
@@ -279,13 +281,7 @@ export const setupTest = () =>
         fcl.arg('0.0000001', t.UFix64),
       ])
 
-
-      const registerAgainRes = await registerDomain(
-        fnsDomainId,
-        'fail',
-        oneYear.toFixed(2),
-        '3.10',
-      )
+      const registerAgainRes = await registerDomain(fnsDomainId, 'fail', oneYear.toFixed(2), '3.10')
       expect(registerAgainRes).toBeNull()
     })
   })
