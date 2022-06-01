@@ -362,9 +362,9 @@ const main = async () => {
 
   // console.log(record)
 
-  // const domains = await buildAndExecScript('queryRootDomains')
+  const domains = await buildAndExecScript('queryRootDomains')
 
-  // console.log(domains)
+  console.log(domains)
 
   // const ress = await buildAndSendTrx(
   //   'registerDomainBatch',

@@ -11,5 +11,4 @@ transaction(id: UInt64) {
     execute {
       self.client.addRootDomainCapability(domainId: id, cap: self.cap)
     }
-
 }

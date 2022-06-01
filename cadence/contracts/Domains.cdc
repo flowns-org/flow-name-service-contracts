@@ -799,7 +799,7 @@ pub contract Domains: NonFungibleToken {
       }
       // update the owner record for new domain owner
       
-      Domains.updateRecords(nameHash: nameHash, address: self.owner?.address!)
+      Domains.updateRecords(nameHash: nameHash, address: self.owner?.address)
       
       // add the new token to the dictionary which removes the old one
       let oldToken <- self.ownedNFTs[id] <- token

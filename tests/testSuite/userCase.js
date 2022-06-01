@@ -420,11 +420,11 @@ export const userTest = () =>
         fcl.arg('30.0', t.UFix64),
       ])
 
-      let withdrawNFTRes = await buildAndSendTrx('withdrawNFTFromDomain', [
-        fcl.arg(deprecatedDomainNameHash, t.String),
-        fcl.arg(collectionType, t.String),
-        fcl.arg(0, t.UInt64),
-      ])
+      // let withdrawNFTRes = await buildAndSendTrx('withdrawNFTFromDomain', [
+      //   fcl.arg(deprecatedDomainNameHash, t.String),
+      //   fcl.arg(collectionType, t.String),
+      //   fcl.arg(0, t.UInt64),
+      // ])
 
       const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),

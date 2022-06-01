@@ -19,15 +19,15 @@ const main = async () => {
   // const setupRes = await buildSetupTrx('setupAdminServer', [])
   // console.log(setupRes)
   // // mint root domain
-  // const flowRes = await buildSetupTrx('mintRootDomain', [fcl.arg(flowName, t.String)])
-  // console.log('mint flow root name', flowRes)
+  // const flowRes = await buildSetupTrx('mintRootDomain', [fcl.arg('meow', t.String)])
+  // console.log('mint meow root name', flowRes)
   // // const nftRes = await buildSetupTrx('mintRootDomain', [fcl.arg(nftName, t.String)])
   // // console.log('mint nft root name', nftRes)
 
   // // setup flow root  domain
-  // await buildSetupTrx('setupRootDomainServer', [
-  //   fcl.arg(0, t.UInt64),
-  // ])
+  await buildSetupTrx('setupRootDomainServer', [
+    fcl.arg(1, t.UInt64),
+  ])
 
   // // setup nft root domain
   // await buildSetupTrx('setupRootDomainServer', [
@@ -35,58 +35,58 @@ const main = async () => {
   // ])
 
   // set 4 len of domain name rent price
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(4, t.Int),
-    fcl.arg('0.00000015', t.UFix64),
-  ])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(4, t.Int),
+  //   fcl.arg('0.00000015', t.UFix64),
+  // ])
 
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(3, t.Int),
-    fcl.arg('0.0000003', t.UFix64),
-  ])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(3, t.Int),
+  //   fcl.arg('0.0000003', t.UFix64),
+  // ])
 
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(5, t.Int),
-    fcl.arg('0.00000005', t.UFix64),
-  ])
-
-
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(6, t.Int),
-    fcl.arg('0.00000001', t.UFix64),
-  ])
-
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(7, t.Int),
-    fcl.arg('0.00000001', t.UFix64),
-  ])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(5, t.Int),
+  //   fcl.arg('0.00000005', t.UFix64),
+  // ])
 
 
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(8, t.Int),
-    fcl.arg('0.00000001', t.UFix64),
-  ])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(6, t.Int),
+  //   fcl.arg('0.00000001', t.UFix64),
+  // ])
 
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(9, t.Int),
-    fcl.arg('0.00000001', t.UFix64),
-  ])
-
-  await buildSetupTrx('setupDomainRentPrice', [
-    fcl.arg(0, t.UInt64),
-    fcl.arg(10, t.Int),
-    fcl.arg('0.00000001', t.UFix64),
-  ])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(7, t.Int),
+  //   fcl.arg('0.00000001', t.UFix64),
+  // ])
 
 
-  await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(8, t.Int),
+  //   fcl.arg('0.00000001', t.UFix64),
+  // ])
+
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(9, t.Int),
+  //   fcl.arg('0.00000001', t.UFix64),
+  // ])
+
+  // await buildSetupTrx('setupDomainRentPrice', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg(10, t.Int),
+  //   fcl.arg('0.00000001', t.UFix64),
+  // ])
+
+
+  // await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
 
   // const nameHash = namehash('caos.flow')
   // const result = await registerDomain(0, 'caos', '3153600.00000000', '5.00000000')

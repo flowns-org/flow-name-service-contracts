@@ -54,7 +54,7 @@ export const paths = {
     createFUSDMinter: buildPath('create_fusd_minter.cdc', 'setup'),
   },
   scripts: {
-    checkDomainCollection: buildPath('check_domain_collection.cdc', 'script'),
+  checkDomainCollection: buildPath('check_domain_collection.cdc', 'script'),
     checkFlownsAdmin: buildPath('check_flowns_admin.cdc', 'script'),
     queryRootDomainsById: buildPath('query_root_domains_by_id.cdc', 'script'),
     queryRootDomains: buildPath('query_root_domains.cdc', 'script'),
@@ -124,5 +124,9 @@ export const paths = {
     transferDomainWithHashName: buildPath('transfer_domain_with_hash_name.cdc'),
     transferDomainWithHashNameP: buildPath('transfer_domain_with_hash_name_public.cdc'),
     mintLilico: buildPath('mint_lilico_domain.cdc'),
+    sendFTInbox: buildPath('send_vault_to_user_with_inbox.cdc'),
+    sendNFTInbox: buildPath('send_nft_to_user_with_inbox.cdc'),
+    withdrawFTInbox: buildPath('withdraw_domain_vault_with_init.cdc'),
+    withdrawNFTInbox: buildPath('withdraw_domain_nft_with_init.cdc'),
   },
 }

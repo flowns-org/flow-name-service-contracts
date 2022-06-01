@@ -1,7 +1,7 @@
 import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
-import FlowToken from 0xFlowToken
+
 
 
 transaction(nameHash: String, itemId: UInt64) {

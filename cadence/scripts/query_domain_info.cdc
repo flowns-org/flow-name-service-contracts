@@ -12,6 +12,5 @@ pub fun main(nameHash: String): Domains.DomainDetail? {
     let domain = collection.borrowDomain(id: id!)
     detail = domain.getDetail()
   }
-
   return detail
 }
