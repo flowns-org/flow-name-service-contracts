@@ -54,7 +54,7 @@ pub contract FlowToken: FungibleToken {
         // and withdraws that amount from the Vault.
         // It creates a new temporary Vault that is used to hold
         // the money that is being transferred. It returns the newly
-        // created Vault to the context that called so it can be deposited
+        // created Vault to the context that called so it can be deposit
         // elsewhere.
         //
         pub fun withdraw(amount: UFix64): @FungibleToken.Vault {

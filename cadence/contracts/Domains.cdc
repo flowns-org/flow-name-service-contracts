@@ -51,8 +51,8 @@ pub contract Domains: NonFungibleToken {
   pub event DomainMinted(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Address)
   pub event DomainVaultDeposited(vaultType: String, amount: UFix64, to: Address?)
   pub event DomainVaultWithdrawn(vaultType: String, amount: UFix64, from: String)
-  pub event DomainCollectionAdded(collectionType: String, to: Address?)
-  pub event DomainCollectionWithdrawn(vaultType: String, itemId: UInt64, from: String)
+  pub event DomainCollectionAdded(nameHash: String, collectionType: String, to: Address?)
+  pub event DomainCollectionWithdrawn(nameHash: String, vaultType: String, itemId: UInt64, from: String)
   pub event DomainReceiveOpened(name: String)
   pub event DomainReceiveClosed(name: String)
 
@@ -691,7 +691,7 @@ pub contract Domains: NonFungibleToken {
       let address = collection.owner?.address
       if self.collections[typeKey] == nil {
         self.collections[typeKey] <-! collection
-        emit DomainCollectionAdded(collectionType: typeKey, to: address )
+        emit DomainCollectionAdded(nameHash:self.nameHash, collectionType: typeKey, to: address )
       } else {
         if collection.getIDs().length > 0 {
           panic("collection not empty ")
@@ -712,6 +712,9 @@ pub contract Domains: NonFungibleToken {
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection?
       collectionRef!.deposit(token: <- token)
+
+      // emit DomainCollectionDeposited(vaultType: key, itemId: itemId, from: self.getDomainName())
+
     }
 
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
@@ -720,9 +723,10 @@ pub contract Domains: NonFungibleToken {
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection?
 
-      emit DomainCollectionWithdrawn(vaultType: key, itemId: itemId, from: self.getDomainName())
+      emit DomainCollectionWithdrawn(nameHash:self.nameHash, vaultType: key, itemId: itemId, from: self.getDomainName())
 
       return <- collectionRef!.withdraw(withdrawID: itemId)
+      // emit event
     }
 
     pub fun setReceivable(_ flag: Bool) {
