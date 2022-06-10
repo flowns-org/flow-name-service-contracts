@@ -10,16 +10,8 @@ export function namehash(inputName) {
   for (var i = 0; i < 32; i++) {
     node += '00'
   }
-  const regex = emojiRegex()
-  // let name = ''
+  // const regex = emojiRegex()
 
-  // if (regex.test(inputName)) {
-  //   name = inputName
-  // } else if (chineseReg.test(inputName)) {
-  //   name = inputName
-  // } else {
-  //   name = normalize(inputName)
-  // }
   let name = inputName
   if (name) {
     var labels = name.split('.')

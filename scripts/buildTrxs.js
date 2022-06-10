@@ -28,9 +28,14 @@ export const registerDomain = async (
   return res
 }
 
-export const renewDomain = async (domainId, nameHash, duration, amount, authz = null) => {
-  
-
+export const renewDomain = async (
+  domainId,
+  nameHash,
+  duration,
+  amount,
+  authz = null,
+  refer = '0xf8d6e0586b0a20c7',
+) => {
   const res = await buildAndSendTrx(
     'renewDomain',
     [
@@ -38,6 +43,27 @@ export const renewDomain = async (domainId, nameHash, duration, amount, authz = 
       fcl.arg(nameHash, t.String),
       fcl.arg(duration, t.UFix64),
       fcl.arg(amount, t.UFix64),
+      fcl.arg(refer, t.Address),
+    ],
+    authz ? authz : undefined,
+  )
+  return res
+}
+
+export const renewDomainWithHash = async (
+  nameHash,
+  duration,
+  amount,
+  authz = null,
+  refer = '0xf8d6e0586b0a20c7',
+) => {
+  const res = await buildAndSendTrx(
+    'renewDomainWithHash',
+    [
+      fcl.arg(nameHash, t.String),
+      fcl.arg(duration, t.UFix64),
+      fcl.arg(amount, t.UFix64),
+      fcl.arg(refer, t.Address),
     ],
     authz ? authz : undefined,
   )

@@ -7,7 +7,12 @@ import { accountAddr } from '../../config/constants.js'
 import { sleep } from '../../utils/index.js'
 import { test1Authz, test2Authz, test1Addr, test2Addr } from '../../utils/authz'
 import { buildAndExecScript, buildSetupTrx, fclInit, buildAndSendTrx } from '../../utils/index'
-import { mintDomain, registerDomain, renewDomain } from '../../scripts/buildTrxs'
+import {
+  mintDomain,
+  registerDomain,
+  renewDomain,
+  renewDomainWithHash,
+} from '../../scripts/buildTrxs'
 
 const oneYear = 60 * 60 * 24 * 365
 const oneMonth = 60 * 60 * 24 * 30
@@ -52,13 +57,11 @@ export const userTest = () =>
     })
 
     test('register domain with less one year', async () => {
-
       const res = await registerDomain(flowDomainId, 'tes1', '86400.00', '6.4', test1Authz())
       expect(res).toBeNull()
     })
 
     test('register domain with not enough token', async () => {
-
       const res = await registerDomain(
         flowDomainId,
         'tes1',
@@ -70,7 +73,6 @@ export const userTest = () =>
     })
 
     test('register domain with not price set', async () => {
-
       const res = await registerDomain(flowDomainId, 'test1', oneYear.toFixed(2), '1', test1Authz())
       expect(res).toBeNull()
     })
@@ -100,6 +102,16 @@ export const userTest = () =>
       expect(test1Reg).not.toBeNull()
       expect(test1Reg.status).toBe(4)
 
+      const renewRes = await renewDomain(
+        flowDomainId,
+        test1DomainNameHash,
+        oneYear.toFixed(2),
+        '10.00',
+        test1Authz()
+      )
+
+      expect(renewRes).not.toBeNull()
+      console.log(renewRes)
       expect(test2Reg).not.toBeNull()
       expect(test2Reg.status).toBe(4)
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
@@ -108,7 +120,7 @@ export const userTest = () =>
       const test2BalAfter = await buildAndExecScript('queryFUSDBalance', [
         fcl.arg(test2Addr, t.Address),
       ])
-      expect(Number(test1BalAfter)).toBe(test1Bal - 6.4)
+      expect(Number(test1BalAfter)).toBe(test1Bal - 16.4)
       expect(Number(test2BalAfter)).toBe(test2Bal - 3.2)
     })
 
@@ -145,7 +157,6 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
       expect(deprecatedId).toBe(currentId)
-
 
       await sleep(1000)
       await buildAndSendTrx('setDomainAddress', [
@@ -184,7 +195,7 @@ export const userTest = () =>
       const newId = await buildAndExecScript('queryDomaimId', [
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
-      expect(deprecatedId+1).toBe(newId)
+      expect(deprecatedId + 1).toBe(newId)
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
@@ -201,10 +212,9 @@ export const userTest = () =>
     test('Deprecated domain change and renew fail ', async () => {
       const renewRes = await renewDomain(
         flowDomainId,
-        deprecatedDomainName,
-        flowName,
+        deprecatedDomainNameHash,
         oneYear.toFixed(2),
-        '10',
+        '10.00',
       )
 
       expect(renewRes).toBeNull()
@@ -218,8 +228,6 @@ export const userTest = () =>
     })
 
     test('Deprecated domain transfer fail ', async () => {
-
-
       const transferRes = await buildAndSendTrx('transferDomainWithHashName', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(test2Addr, t.Address),
@@ -228,12 +236,10 @@ export const userTest = () =>
     })
 
     test('Transfer renew domains to deprecate account', async () => {
-
       const beforeAddr = await buildAndExecScript('queryDomainRecord', [
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
       expect(beforeAddr).toBe(test1Addr)
-
 
       const transferRes = await buildAndSendTrx(
         'transferDomainWithHashName',
@@ -247,8 +253,6 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
       expect(accountAddr).toBe(afterAddr)
-
-
     })
 
     test('Deprecate account manage domain and subdomain with same hash name', async () => {
@@ -394,7 +398,7 @@ export const userTest = () =>
       ])
       console.log(beforeQuery)
       expect(beforeQuery.length).toBe(4)
-      
+
       const sendNFTRes = await buildAndSendTrx('sendNFTToDomain', [
         fcl.arg(deprecatedDomainNameHash, t.String),
         fcl.arg(0, t.UInt64),
@@ -485,7 +489,9 @@ export const userTest = () =>
       )
       expect(res4).not.toBeNull()
       expect(res4.status).toBe(4)
-      await buildAndSendTrx('setDomainForbidChars', [fcl.arg('ABCDEFGHIJKLMNOPQRSTUVWXYZ.,', t.String)])
+      await buildAndSendTrx('setDomainForbidChars', [
+        fcl.arg('ABCDEFGHIJKLMNOPQRSTUVWXYZ.,', t.String),
+      ])
     })
 
     test('test domain length ', async () => {
@@ -533,7 +539,6 @@ export const userTest = () =>
 
       expect(Number(domainQuery1.maxDomainLength)).toBe(32)
 
-
       const res3 = await registerDomain(
         flowDomainId,
         'thisisolenthisisolenthisisolen1',
@@ -557,7 +562,6 @@ export const userTest = () =>
       ])
 
       expect(Number(domainQuery2.maxDomainLength)).toBe(9)
-
 
       const res4 = await registerDomain(
         flowDomainId,
@@ -588,7 +592,6 @@ export const userTest = () =>
       ])
 
       expect(Number(domainQuery.minRentDuration)).toBe(15768000)
-
 
       const res = await registerDomain(
         flowDomainId,
@@ -689,7 +692,7 @@ export const userTest = () =>
       ])
       const balanceAfter = domainRes2.vaultBalances[flowVaultType]
 
-      expect(Number(balanceBefore)).toBe(Number(balanceAfter)-1)
+      expect(Number(balanceBefore)).toBe(Number(balanceAfter) - 1)
 
       const reg2 = await registerDomain(
         fnsDomainId,
@@ -707,7 +710,54 @@ export const userTest = () =>
       ])
       const balance = domainRes3.vaultBalances[flowVaultType]
 
-      expect(Number(balanceBefore)).toBe(Number(balance)-1)
+      expect(Number(balanceBefore)).toBe(Number(balance) - 1)
+    })
 
+    test('test fns renew domain with hash', async () => {
+      const test1Domain = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(test1DomainNameHash, t.String),
+      ])
+      const { expiredAt } = test1Domain
+
+      const renewRes = await renewDomainWithHash(
+        test1DomainNameHash,
+        oneYear.toFixed(2),
+        '10.0',
+        test2Authz(),
+      )
+      expect(renewRes).not.toBeNull()
+      expect(renewRes.status).toBe(4)
+      console.log(renewRes)
+      const test1DomainAfter = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(test1DomainNameHash, t.String),
+      ])
+      const { expiredAt: expiredAfter } = test1DomainAfter
+
+      console.log(expiredAt, expiredAfter)
+
+      expect(Number(expiredAt) + oneYear).toBe(Number(expiredAfter))
+    })
+
+    test('test fns renew domain with admin', async () => {
+      const test1Domain = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(test1DomainNameHash, t.String),
+      ])
+      const { expiredAt } = test1Domain
+
+      const renewRes = await buildAndSendTrx('renewDomainWithAdmin', [
+        fcl.arg(test1DomainNameHash, t.String),
+        fcl.arg(oneMonth.toFixed(2), t.UFix64),
+      ])
+      expect(renewRes).not.toBeNull()
+      expect(renewRes.status).toBe(4)
+      console.log(renewRes)
+      const test1DomainAfter = await buildAndExecScript('queryDomainInfo', [
+        fcl.arg(test1DomainNameHash, t.String),
+      ])
+      const { expiredAt: expiredAfter } = test1DomainAfter
+
+      console.log(expiredAt, expiredAfter)
+
+      expect(Number(expiredAt) + oneMonth).toBe(Number(expiredAfter))
     })
   })

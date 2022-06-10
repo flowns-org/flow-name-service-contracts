@@ -8,6 +8,7 @@ transaction(nameHash: String, itemId: UInt64) {
   var domain: &{Domains.DomainPublic}
   var collection: @NonFungibleToken.Collection
   var NFT: @NonFungibleToken.NFT
+  let sender: Address
   prepare(account: AuthAccount) {
     let address = Domains.getRecords(nameHash) ?? panic("Can not find domain ..")
     let userCollection = getAccount(address).getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath).borrow()! 
@@ -23,6 +24,7 @@ transaction(nameHash: String, itemId: UInt64) {
     }
     self.domain = domain!
     let senderCollection = account.borrow<&Domains.Collection>(from: Domains.CollectionStoragePath)!
+    self.sender = senderCollection.owner!.address
     self.NFT <- senderCollection.withdraw(withdrawID: itemId)
     self.collection <- Domains.createEmptyCollection()
 
@@ -31,11 +33,8 @@ transaction(nameHash: String, itemId: UInt64) {
     let typeKey = self.collection.getType().identifier
 
     if self.domain!.checkCollection(key: typeKey) == false {
-      self.collection.deposit(token: <- self.NFT) 
       self.domain.addCollection(collection: <- self.collection )
-    } else {
-      self.domain!.depositNFT(key: typeKey, token: <- self.NFT)
-      destroy self.collection 
-    }
+    } 
+    self.domain!.depositNFT(key: typeKey, token: <- self.NFT, sender: self.sender)
   }
 }

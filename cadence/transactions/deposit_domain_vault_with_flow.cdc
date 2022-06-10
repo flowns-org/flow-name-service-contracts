@@ -1,9 +1,11 @@
 import Flowns from 0xFlowns
 import Domains from 0xDomains
 import FlowToken from 0xFlowToken
+import FungibleToken from 0xFungibleToken
 
 transaction(domainNameHash: String, amount: UFix64) {
   var domain: &{Domains.DomainPublic}
+  let senderRef: &{FungibleToken.Receiver}
   var vaultRef: &FlowToken.Vault
   prepare(account: AuthAccount) {
     let address = Domains.getRecords(domainNameHash) ?? panic("Domain not exsit")
@@ -19,10 +21,13 @@ transaction(domainNameHash: String, amount: UFix64) {
     self.domain = domain!
     self.vaultRef = account.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
 			?? panic("Could not borrow reference to the owner's Vault!")
+
+    self.senderRef = account.getCapability(/public/flowTokenReceiver)
+      .borrow<&{FungibleToken.Receiver}>()!
   }
   execute {
     let sentVault <- self.vaultRef.withdraw(amount: amount)
-    self.domain.depositVault(from: <- sentVault)
+    self.domain.depositVault(from: <- sentVault, senderRef: self.senderRef)
   }
 }
 

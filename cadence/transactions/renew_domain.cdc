@@ -3,7 +3,7 @@ import Domains from 0xDomains
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 
-transaction(domainId: UInt64, nameHash: String, duration: UFix64, amount: UFix64, refer: Address) {
+transaction(domainId: UInt64, nameHash: String, duration: UFix64, amount: UFix64, refer: Address?) {
   let vault: @FungibleToken.Vault
   var domain: &Domains.NFT
   prepare(account: AuthAccount) {
@@ -24,7 +24,7 @@ transaction(domainId: UInt64, nameHash: String, duration: UFix64, amount: UFix64
   }
 
   execute {
-    Flowns.renewDomain(domainId: domainId, domain: self.domain, duration: duration, feeTokens: <- self.vault)
+    Flowns.renewDomain(domainId: domainId, domain: self.domain, duration: duration, feeTokens: <- self.vault, refer: refer)
   }
 }
  

@@ -93,6 +93,8 @@ export const paths = {
     registerDomainBatch: buildPath('register_domain_batch.cdc'),
     registerDomainWithFUSD: buildPath('register_domain_with_fusd.cdc'),
     renewDomain: buildPath('renew_domain.cdc'),
+    renewDomainWithHash: buildPath('renew_domain_with_hash.cdc'),
+    renewDomainWithAdmin: buildPath('renew_domain_with_admin.cdc'),
     mintSubdomain: buildPath('mint_subdomain.cdc'),
     removeSubdomain: buildPath('remove_subdomain.cdc'),
     setDomainAddress: buildPath('set_domain_address.cdc'),

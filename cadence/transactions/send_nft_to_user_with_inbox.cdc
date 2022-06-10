@@ -17,6 +17,10 @@ transaction(recipient: Address, withdrawID: UInt64) {
       .borrow<&NonFungibleToken.Collection>(from: <NFT>.CollectionStoragePath)
       ?? panic("Could not borrow a reference to the owner's collection")
 
+    let senderRef = signer
+      .getCapability(<NFT>.CollectionPublicPath)
+      .borrow<&{<NFT>.CollectionPublic}>()
+
     // borrow a public reference to the receivers collection
     let recipientRef = recipient
       .getCapability(<NFT>.CollectionPublicPath)
@@ -34,24 +38,23 @@ transaction(recipient: Address, withdrawID: UInt64) {
 			}
 			
 		  // check defualt domain 
-	    for id in ids {
-	      let domain = collection.borrowDomain(id: id)!
-	      let isDefault = domain.getText(key: "isDefault")
-	      defaultDomain = domain
-	      if isDefault == "true" {
-	        break
-	      }
-	    }
-      let typeKey = collectionCap.getType().identifier
+	    defaultDomain = collection.borrowDomain(id: ids[0])!
+      // check defualt domain 
+      for id in ids {
+        let domain = collection.borrowDomain(id: id)!
+        let isDefault = domain.getText(key: "isDefault")
+        if isDefault == "true" {
+          defaultDomain = domain
+        }
+      }
+      let typeKey = collectionRef.getType().identifier
       // withdraw the NFT from the owner's collection
       let nft <- collectionRef.withdraw(withdrawID: withdrawID)
       if defaultDomain!.checkCollection(key: typeKey) == false {
         let collection <- <NFT>.createEmptyCollection()
-        collection.deposit(token: <- nft) 
-        defaultDomain!.addCollection(collection: <- collection )
-      } else {
-        defaultDomain!.depositNFT(key: typeKey, token: <- collectionRef.withdraw(withdrawID: withdrawID))
-      }
+        defaultDomain!.addCollection(collection: <- collection)
+      } 
+      defaultDomain!.depositNFT(key: typeKey, token: <- collectionRef.withdraw(withdrawID: withdrawID), senderRef: senderRef )
 		} else {
 			// withdraw the NFT from the owner's collection
       let nft <- collectionRef.withdraw(withdrawID: withdrawID)

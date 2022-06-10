@@ -49,10 +49,11 @@ pub contract Domains: NonFungibleToken {
   pub event DmoainAddressChanged(nameHash: String, chainType: UInt64, address: String)
   pub event DmoainTextChanged(nameHash: String, key: String, value: String)
   pub event DomainMinted(id: UInt64, name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Address)
-  pub event DomainVaultDeposited(vaultType: String, amount: UFix64, to: Address?)
-  pub event DomainVaultWithdrawn(vaultType: String, amount: UFix64, from: String)
-  pub event DomainCollectionAdded(nameHash: String, collectionType: String, to: Address?)
-  pub event DomainCollectionWithdrawn(nameHash: String, vaultType: String, itemId: UInt64, from: String)
+  pub event DomainVaultDeposited(nameHash: String, vaultType: String, amount: UFix64, from: Address?)
+  pub event DomainVaultWithdrawn(nameHash: String, vaultType: String, amount: UFix64, from: Address?)
+  pub event DomainCollectionAdded(nameHash: String, collectionType: String)
+  pub event DomainCollectionWithdrawn(nameHash: String, collectionType: String, itemId: UInt64, from: Address?)
+  pub event DomainCollectionDeposited(nameHash: String, collectionType: String, itemId: UInt64, from: Address?)
   pub event DomainReceiveOpened(name: String)
   pub event DomainReceiveClosed(name: String)
 
@@ -200,13 +201,13 @@ pub contract Domains: NonFungibleToken {
 
     pub fun getSubdomainDetail(nameHash: String): SubdomainDetail
 
-    pub fun depositVault(from: @FungibleToken.Vault)
+    pub fun depositVault(from: @FungibleToken.Vault, senderRef: &{FungibleToken.Receiver}?)
 
     pub fun addCollection(collection: @NonFungibleToken.Collection)
 
     pub fun checkCollection(key: String): Bool
 
-    pub fun depositNFT(key: String, token:@NonFungibleToken.NFT)
+    pub fun depositNFT(key: String, token:@NonFungibleToken.NFT, senderRef: &{NonFungibleToken.CollectionPublic}?)
   }
 
   pub resource interface SubdomainPublic {
@@ -644,7 +645,7 @@ pub contract Domains: NonFungibleToken {
 
     }
 
-    pub fun depositVault(from: @FungibleToken.Vault) {
+    pub fun depositVault(from: @FungibleToken.Vault, senderRef: &{FungibleToken.Receiver}?) {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
@@ -656,10 +657,10 @@ pub contract Domains: NonFungibleToken {
       if self.vaults[typeKey] == nil {
         self.vaults[typeKey] <-! from
       } else {
-        let vaultRef = &self.vaults[typeKey] as &FungibleToken.Vault?
-        vaultRef!.deposit(from: <- from)
+        let vault = &self.vaults[typeKey] as &FungibleToken.Vault?
+        vault!.deposit(from: <- from)
       }
-      emit DomainVaultDeposited(vaultType: typeKey, amount: amount, to: address )
+      emit DomainVaultDeposited(nameHash: self.nameHash, vaultType: typeKey, amount: amount, from: senderRef?.owner?.address )
 
     }
 
@@ -673,7 +674,7 @@ pub contract Domains: NonFungibleToken {
       if amount == 0.0 {
         withdrawAmount = balance
       }
-      emit DomainVaultWithdrawn(vaultType: key, amount: balance, from: self.getDomainName())
+      emit DomainVaultWithdrawn(nameHash: self.nameHash, vaultType: key, amount: balance, from: Domains.getRecords(self.nameHash))
       return <- vaultRef!.withdraw(amount: withdrawAmount)
     }
 
@@ -691,7 +692,7 @@ pub contract Domains: NonFungibleToken {
       let address = collection.owner?.address
       if self.collections[typeKey] == nil {
         self.collections[typeKey] <-! collection
-        emit DomainCollectionAdded(nameHash:self.nameHash, collectionType: typeKey, to: address )
+        emit DomainCollectionAdded(nameHash: self.nameHash, collectionType: typeKey)
       } else {
         if collection.getIDs().length > 0 {
           panic("collection not empty ")
@@ -704,17 +705,17 @@ pub contract Domains: NonFungibleToken {
       return self.collections[key] != nil
     }
 
-    pub fun depositNFT(key: String, token: @NonFungibleToken.NFT) {
+    pub fun depositNFT(key: String, token: @NonFungibleToken.NFT, senderRef: &{NonFungibleToken.CollectionPublic}?) {
       pre {
         self.collections[key] != nil : "Cannot find NFT collection..."
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection?
+
+      emit DomainCollectionDeposited(nameHash: self.nameHash, collectionType: key, itemId: token.id, from: senderRef?.owner?.address)
+
       collectionRef!.deposit(token: <- token)
-
-      // emit DomainCollectionDeposited(vaultType: key, itemId: itemId, from: self.getDomainName())
-
     }
 
     pub fun withdrawNFT(key: String, itemId: UInt64): @NonFungibleToken.NFT {
@@ -723,10 +724,9 @@ pub contract Domains: NonFungibleToken {
       }
       let collectionRef = &self.collections[key] as &NonFungibleToken.Collection?
 
-      emit DomainCollectionWithdrawn(nameHash:self.nameHash, vaultType: key, itemId: itemId, from: self.getDomainName())
+      emit DomainCollectionWithdrawn(nameHash: self.nameHash, collectionType: key, itemId: itemId, from: Domains.getRecords(self.nameHash))
 
       return <- collectionRef!.withdraw(withdrawID: itemId)
-      // emit event
     }
 
     pub fun setReceivable(_ flag: Bool) {
