@@ -429,7 +429,7 @@ export const userTest = () =>
       //   fcl.arg(collectionType, t.String),
       //   fcl.arg(0, t.UInt64),
       // ])
-
+      console.log(withdrawRes)
       const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
       ])

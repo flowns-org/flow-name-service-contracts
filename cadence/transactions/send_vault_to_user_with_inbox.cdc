@@ -49,7 +49,7 @@ transaction(amount: UFix64, recipient: Address) {
           }
         }
         // Deposit the withdrawn tokens in the recipient's domain inbox
-        defaultDomain!.depositVault(from: <- self.sentVault, senderRef: self.sentVault)
+        defaultDomain!.depositVault(from: <- self.sentVault, senderRef: self.senderRef)
 
     } else {
         // Deposit the withdrawn tokens in the recipient's receiver

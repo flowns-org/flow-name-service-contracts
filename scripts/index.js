@@ -354,17 +354,17 @@ const main = async () => {
   // ])
   // console.log(hash)
 
-  // const queryHash = namehash('soul.fn')
-  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
-  // console.log(flowDetail)
+  const queryHash = namehash('switchtest1.meow')
+  const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
+  console.log(flowDetail)
 
   // const record = await buildAndExecScript('queryDomainRecord', [fcl.arg(queryHash, t.String)])
 
   // console.log(record)
 
-  const domains = await buildAndExecScript('queryRootDomains')
+  // const domains = await buildAndExecScript('queryRootDomains')
 
-  console.log(domains)
+  // console.log(domains)
 
   // const ress = await buildAndSendTrx(
   //   'registerDomainBatch',

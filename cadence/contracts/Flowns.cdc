@@ -832,7 +832,7 @@ pub contract Flowns {
   pub fun getDomain(nameHash: String): &{Domains.DomainPublic}? {
     let address = Domains.getRecords(nameHash) ?? panic("Domain not exist")
     let account = getAccount(address)
-    let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
+    let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)!
     let collection = collectionCap.borrow()!
     var domain: &{Domains.DomainPublic}? = nil
 
