@@ -344,7 +344,7 @@ const main = async () => {
   // const test = normalize('你好1.flow')
   // console.log(test)
 
-  // const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('!@#$%^&*()<>? ./_ABCDEFGHIJKLMNOPQRSTUVWXYZ-', t.String)])
+  // const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('!@$%^&*()<>? ./_ABCDEFGHIJKLMNOPQRSTUVWXYZ-', t.String)])
   // console.log(setRes)
 
   // console.log(namehash('te-st.fn'))
@@ -354,9 +354,9 @@ const main = async () => {
   // ])
   // console.log(hash)
 
-  const queryHash = namehash('switchtest1.meow')
-  const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
-  console.log(flowDetail)
+  // const queryHash = namehash('switchtest1.meow')
+  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(queryHash, t.String)])
+  // console.log(flowDetail)
 
   // const record = await buildAndExecScript('queryDomainRecord', [fcl.arg(queryHash, t.String)])
 
