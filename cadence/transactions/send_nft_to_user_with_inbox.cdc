@@ -19,7 +19,7 @@ transaction(recipient: Address, withdrawID: UInt64) {
 
     let senderRef = signer
       .getCapability(<NFT>.CollectionPublicPath)
-      .borrow<&{<NFT>.CollectionPublic}>()
+      .borrow<&{NonFungibleToken.CollectionPublic}>()
 
     // borrow a public reference to the receivers collection
     let recipientRef = recipient
@@ -48,13 +48,13 @@ transaction(recipient: Address, withdrawID: UInt64) {
         }
       }
       let typeKey = collectionRef.getType().identifier
-      // withdraw the NFT from the owner's collection
+
       let nft <- collectionRef.withdraw(withdrawID: withdrawID)
       if defaultDomain!.checkCollection(key: typeKey) == false {
         let collection <- <NFT>.createEmptyCollection()
         defaultDomain!.addCollection(collection: <- collection)
       } 
-      defaultDomain!.depositNFT(key: typeKey, token: <- collectionRef.withdraw(withdrawID: withdrawID), senderRef: senderRef )
+      defaultDomain!.depositNFT(key: typeKey, token: <- nft, senderRef: senderRef )
 		} else {
 			// withdraw the NFT from the owner's collection
       let nft <- collectionRef.withdraw(withdrawID: withdrawID)

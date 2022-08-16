@@ -86,7 +86,7 @@ export const paths = {
     queryDomainAvailableBatch: buildPath('query_domain_available_batch.cdc', 'script'),
     queryDomaimPrice: buildPath('query_domain_price.cdc', 'script'),
     queryDomaimId: buildPath('query_domain_id.cdc', 'script'),
-    test: buildPath('test_script.cdc', 'script'),
+    test: buildPath('test_script.cdc', 'script')
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),
@@ -130,5 +130,7 @@ export const paths = {
     sendNFTInbox: buildPath('send_nft_to_user_with_inbox.cdc'),
     withdrawFTInbox: buildPath('withdraw_domain_vault_with_init.cdc'),
     withdrawNFTInbox: buildPath('withdraw_domain_nft_with_init.cdc'),
+    batchRenewWithHash: buildPath('batch_renew_domain_with_hash.cdc'),
+    transferFlowBatch: buildPath('transfer_flow_batch.cdc'),
   },
 }

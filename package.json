@@ -34,14 +34,15 @@
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
     "@onflow/util-encode-key": "^0.0.2",
+    "axios": "^0.27.2",
     "babel-jest": "^27.0.6",
     "dotenv": "^10.0.0",
     "elliptic": "^6.5.4",
     "flow-js-testing": "^0.1.11",
     "jest": "^27.0.6",
     "js-sha3": "^0.8.0",
+    "jsonfile": "^6.1.0",
     "prettier": "^2.3.2",
-    "sha3": "^2.1.4",
-    "axios": "^0.27.2"
+    "sha3": "^2.1.4"
   }
 }

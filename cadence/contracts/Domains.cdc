@@ -1,5 +1,6 @@
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
+import MetadataViews from "./standard/MetadataViews.cdc"
 
 
 // Domains define the domain and sub domain resource
@@ -384,7 +385,7 @@ pub contract Domains: NonFungibleToken {
   }
 
   // Domain resource for NFT standard
-  pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT{
+  pub resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT, MetadataViews.Resolver{
 
     pub let id: UInt64
     pub let name: String
@@ -416,6 +417,94 @@ pub contract Domains: NonFungibleToken {
       self.collections <- {}
       self.receivable = true
       self.createdAt = getCurrentBlock().timestamp
+    }
+
+    pub fun getViews(): [Type] {
+      return [
+        Type<MetadataViews.Display>(),
+        Type<MetadataViews.Royalties>(),
+        Type<MetadataViews.Editions>(),
+        Type<MetadataViews.ExternalURL>(),
+        Type<MetadataViews.NFTCollectionData>(),
+        Type<MetadataViews.NFTCollectionDisplay>(),
+        Type<MetadataViews.Serial>(),
+        Type<MetadataViews.Traits>()
+      ]
+    }
+
+
+    pub fun resolveView(_ view: Type): AnyStruct? {
+      let domainName = self.getDomainName()
+      let dataUrl = "https://flowns.org/api/data/domain/".concat(domainName)
+      let thumbnailUrl = "https://flowns.org/api/fns?domain=".concat(domainName)
+      
+      switch view {
+        case Type<MetadataViews.Display>():
+          return MetadataViews.Display(
+              name: domainName,
+              description: "Flowns domain ".concat(domainName),
+              thumbnail: MetadataViews.HTTPFile(
+                  url: thumbnailUrl
+              )
+          )
+        case Type<MetadataViews.Editions>():
+            // There is no max number of NFTs that can be minted from this contract
+            // so the max edition field value is set to nil
+            let editionInfo = MetadataViews.Edition(name: "Flowns Domains NFT Edition", number: self.id, max: nil)
+            let editionList: [MetadataViews.Edition] = [editionInfo]
+            return MetadataViews.Editions(
+                editionList
+            )
+        case Type<MetadataViews.Serial>():
+            return MetadataViews.Serial(
+                self.id
+            )
+        case Type<MetadataViews.Royalties>():
+
+            return MetadataViews.Royalties(
+                self.royalties
+            )
+        case Type<MetadataViews.ExternalURL>():
+            return MetadataViews.ExternalURL("https://flowns.org/domain/".concat(domainName))
+        case Type<MetadataViews.NFTCollectionData>():
+            return MetadataViews.NFTCollectionData(
+                storagePath: Domains.CollectionStoragePath,
+                publicPath: Domains.CollectionPublicPath,
+                providerPath: Domains.CollectionPrivatePath,
+                publicCollection: Type<&Domains.Collection{Domains.CollectionPublic}>(),
+                publicLinkedType: Type<&Domains.Collection{Domains.CollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                providerLinkedType: Type<&Domains.Collection{Domains.CollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                    return <- Domains.createEmptyCollection()
+                })
+            )
+        case Type<MetadataViews.NFTCollectionDisplay>():
+            let media = MetadataViews.Media(
+                file: MetadataViews.HTTPFile(
+                    url: "https://flowns.org/api/fns?isSvg=true&domain=".concat(domainName)
+                ),
+                mediaType: "image/svg+xml"
+            )
+            return MetadataViews.NFTCollectionDisplay(
+              name: "The Flowns domain Collection",
+              description: "This collection is managed by Flowns and present the ownership of domain.",
+              externalURL: MetadataViews.ExternalURL("https://flowns.org"),
+              squareImage: media,
+              bannerImage: media,
+              socials: {
+                  "twitter": MetadataViews.ExternalURL("https://twitter.com/flownsorg"),
+                  "discord": MetadataViews.ExternalURL("https://discord.gg/fXz4gBaYXd"),
+                  "website": MetadataViews.ExternalURL("https://flowns.org"),
+                  "medium": MetadataViews.ExternalURL("https://medium.com/@Flowns")
+              }
+            )
+        case Type<MetadataViews.Traits>():
+          let excludedTraits = ["mintedTime"]
+          let traitsView = MetadataViews.dictToTraits(dict: self.texts, excludedNames: excludedTraits)
+          // mintedTime is a unix timestamp, we should mark it with a displayType so platforms know how to show it.
+          return traitsView
+      }
+      return nil
     }
     
     // get domain full name with root domain
@@ -771,7 +860,7 @@ pub contract Domains: NonFungibleToken {
 
 
   // NFT collection 
-  pub resource Collection: CollectionPublic, CollectionPrivate, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+  pub resource Collection: CollectionPublic, CollectionPrivate, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
     pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
@@ -840,6 +929,13 @@ pub contract Domains: NonFungibleToken {
       let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
       return ref! as! &Domains.NFT
     }
+
+     pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+        let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+        let domainNFT = nft as! &Domains.NFT
+        return domainNFT as &AnyResource{MetadataViews.Resolver}
+      }
+
 
     access(account) fun mintDomain(name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       

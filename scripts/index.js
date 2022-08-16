@@ -16,17 +16,19 @@ const main = async () => {
   // await buildSetupTrx('initDomainCollection', [], test1Authz())
   // await buildSetupTrx('initDomainCollection', [], test2Authz())
 
+  // mainnet
   // const price = await buildSetupTrx('setupDomainRentPrice', [
-  //   fcl.arg(1, t.UInt64),
+  //   fcl.arg(0, t.UInt64),
   //   fcl.arg(4, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.00000094', t.UFix64),
   // ])
   // console.log(price)
 
+  // testnet
   // const price2 = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(1, t.UInt64),
-  //   fcl.arg(5, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg(4, t.Int),
+  //   fcl.arg('0.00000094', t.UFix64),
   // ])
   // console.log(price2)
 
@@ -300,10 +302,13 @@ const main = async () => {
   //   fcl.arg('block', t.String),
   // ])
   // console.log(mintRes2)
+  const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('!@$%^&*#()<>? ./ABCDEFGHIJKLMNOPQRSTUVWXYZ-', t.String)])
+  console.log(setRes)
+  
 
   // const trxs1 = await buildAndSendTrx('mintDomain', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg('soul', t.String),
+  //   fcl.arg('raven-kus', t.String),
   //   fcl.arg(oneYear.toFixed(2), t.UFix64),
   // ])
 
@@ -344,8 +349,7 @@ const main = async () => {
   // const test = normalize('你好1.flow')
   // console.log(test)
 
-  // const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('!@$%^&*()<>? ./_ABCDEFGHIJKLMNOPQRSTUVWXYZ-', t.String)])
-  // console.log(setRes)
+ 
 
   // console.log(namehash('te-st.fn'))
   // const hash = await buildAndExecScript('calcHashRaw', [
@@ -431,11 +435,11 @@ const main = async () => {
   // ])
   // console.dir(userDomain)
 
-  // const hash = namehash('drep1.fn'.toLocaleLowerCase())
-  // console.log(hash)
+  const hash = namehash('raven-kus.fn'.toLocaleLowerCase())
+  console.log(hash)
 
-  // const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(hash, t.String)])
-  // console.log(flowDetail)
+  const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(hash, t.String)])
+  console.log(flowDetail)
 
   // const testRes = await buildAndExecScript('test', [fcl.arg('0xc0597793abff95ba', t.Address)])
   // console.log(testRes)
@@ -454,6 +458,50 @@ const main = async () => {
 
   // const res = await query('https://www.flowns.org/api/data/address/0x95c1afc355056c36')
   // console.log(res.data)
+
+  // batch renew
+
+  // const renewRes = await await buildAndSendTrx('batchRenewWithHash', [
+  //   fcl.arg(
+  //     [namehash('tes1.flow'), namehash('thisisolen10.flow'), namehash('thisisolen2.flow')],
+  //     t.Array(t.String),
+  //   ),
+  //   fcl.arg(oneYear.toFixed(2), t.UFix64),
+  //   // fcl.arg('10.0', t.UFix64),
+  //   fcl.arg(accountAddr, t.Address),
+  // ])
+  // console.log(renewRes)
+
+  // const userDomain = await buildAndExecScript('queryUsersAllDomain', [
+  //   fcl.arg(test1Addr, t.Address),
+  // ])
+  // console.dir(userDomain)
+
+  // const batchRes = await buildAndSendTrx('transferFlowBatch', [
+  //   fcl.arg(
+  //     [
+  //       '0xe14ec858612c27fb',
+  //       '0x4a04ff8fabe85fd9',
+  //       '0xb96e3003eeb1f9ac',
+  //       '0x645ef7aa7a7291fd',
+  //       '0x53f29ea4b01498f7',
+  //       '0xa2067e038f0f7152',
+  //       '0x6c031631a606532d',
+  //       '0x4ad3bf3a4791d2b0',
+  //       '0xa886b070d087e674',
+  //       '0x6eef0fc267031951',
+  //       '0x645ef7aa7a7291fd',
+  //       '0x6761a501384744ad',
+  //       '0xc57db8fe8c60f21b',
+  //       '0x97e894ffc656c2dd',
+  //       '0x79b09df771cbb8eb',
+  //     ],
+  //     t.Array(t.Address),
+  //   ),
+  //   fcl.arg('0.32', t.UFix64),
+  // ])
+  // //
+  // console.log(batchRes)
 }
 
 main()
