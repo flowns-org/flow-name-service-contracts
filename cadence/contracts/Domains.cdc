@@ -460,10 +460,7 @@ pub contract Domains: NonFungibleToken {
                 self.id
             )
         case Type<MetadataViews.Royalties>():
-
-            return MetadataViews.Royalties(
-                self.royalties
-            )
+            return []
         case Type<MetadataViews.ExternalURL>():
             return MetadataViews.ExternalURL("https://flowns.org/domain/".concat(domainName))
         case Type<MetadataViews.NFTCollectionData>():

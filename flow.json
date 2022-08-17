@@ -6,6 +6,12 @@
     }
   },
   "contracts": {
+    "MetadataViews": {
+      "source": "./cadence/contracts/standard/MetadataViews.cdc",
+      "aliases": {
+        "testnet": "0x631e88ae7f1d7c20"
+      }
+    },
     "NonFungibleToken": {
       "source": "./cadence/contracts/standard/NonFungibleToken.cdc",
       "aliases": {
@@ -80,6 +86,7 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "MetadataViews",
         "NonFungibleToken",
         "Domains",
         "Flowns",
