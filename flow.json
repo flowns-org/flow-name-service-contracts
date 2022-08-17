@@ -20,6 +20,7 @@
     },
     "Domains": "./cadence/contracts/Domains.cdc",
     "Flowns": "./cadence/contracts/Flowns.cdc",
+    "FNSConfig": "./cadence/contracts/FNSConfig.cdc",
     "FungibleToken": {
       "source": "./cadence/contracts/standard/FungibleToken.cdc",
       "aliases": {
@@ -90,6 +91,7 @@
         "NonFungibleToken",
         "Domains",
         "Flowns",
+        "FNSConfig",
         "Kibble",
         "FUSD"
       ],
@@ -99,7 +101,8 @@
     "testnet": {
       "testnet": [
         "Domains",
-        "Flowns"
+        "Flowns",
+        "FNSConfig"
       ]
     }
   }

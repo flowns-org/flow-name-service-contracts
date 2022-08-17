@@ -2,7 +2,7 @@
 import FungibleToken from "./standard/FungibleToken.cdc"
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import Domains from "./Domains.cdc"
-
+import FNSConfig from "./FNSConfig.cdc"
 
 // Flowns is the core contract of FNS, Flowns define Root domain and admin resource
 pub contract Flowns {
@@ -664,6 +664,10 @@ pub contract Flowns {
 
     pub fun setPause(_ flag: Bool)
 
+    pub fun setFTWhitelist(key: String, flag: Bool)
+
+    pub fun setNFTWhitelist(key: String, flag: Bool)
+
   }
 
 
@@ -790,6 +794,14 @@ pub contract Flowns {
       Flowns.forbidChars = chars
       
       emit FlownsForbidCharsUpdated(before: oldChars, after: chars)
+    }
+
+    pub fun setFTWhitelist(key: String, flag: Bool) {
+      FNSConfig.setFTWhitelist(key: key, flag: flag)
+    }
+
+    pub fun setNFTWhitelist(key: String, flag: Bool) {
+      FNSConfig.setNFTWhitelist(key: key, flag: flag)
     }
 
 

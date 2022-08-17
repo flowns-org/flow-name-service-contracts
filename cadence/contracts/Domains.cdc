@@ -1,7 +1,7 @@
 import NonFungibleToken from "./standard/NonFungibleToken.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
 import MetadataViews from "./standard/MetadataViews.cdc"
-
+import FNSConfig from "./FNSConfig.cdc"
 
 // Domains define the domain and sub domain resource
 // Use records and expired to store domain's owner and expiredTime
@@ -460,7 +460,10 @@ pub contract Domains: NonFungibleToken {
                 self.id
             )
         case Type<MetadataViews.Royalties>():
-            return []
+            let receieverCap =  Domains.account.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+            let royalty= MetadataViews.Royalty(receiver: receieverCap, cut: 0.1, description: "Flowns will take 10% as second trade royalty fee")
+            return MetadataViews.Royalties([royalty])
+            
         case Type<MetadataViews.ExternalURL>():
             return MetadataViews.ExternalURL("https://flowns.org/domain/".concat(domainName))
         case Type<MetadataViews.NFTCollectionData>():
@@ -738,6 +741,8 @@ pub contract Domains: NonFungibleToken {
         self.receivable : "Domain is not receivable"
       }
       let typeKey = from.getType().identifier
+      // add type whitelist check 
+      assert(FNSConfig.checkFTWhitelist(typeKey) == true, message: "FT type is not in inbox whitelist")
       let amount = from.balance
       let address = from.owner?.address
       if self.vaults[typeKey] == nil {
@@ -772,6 +777,8 @@ pub contract Domains: NonFungibleToken {
       }
 
       let typeKey = collection.getType().identifier
+      assert(FNSConfig.checkNFTWhitelist(typeKey) == true, message: "NFT type is not in inbox whitelist")
+
       if collection.isInstance(Type<@Domains.Collection>()) {
         panic("Do not nest domain resource")
       }
@@ -797,6 +804,8 @@ pub contract Domains: NonFungibleToken {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
+      assert(FNSConfig.checkNFTWhitelist(key) == true, message: "NFT type is not in inbox whitelist")
+
       let collectionRef = (&self.collections[key] as &NonFungibleToken.Collection?)!
 
       emit DomainCollectionDeposited(nameHash: self.nameHash, collectionType: key, itemId: token.id, from: senderRef?.owner?.address)
@@ -844,6 +853,8 @@ pub contract Domains: NonFungibleToken {
     pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
 
     pub fun borrowDomain(id: UInt64): &{Domains.DomainPublic}
+
+    pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver}
   }
 
   // return the content for this NFT

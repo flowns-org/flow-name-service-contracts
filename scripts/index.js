@@ -1,18 +1,28 @@
-import t from '@onflow/types'
-import fcl from '@onflow/fcl'
-import { fclInit, buildAndSendTrx, buildAndExecScript, buildSetupTrx } from '../utils/index.js'
-import { registerDomain, renewDomain } from './buildTrxs.js'
-import { accountAddr } from '../config/constants.js'
-import { test1Addr, test2Addr, test1Authz, test2Authz } from '../utils/authz.js'
-import { namehash, normalize } from '../utils/hash.js'
-import { query } from '../utils/index.js'
-const oneYear = 60 * 60 * 24 * 365
-const oneHour = 60 * 20
-const flowVaultType = 'A.7e60df042a9c0868.FlowToken.Vault'
-const collectionType = 'A.b05b2abb42335e88.Domains.Collection'
+import t from "@onflow/types";
+import fcl from "@onflow/fcl";
+import {
+  fclInit,
+  buildAndSendTrx,
+  buildAndExecScript,
+  buildSetupTrx,
+} from "../utils/index.js";
+import { registerDomain, renewDomain } from "./buildTrxs.js";
+import { accountAddr } from "../config/constants.js";
+import {
+  test1Addr,
+  test2Addr,
+  test1Authz,
+  test2Authz,
+} from "../utils/authz.js";
+import { namehash, normalize } from "../utils/hash.js";
+import { query } from "../utils/index.js";
+const oneYear = 60 * 60 * 24 * 365;
+const oneHour = 60 * 20;
+const flowVaultType = "A.7e60df042a9c0868.FlowToken.Vault";
+const collectionType = "A.b05b2abb42335e88.Domains.Collection";
 
 const main = async () => {
-  fclInit()
+  fclInit();
   // await buildSetupTrx('initDomainCollection', [], test1Authz())
   // await buildSetupTrx('initDomainCollection', [], test2Authz())
 
@@ -302,9 +312,10 @@ const main = async () => {
   //   fcl.arg('block', t.String),
   // ])
   // console.log(mintRes2)
-  const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('!@$%^&*#()<>? ./ABCDEFGHIJKLMNOPQRSTUVWXYZ-', t.String)])
-  console.log(setRes)
-  
+  // const setRes = await buildAndSendTrx("setDomainForbidChars", [
+  //   fcl.arg("!@$%^&*#()<>? ./ABCDEFGHIJKLMNOPQRSTUVWXYZ-", t.String),
+  // ]);
+  // console.log(setRes);
 
   // const trxs1 = await buildAndSendTrx('mintDomain', [
   //   fcl.arg(0, t.UInt64),
@@ -348,8 +359,6 @@ const main = async () => {
   // console.log(change)
   // const test = normalize('你好1.flow')
   // console.log(test)
-
- 
 
   // console.log(namehash('te-st.fn'))
   // const hash = await buildAndExecScript('calcHashRaw', [
@@ -435,11 +444,13 @@ const main = async () => {
   // ])
   // console.dir(userDomain)
 
-  const hash = namehash('raven-kus.fn'.toLocaleLowerCase())
-  console.log(hash)
+  // const hash = namehash("raven-kus.fn".toLocaleLowerCase());
+  // console.log(hash);
 
-  const flowDetail = await buildAndExecScript('queryDomainInfo', [fcl.arg(hash, t.String)])
-  console.log(flowDetail)
+  // const flowDetail = await buildAndExecScript("queryDomainInfo", [
+  //   fcl.arg(hash, t.String),
+  // ]);
+  // console.log(flowDetail);
 
   // const testRes = await buildAndExecScript('test', [fcl.arg('0xc0597793abff95ba', t.Address)])
   // console.log(testRes)
@@ -452,9 +463,11 @@ const main = async () => {
   // console.log(mintRes)
 
   // console.log(await buildAndExecScript('queryUsersAllDomain', [fcl.arg(test1Addr, t.Address)]))
-  // console.log(
-  //   await buildAndExecScript('queryUsersAllDomain', [fcl.arg('0xe242ccfb4b8ea3e2', t.Address)]),
-  // )
+  console.log(
+    await buildAndExecScript("queryUsersAllDomain", [
+      fcl.arg('0x7179def56a8b9c5e', t.Address),
+    ])
+  );
 
   // const res = await query('https://www.flowns.org/api/data/address/0x95c1afc355056c36')
   // console.log(res.data)
@@ -502,11 +515,17 @@ const main = async () => {
   // ])
   // //
   // console.log(batchRes)
-}
+  let metadata = await buildAndExecScript("getDomainMetadata", [
+    fcl.arg('0x3c09a556ecca42dc', t.Address),
+    fcl.arg(23370, t.UInt64),
+  ]);
+
+  console.log(metadata);
+};
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+    console.error(error);
+    process.exit(1);
+  });

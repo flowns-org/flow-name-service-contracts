@@ -54,7 +54,7 @@ export const paths = {
     createFUSDMinter: buildPath('create_fusd_minter.cdc', 'setup'),
   },
   scripts: {
-  checkDomainCollection: buildPath('check_domain_collection.cdc', 'script'),
+    checkDomainCollection: buildPath('check_domain_collection.cdc', 'script'),
     checkFlownsAdmin: buildPath('check_flowns_admin.cdc', 'script'),
     queryRootDomainsById: buildPath('query_root_domains_by_id.cdc', 'script'),
     queryRootDomains: buildPath('query_root_domains.cdc', 'script'),
@@ -86,6 +86,8 @@ export const paths = {
     queryDomainAvailableBatch: buildPath('query_domain_available_batch.cdc', 'script'),
     queryDomaimPrice: buildPath('query_domain_price.cdc', 'script'),
     queryDomaimId: buildPath('query_domain_id.cdc', 'script'),
+    queryWhitelist: buildPath('query_white_list.cdc', 'script'),
+    getDomainMetadata: buildPath('get_domain_metadata.cdc', 'script'),
     test: buildPath('test_script.cdc', 'script')
   },
   transactions: {
@@ -132,5 +134,7 @@ export const paths = {
     withdrawNFTInbox: buildPath('withdraw_domain_nft_with_init.cdc'),
     batchRenewWithHash: buildPath('batch_renew_domain_with_hash.cdc'),
     transferFlowBatch: buildPath('transfer_flow_batch.cdc'),
+    setFTWhitelist: buildPath('set_ft_white_list.cdc'),
+    setNFTWhitelist: buildPath('set_nft_white_list.cdc'),
   },
 }

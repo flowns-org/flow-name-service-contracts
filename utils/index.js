@@ -2,6 +2,8 @@ import fs from 'fs'
 import { authz } from './authz.js'
 import fcl from '@onflow/fcl'
 import axios from 'axios'
+import { send as grpcSend } from '@onflow/transport-grpc'
+
 import {
   nodeUrl,
   accountAddr,
@@ -21,10 +23,13 @@ const { setup, scripts, transactions } = paths
 export const fclInit = () => {
   fcl
     .config()
+    .put('sdk.transport', grpcSend)
     .put('accessNode.api', nodeUrl)
     .put('0xDomains', accountAddr)
     .put('0xFlowns', accountAddr)
+    .put('0xFNSConfig', accountAddr)
     .put('0xNonFungibleToken', flowNonFungibleAddr)
+    .put('0xMetadataViews', flowNonFungibleAddr)
     .put('0xFungibleToken', flowFungibleAddr)
     .put('0xFlowToken', flowTokenAddr)
     .put('0xKibble', KibbleTokenAddr)
