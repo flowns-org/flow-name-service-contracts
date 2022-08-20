@@ -55,7 +55,7 @@ export const setupTest = () =>
       // check root domain info
       const query = await buildAndExecScript('queryRootDomainsById', [fcl.arg(0, t.UInt64)])
       expect(query).not.toBe(null)
-      expect(query.id).toBe(0)
+      expect(Number(query.id)).toBe(0)
       expect(query.name).toBe(flowName)
       expect(query.nameHash).toBe(flowNameHash)
       flowDomainId = query.id
@@ -72,7 +72,7 @@ export const setupTest = () =>
 
       const query = await buildAndExecScript('queryRootDomainsById', [fcl.arg(1, t.UInt64)])
       expect(query).not.toBe(null)
-      expect(query.id).toBe(1)
+      expect(Number(query.id)).toBe(1)
       expect(query.name).toBe(fnsName)
       expect(query.nameHash).toBe(fnsNameHash)
       fnsDomainId = query.id
@@ -117,7 +117,7 @@ export const setupTest = () =>
       const query = await buildAndExecScript('queryRootDomainsById', [
         fcl.arg(flowDomainId, t.UInt64),
       ])
-      expect(query.domainCount).toBe(1)
+      expect(Number(query.domainCount)).toBe(1)
 
       const availableQuery = await buildAndExecScript('queryDomainAvailable', [
         fcl.arg(caosDomainNameHash, t.String),

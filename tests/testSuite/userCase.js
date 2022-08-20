@@ -6,7 +6,12 @@ import moment from 'moment'
 import { accountAddr } from '../../config/constants.js'
 import { sleep } from '../../utils/index.js'
 import { test1Authz, test2Authz, test1Addr, test2Addr } from '../../utils/authz'
-import { buildAndExecScript, buildSetupTrx, fclInit, buildAndSendTrx } from '../../utils/index'
+import {
+  buildAndExecScript,
+  buildSetupTrx,
+  fclInit,
+  buildAndSendTrx,
+} from '../../utils/index'
 import {
   mintDomain,
   registerDomain,
@@ -47,17 +52,31 @@ export const userTest = () =>
 
     test('init domain collection with test1Authz and test2Authz', async () => {
       // check resource
-      const setupTest1Res = await buildSetupTrx('initDomainCollection', [], test1Authz())
+      const setupTest1Res = await buildSetupTrx(
+        'initDomainCollection',
+        [],
+        test1Authz(),
+      )
       expect(setupTest1Res).not.toBeNull()
       expect(setupTest1Res.status).toBe(4)
 
-      const setuptest2Res = await buildSetupTrx('initDomainCollection', [], test2Authz())
+      const setuptest2Res = await buildSetupTrx(
+        'initDomainCollection',
+        [],
+        test2Authz(),
+      )
       expect(setuptest2Res).not.toBeNull()
       expect(setuptest2Res.status).toBe(4)
     })
 
     test('register domain with less one year', async () => {
-      const res = await registerDomain(flowDomainId, 'tes1', '86400.00', '6.4', test1Authz())
+      const res = await registerDomain(
+        flowDomainId,
+        'tes1',
+        '86400.00',
+        '6.4',
+        test1Authz(),
+      )
       expect(res).toBeNull()
     })
 
@@ -73,7 +92,13 @@ export const userTest = () =>
     })
 
     test('register domain with not price set', async () => {
-      const res = await registerDomain(flowDomainId, 'test1', oneYear.toFixed(2), '1', test1Authz())
+      const res = await registerDomain(
+        flowDomainId,
+        'test1',
+        oneYear.toFixed(2),
+        '1',
+        test1Authz(),
+      )
       expect(res).toBeNull()
     })
 
@@ -81,7 +106,9 @@ export const userTest = () =>
       const test1Bal = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
-      const test2Bal = await buildAndExecScript('queryFUSDBalance', [fcl.arg(test2Addr, t.Address)])
+      const test2Bal = await buildAndExecScript('queryFUSDBalance', [
+        fcl.arg(test2Addr, t.Address),
+      ])
 
       const test1Reg = await registerDomain(
         flowDomainId,
@@ -107,7 +134,7 @@ export const userTest = () =>
         test1DomainNameHash,
         oneYear.toFixed(2),
         '10.00',
-        test1Authz()
+        test1Authz(),
       )
 
       expect(renewRes).not.toBeNull()
@@ -172,7 +199,10 @@ export const userTest = () =>
       ])
       await sleep(1000)
 
-      const currentTime = await buildAndExecScript('getCurrentBlockTimestamp', [])
+      const currentTime = await buildAndExecScript(
+        'getCurrentBlockTimestamp',
+        [],
+      )
       console.log(currentTime, 'current time ')
       const res = await buildAndExecScript('queryDomainAvailable', [
         fcl.arg(deprecatedDomainNameHash, t.String),
@@ -195,7 +225,7 @@ export const userTest = () =>
       const newId = await buildAndExecScript('queryDomaimId', [
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
-      expect(deprecatedId + 1).toBe(newId)
+      expect(Number(deprecatedId) + 1).toBe(Number(newId))
       const test1BalAfter = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(test1Addr, t.Address),
       ])
@@ -243,7 +273,10 @@ export const userTest = () =>
 
       const transferRes = await buildAndSendTrx(
         'transferDomainWithHashName',
-        [fcl.arg(deprecatedDomainNameHash, t.String), fcl.arg(accountAddr, t.Address)],
+        [
+          fcl.arg(deprecatedDomainNameHash, t.String),
+          fcl.arg(accountAddr, t.Address),
+        ],
         test1Authz(),
       )
       expect(transferRes).not.toBeNull()
@@ -310,9 +343,11 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
 
-      expect(domainQuery.subdomainCount).toBe(1)
+      expect(Number(domainQuery.subdomainCount)).toBe(1)
       expect(domainQuery.texts['text']).toBe('value')
-      expect(domainQuery.addresses[0]).toBe('0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480')
+      expect(domainQuery.addresses[0]).toBe(
+        '0xCea5E66bec5193e5eC0b049a3Fe5d7Dd896fD480',
+      )
 
       const subdomains = await buildAndExecScript('queryUsersAllSubDomain', [
         fcl.arg(accountAddr, t.Address),
@@ -343,10 +378,13 @@ export const userTest = () =>
       expect(removeSubAddrRes).not.toBeNull()
       expect(removeSubAddrRes.status).toBe(4)
 
-      const subdomainsAfter = await buildAndExecScript('queryUsersAllSubDomain', [
-        fcl.arg(accountAddr, t.Address),
-        fcl.arg(deprecatedDomainNameHash, t.String),
-      ])
+      const subdomainsAfter = await buildAndExecScript(
+        'queryUsersAllSubDomain',
+        [
+          fcl.arg(accountAddr, t.Address),
+          fcl.arg(deprecatedDomainNameHash, t.String),
+        ],
+      )
       const subdomainInfo2 = subdomainsAfter[0]
 
       expect(subdomainInfo2).not.toBeNull()
@@ -365,7 +403,7 @@ export const userTest = () =>
         fcl.arg(deprecatedDomainNameHash, t.String),
       ])
 
-      expect(domainQueryAfter.subdomainCount).toBe(0)
+      expect(Number(domainQueryAfter.subdomainCount)).toBe(0)
 
       const domainsQuery = await buildAndExecScript('queryUsersAllDomain', [
         fcl.arg(accountAddr, t.Address),
@@ -377,7 +415,16 @@ export const userTest = () =>
 
     test('deposit flow to domain', async () => {
       const flowVaultType = 'A.0ae53cb6e3f42a79.FlowToken.Vault'
+      await buildAndSendTrx('updateFTWhitelist', [
+        fcl.arg(flowVaultType, t.String),
+        fcl.arg(true, t.Bool),
+      ])
       const collectionType = 'A.f8d6e0586b0a20c7.Domains.Collection'
+
+      await buildAndSendTrx('updateNFTWhitelist', [
+        fcl.arg(collectionType, t.String),
+        fcl.arg(true, t.Bool),
+      ])
       const test1FlowBal = await buildAndExecScript('queryFlowTokenBalance', [
         fcl.arg(accountAddr, t.Address),
       ])
@@ -388,9 +435,10 @@ export const userTest = () =>
       expect(depositRes).not.toBeNull()
       expect(depositRes.status).toBe(4)
 
-      const test1FlowBalAfter = await buildAndExecScript('queryFlowTokenBalance', [
-        fcl.arg(accountAddr, t.Address),
-      ])
+      const test1FlowBalAfter = await buildAndExecScript(
+        'queryFlowTokenBalance',
+        [fcl.arg(accountAddr, t.Address)],
+      )
 
       expect(Number(test1FlowBalAfter)).toBe(test1FlowBal - 50)
       const beforeQuery = await buildAndExecScript('queryUsersAllDomain', [
@@ -430,20 +478,24 @@ export const userTest = () =>
       //   fcl.arg(0, t.UInt64),
       // ])
       console.log(withdrawRes)
-      const domainsQueryAfter = await buildAndExecScript('queryUsersAllDomain', [
-        fcl.arg(accountAddr, t.Address),
-      ])
+      const domainsQueryAfter = await buildAndExecScript(
+        'queryUsersAllDomain',
+        [fcl.arg(accountAddr, t.Address)],
+      )
       expect(domainsQueryAfter.length).toBe(4)
 
-      const test1FlowBalLast = await buildAndExecScript('queryFlowTokenBalance', [
-        fcl.arg(accountAddr, t.Address),
-      ])
+      const test1FlowBalLast = await buildAndExecScript(
+        'queryFlowTokenBalance',
+        [fcl.arg(accountAddr, t.Address)],
+      )
 
       expect(Number(test1FlowBalLast)).toBe(test1FlowBal - 50 + 30)
     })
 
     test('test fns root domain forbid chars', async () => {
-      const setRes = await buildAndSendTrx('setDomainForbidChars', [fcl.arg('. abc', t.String)])
+      const setRes = await buildAndSendTrx('setDomainForbidChars', [
+        fcl.arg('. abc', t.String),
+      ])
 
       expect(setRes).not.toBeNull()
       expect(setRes.status).toBe(4)
