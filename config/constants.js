@@ -24,6 +24,8 @@ export const publicKey = process.env.FLOW_ACCOUNT_PUBLIC_KEY
 
 export const alchemyKey = process.env.ALCHEMY_KEY
 
+export const network = process.env.NETWORK
+
 const buildPath = (fileName, type) => {
   let filePath = ''
   switch (type) {
@@ -136,5 +138,7 @@ export const paths = {
     transferFlowBatch: buildPath('transfer_flow_batch.cdc'),
     setFTWhitelist: buildPath('set_ft_white_list.cdc'),
     setNFTWhitelist: buildPath('set_nft_white_list.cdc'),
+    updateFTWhitelist: buildPath('update_ft_white_list.cdc'),
+    updateNFTWhitelist: buildPath('update_nft_white_list.cdc'),
   },
 }

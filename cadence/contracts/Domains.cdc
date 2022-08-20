@@ -479,9 +479,15 @@ pub contract Domains: NonFungibleToken {
                 })
             )
         case Type<MetadataViews.NFTCollectionDisplay>():
-            let media = MetadataViews.Media(
+            let squareMedia = MetadataViews.Media(
                 file: MetadataViews.HTTPFile(
-                    url: "https://flowns.org/api/fns?isSvg=true&domain=".concat(domainName)
+                    url: "https://www.flowns.org/_next/image?url=%2Fassets%2Fflowns_v_logo_light.svg&w=256&q=75"
+                ),
+                mediaType: "image/svg+xml"
+            )
+            let banerMedia = MetadataViews.Media(
+                file: MetadataViews.HTTPFile(
+                    url: "https://www.flowns.org/_next/image?url=%2Fassets%2Fflowns_logo_light.svg&w=128&q=75"
                 ),
                 mediaType: "image/svg+xml"
             )
@@ -489,8 +495,8 @@ pub contract Domains: NonFungibleToken {
               name: "The Flowns domain Collection",
               description: "This collection is managed by Flowns and present the ownership of domain.",
               externalURL: MetadataViews.ExternalURL("https://flowns.org"),
-              squareImage: media,
-              bannerImage: media,
+              squareImage: squareMedia,
+              bannerImage: banerMedia,
               socials: {
                   "twitter": MetadataViews.ExternalURL("https://twitter.com/flownsorg"),
                   "discord": MetadataViews.ExternalURL("https://discord.gg/fXz4gBaYXd"),

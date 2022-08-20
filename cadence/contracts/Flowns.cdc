@@ -664,9 +664,13 @@ pub contract Flowns {
 
     pub fun setPause(_ flag: Bool)
 
-    pub fun setFTWhitelist(key: String, flag: Bool)
+    pub fun updateFTWhitelist(key: String, flag: Bool)
 
-    pub fun setNFTWhitelist(key: String, flag: Bool)
+    pub fun updateNFTWhitelist(key: String, flag: Bool)
+
+    pub fun setFTWhitelist(_ val: {String: Bool})
+
+    pub fun setNFTWhitelist(_ val: {String: Bool})
 
   }
 
@@ -796,13 +800,22 @@ pub contract Flowns {
       emit FlownsForbidCharsUpdated(before: oldChars, after: chars)
     }
 
-    pub fun setFTWhitelist(key: String, flag: Bool) {
-      FNSConfig.setFTWhitelist(key: key, flag: flag)
+    pub fun updateFTWhitelist(key: String, flag: Bool) {
+      FNSConfig.updateFTWhitelist(key: key, flag: flag)
     }
 
-    pub fun setNFTWhitelist(key: String, flag: Bool) {
-      FNSConfig.setNFTWhitelist(key: key, flag: flag)
+    pub fun updateNFTWhitelist(key: String, flag: Bool) {
+      FNSConfig.updateNFTWhitelist(key: key, flag: flag)
     }
+
+    pub fun setFTWhitelist(_ val: {String: Bool}) {
+      FNSConfig.setFTWhitelist(val)
+    }
+
+    pub fun setNFTWhitelist(_ val: {String: Bool}) {
+      FNSConfig.setNFTWhitelist(val)
+    }
+
 
 
   }

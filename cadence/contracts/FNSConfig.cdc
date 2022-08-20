@@ -1,22 +1,36 @@
 
 pub contract FNSConfig {
 
-  access(self) let inboxFTWhitelist: {String: Bool}
-  access(self) let inboxNFTWhitelist: {String: Bool}
+  access(self) var inboxFTWhitelist: {String: Bool}
+  access(self) var inboxNFTWhitelist: {String: Bool}
 
   access(self) let _reservedFields: {String: AnyStruct}
 
   access(self) let rootDomainConfig: {String: {String: AnyStruct}}
 
+  access(self) let userConfig: {Address: {String: AnyStruct}}
+
+  access(self) let domainConfig: {String: {String: AnyStruct}}
 
 
-  access(account) fun setFTWhitelist(key: String, flag: Bool) {
+
+  access(account) fun updateFTWhitelist(key: String, flag: Bool) {
     self.inboxFTWhitelist[key] = flag
   }
 
-  access(account) fun setNFTWhitelist(key: String, flag: Bool) {
+  access(account) fun updateNFTWhitelist(key: String, flag: Bool) {
     self.inboxNFTWhitelist[key] = flag
   }
+
+  access(account) fun setFTWhitelist(_ val:{String: Bool}) {
+    self.inboxFTWhitelist = val
+  }
+
+  access(account) fun setNFTWhitelist(_ val:{String: Bool}) {
+    self.inboxNFTWhitelist = val
+  }
+
+
 
   pub fun checkFTWhitelist(_ typeIdentifier: String) :Bool {
     return self.inboxFTWhitelist[typeIdentifier] ?? false
@@ -40,5 +54,7 @@ pub contract FNSConfig {
     self.inboxNFTWhitelist = {}
     self._reservedFields = {}
     self.rootDomainConfig = {}
+    self.userConfig = {}
+    self.domainConfig = {}
   }
 }

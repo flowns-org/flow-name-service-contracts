@@ -101,4 +101,9 @@ export const query = async (url) => {
   return await axios.get(url)
 }
 
+export const isFlowAddr = (str = '') => {
+  return /^0x[0-9a-f]{16}$/.test(str)
+}
+
+
 export default {}

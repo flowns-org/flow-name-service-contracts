@@ -1,11 +1,11 @@
 import Flowns from 0xFlowns
 
-transaction(val: {String: Bool}) {
+transaction(key: String, flag: Bool) {
   let client: &Flowns.Admin
   prepare(account: AuthAccount) {
       self.client = account.borrow<&Flowns.Admin>(from: Flowns.FlownsAdminStoragePath) ?? panic("Could not borrow admin client")
   }
   execute {
-    self.client.setNFTWhitelist(val)
+    self.client.updateFTWhitelist(key: key, flag: flag)
   }
 }
