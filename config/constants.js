@@ -92,7 +92,8 @@ export const paths = {
     getDomainMetadata: buildPath('get_domain_metadata.cdc', 'script'),
     getALLIds: buildPath('get_all_domain_ids.cdc', 'script'),
     getEthSignInfoByAddr: buildPath('get_eth_sign_info_by_addr.cdc', 'script'),
-    test: buildPath('test_script.cdc', 'script')
+    test: buildPath('test_script.cdc', 'script'),
+    queryEthSignVerify: buildPath('get_eth_sign_verify.cdc', 'script')
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),

@@ -24,7 +24,12 @@
     },
     "Domains": "./cadence/contracts/Domains.cdc",
     "Flowns": "./cadence/contracts/Flowns.cdc",
-    "FNSConfig": "./cadence/contracts/FNSConfig.cdc",
+    "FNSConfig": {
+      "source": "./cadence/contracts/FNSConfig.cdc",
+      "aliases": {
+        "testnet": "0xb05b2abb42335e88"
+      }
+    },
     "FungibleToken": {
       "source": "./cadence/contracts/standard/FungibleToken.cdc",
       "aliases": {
@@ -114,8 +119,7 @@
     "testnet": {
       "testnet": [
         "Domains",
-        "Flowns",
-        "FNSConfig"
+        "Flowns"
       ]
     },
     "mainnet": {},

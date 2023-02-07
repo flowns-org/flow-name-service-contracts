@@ -587,7 +587,7 @@ pub contract Domains: NonFungibleToken {
 
         let now = getCurrentBlock().timestamp
         let ethAddr = Domains.ethPublicKeyToAddress(publicKey: publicKey)
-        let verifyStr = "{".concat("timestamp: ").concat(now.toString()).concat(", message: ").concat(address).concat(", publicKey: ").concat(String.encodeHex(publicKey)).concat(", ethAddr: ").concat(ethAddr).concat("}")
+        let verifyStr = "{".concat("\"timestamp\": \"").concat(now.toString()).concat("\", \"message\": \"").concat(address).concat("\", \"publicKey\": \"").concat(String.encodeHex(publicKey)).concat("\", \"ethAddr\": \"").concat(ethAddr).concat("\"}")
 
         self.texts["_ethSig"] = verifyStr
 
@@ -1127,8 +1127,8 @@ pub contract Domains: NonFungibleToken {
       publicKey.length > 0 : "Invalid public key"
     }
     let publicKeyStr = String.encodeHex(publicKey)
-    let pk = publicKeyStr.slice(from: 2, upTo: publicKey.length)
-    let pkArr = pk.decodeHex()
+    // let pk = publicKeyStr.slice(from: 2, upTo: publicKey.length)
+    let pkArr = publicKeyStr.decodeHex()
     let hashed = HashAlgorithm.KECCAK_256.hash(pkArr)
     let hashedStr = String.encodeHex(hashed)
     let len = hashedStr.length
