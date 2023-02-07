@@ -3,6 +3,7 @@ import { authz } from './authz.js'
 import fcl from '@onflow/fcl'
 import axios from 'axios'
 import { send as grpcSend } from '@onflow/transport-grpc'
+import { send as httpSend } from '@onflow/transport-http'
 
 import {
   nodeUrl,
@@ -23,6 +24,7 @@ const { setup, scripts, transactions } = paths
 export const fclInit = () => {
   fcl
     .config()
+    // .put('sdk.transport', httpSend)
     .put('sdk.transport', grpcSend)
     .put('accessNode.api', nodeUrl)
     .put('0xDomains', accountAddr)
@@ -32,9 +34,9 @@ export const fclInit = () => {
     .put('0xMetadataViews', flowNonFungibleAddr)
     .put('0xFungibleToken', flowFungibleAddr)
     .put('0xFlowToken', flowTokenAddr)
-    .put('0xKibble', KibbleTokenAddr)
+    // .put('0xKibble', KibbleTokenAddr)
     .put('0xFUSD', FUSDTokenAddr)
-    .put('grpc.metadata', { api_key: alchemyKey })
+    // .put('grpc.metadata', { api_key: alchemyKey })
 }
 
 export const sendTrx = async (CODE, args, auth = null, limit = 9999) => {
@@ -107,3 +109,4 @@ export const isFlowAddr = (str = '') => {
 
 
 export default {}
+ 

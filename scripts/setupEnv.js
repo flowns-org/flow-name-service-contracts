@@ -23,14 +23,14 @@ const main = async () => {
 
 
 
-  await buildSetupTrx('mintKibbleToken', [
-    fcl.arg(test1Addr, t.Address),
-    fcl.arg('100.00', t.UFix64),
-  ])
-  await buildSetupTrx('mintKibbleToken', [
-    fcl.arg(test2Addr, t.Address),
-    fcl.arg('100.00', t.UFix64),
-  ])
+  // await buildSetupTrx('mintKibbleToken', [
+  //   fcl.arg(test1Addr, t.Address),
+  //   fcl.arg('100.00', t.UFix64),
+  // ])
+  // await buildSetupTrx('mintKibbleToken', [
+  //   fcl.arg(test2Addr, t.Address),
+  //   fcl.arg('100.00', t.UFix64),
+  // ])
   await buildSetupTrx('createFUSDMinter', [])
   await buildSetupTrx('mintFUSD', [fcl.arg(test1Addr, t.Address), fcl.arg('1000.00', t.UFix64)])
   await buildSetupTrx('mintFUSD', [fcl.arg(test2Addr, t.Address), fcl.arg('1000.00', t.UFix64)])

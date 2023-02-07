@@ -90,6 +90,8 @@ export const paths = {
     queryDomaimId: buildPath('query_domain_id.cdc', 'script'),
     queryWhitelist: buildPath('query_white_list.cdc', 'script'),
     getDomainMetadata: buildPath('get_domain_metadata.cdc', 'script'),
+    getALLIds: buildPath('get_all_domain_ids.cdc', 'script'),
+    getEthSignInfoByAddr: buildPath('get_eth_sign_info_by_addr.cdc', 'script'),
     test: buildPath('test_script.cdc', 'script')
   },
   transactions: {
@@ -140,5 +142,6 @@ export const paths = {
     setNFTWhitelist: buildPath('set_nft_white_list.cdc'),
     updateFTWhitelist: buildPath('update_ft_white_list.cdc'),
     updateNFTWhitelist: buildPath('update_nft_white_list.cdc'),
+    setEthAddr: buildPath('set_domain_eth_address.cdc'),
   },
 }

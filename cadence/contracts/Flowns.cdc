@@ -947,7 +947,6 @@ pub contract Flowns {
     let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
     let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
     collection.renewDomainWithNameHash(nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, refer: refer)
-
   }
   
   init() {
@@ -973,3 +972,4 @@ pub contract Flowns {
     account.link<&Flowns.Admin{Flowns.AdminPrivate}>(Flowns.FlownsAdminPrivatePath, target: Flowns.FlownsAdminStoragePath)
   }
 }
+ 

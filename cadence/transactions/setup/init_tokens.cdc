@@ -1,6 +1,6 @@
 import FungibleToken from 0xFungibleToken
 import FUSD from 0xFUSD
-import Kibble from 0xKibble
+// import Kibble from 0xKibble
 import FlowToken from 0xFlowToken
 
 transaction() {
@@ -18,17 +18,17 @@ transaction() {
       target: /storage/fusdVault
     )
 
-    signer.save(<-Kibble.createEmptyVault(), to: Kibble.VaultStoragePath)
+    // signer.save(<-Kibble.createEmptyVault(), to: Kibble.VaultStoragePath)
 
-    signer.link<&Kibble.Vault{FungibleToken.Receiver}>(
-      Kibble.ReceiverPublicPath,
-      target: Kibble.VaultStoragePath
-    )
+    // signer.link<&Kibble.Vault{FungibleToken.Receiver}>(
+    //   Kibble.ReceiverPublicPath,
+    //   target: Kibble.VaultStoragePath
+    // )
 
-    signer.link<&Kibble.Vault{FungibleToken.Balance}>(
-      Kibble.BalancePublicPath,
-      target: Kibble.VaultStoragePath
-    )
+    // signer.link<&Kibble.Vault{FungibleToken.Balance}>(
+    //   Kibble.BalancePublicPath,
+    //   target: Kibble.VaultStoragePath
+    // )
 
     // signer.save(<-FlowToken.createEmptyVault(), to: /storage/flowTokenVault)
 
@@ -46,3 +46,4 @@ transaction() {
     // )
   }
 }
+ 

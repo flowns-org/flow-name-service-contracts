@@ -1,5 +1,10 @@
 import t from '@onflow/types'
-import { fclInit, buildSetupTrx, buildAndExecScript, buildAndSendTrx } from '../utils/index.js'
+import {
+  fclInit,
+  buildSetupTrx,
+  buildAndExecScript,
+  buildAndSendTrx,
+} from '../utils/index.js'
 import fcl from '@onflow/fcl'
 import { namehash } from '../utils/hash.js'
 import { accountAddr } from '../config/constants.js'
@@ -9,33 +14,27 @@ const main = async () => {
   // fcl init and load config
   fclInit()
 
-  
-  
   // setup admin cap
-  // await buildSetupTrx('setupAdminServer', [fcl.arg(accountAddr, t.Address)])
+  // await buildSetupTrx('setupAdminServer', [])
   // mint flow root domain
-  // await buildSetupTrx('mintRootDomain', [fcl.arg('li', t.String)])
-
-
-
+  // await buildSetupTrx('mintRootDomain', [fcl.arg('fn', t.String)])
 
   // setup root domain
   // await buildSetupTrx('setupRootDomainServer', [
-  //   fcl.arg(accountAddr, t.Address),
   //   fcl.arg(0, t.UInt64),
   // ])
   // set 5 len of domain name rent price
   // await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
-  //   fcl.arg(5, t.Int),
+  //   fcl.arg(10, t.Int),
   //   fcl.arg('0.00000001', t.UFix64),
   // ])
 
-
   // await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
 
-  // const nameHash = namehash('caoss.flow')
-  // const result = await registerDomain(0, 'caoss', '3153600.00000000', '5.00000000')
+  // const nameHash = namehash('caos.fn')
+  // const result = await registerDomain(0, 'flowns', '31536000.00000000', '5.00000000')
+  // console.log(result)
   // // renew
   // await renewDomain(0, 'caoss', '3153600.00000000', '0.70000000')
 
@@ -71,8 +70,8 @@ const main = async () => {
 
   // const dmoain = await buildAndExecScript('queryRootDomainsById', [fcl.arg(0, t.UInt64)])
   // console.log(dmoain)
-  const dmoains = await buildAndExecScript('queryRootDomains')
-  console.log(dmoains, 'domains')
+  // const dmoains = await buildAndExecScript('queryRootDomains')
+  // console.log(dmoains, 'domains')
   // const checkCollection = await buildAndExecScript('checkDomainCollection', [
   //   fcl.arg(accountAddr, t.Address),
   // ])
@@ -90,3 +89,4 @@ main()
     console.error(error)
     process.exit(1)
   })
+ 

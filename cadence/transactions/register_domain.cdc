@@ -27,3 +27,4 @@ transaction(domainId: UInt64, name: String, duration: UFix64, amount: UFix64, re
     Flowns.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <- self.vault, receiver: self.collectionCap, refer: refer)
   }
 }
+ 

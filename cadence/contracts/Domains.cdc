@@ -251,6 +251,8 @@ pub contract Domains: NonFungibleToken {
 
     pub fun setAddress(chainType: UInt64, address: String)
 
+    pub fun setETHAddress(address: String, publicKey: [UInt8], signature: [UInt8])
+
     pub fun removeText(key: String)
 
     pub fun removeAddress(chainType: UInt64)
@@ -540,6 +542,7 @@ pub contract Domains: NonFungibleToken {
       pre {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
+        key != "_ethSig": "`_ethSig` is reserved"
       }
       self.texts[key] = value
 
@@ -551,11 +554,50 @@ pub contract Domains: NonFungibleToken {
         !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
         !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
       }
-      self.addresses[chainType] = address
 
-      emit DmoainAddressChanged(nameHash: self.nameHash, chainType: chainType, address: address)
+      switch chainType {
+        case 0 :
+          self.addresses[chainType] = address
+          emit DmoainAddressChanged(nameHash: self.nameHash, chainType: chainType, address: address)
+          return
+        case 1 :
+          // verify domain name texts with signature
+          return
+        default:
+          return
+      }
 
     }
+
+    pub fun setETHAddress(address: String, publicKey: [UInt8], signature: [UInt8]) {
+      pre {
+        !Domains.isExpired(self.nameHash) : Domains.domainExpiredTip
+        !Domains.isDeprecated(nameHash: self.nameHash, domainId: self.id) : Domains.domainDeprecatedTip
+        address.length > 0 : "Cannot verify empty message"
+      }
+
+      let prefix = "\u{19}Ethereum Signed Message:\n".concat(address.length.toString())
+
+      assert(Domains.verifySignature(message: address, messagePrefix: prefix, hashTag: nil, hashAlgorithm: HashAlgorithm.KECCAK_256, publicKey: publicKey, signatureAlgorithm: SignatureAlgorithm.ECDSA_secp256k1, signature: signature) == true, message: "Invalid signature")
+
+      let owner = Domains.getRecords(self.nameHash)
+      assert(owner != nil, message: "Can not find owner")
+
+      if owner!.toString() == address {
+
+        let now = getCurrentBlock().timestamp
+        let ethAddr = Domains.ethPublicKeyToAddress(publicKey: publicKey)
+        let verifyStr = "{".concat("timestamp: ").concat(now.toString()).concat(", message: ").concat(address).concat(", publicKey: ").concat(String.encodeHex(publicKey)).concat(", ethAddr: ").concat(ethAddr).concat("}")
+
+        self.texts["_ethSig"] = verifyStr
+
+        
+        self.addresses[1] = ethAddr
+
+        emit DmoainAddressChanged(nameHash: self.nameHash, chainType: 1, address: address)
+      }
+    }
+
 
     pub fun removeText(key: String){
         pre {
@@ -1060,6 +1102,41 @@ pub contract Domains: NonFungibleToken {
     return self.deprecated
   }
 
+  pub fun getIdMap(): {String: UInt64 } {
+    return self.idMap
+  }
+
+  pub fun verifySignature(message: String, messagePrefix: String?, hashTag: String?, hashAlgorithm: HashAlgorithm, publicKey: [UInt8], signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) :Bool {
+      
+    let messageToVerify = (messagePrefix ?? "").concat(message)
+    let keyToVerify = PublicKey(publicKey: publicKey, signatureAlgorithm: signatureAlgorithm)
+    let isValid = keyToVerify.verify(
+        signature: signature,
+        signedData: messageToVerify.utf8,
+        domainSeparationTag: hashTag ?? "",
+        hashAlgorithm: hashAlgorithm
+    )
+    if !isValid {
+        return false
+    }
+    return true
+  }
+
+   pub fun ethPublicKeyToAddress(publicKey:[UInt8]) :String {
+    pre{
+      publicKey.length > 0 : "Invalid public key"
+    }
+    let publicKeyStr = String.encodeHex(publicKey)
+    let pk = publicKeyStr.slice(from: 2, upTo: publicKey.length)
+    let pkArr = pk.decodeHex()
+    let hashed = HashAlgorithm.KECCAK_256.hash(pkArr)
+    let hashedStr = String.encodeHex(hashed)
+    let len = hashedStr.length
+    let addr = hashedStr.slice(from: len-40, upTo: len)
+
+    return "0x".concat(addr)
+
+   }
 
   access(account) fun updateDeprecatedRecords(nameHash: String, records: {UInt64: DomainDeprecatedInfo}) {
     self.deprecated[nameHash] = records

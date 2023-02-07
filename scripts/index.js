@@ -1,28 +1,23 @@
-import t from "@onflow/types";
-import fcl from "@onflow/fcl";
+import t from '@onflow/types'
+import fcl from '@onflow/fcl'
 import {
   fclInit,
   buildAndSendTrx,
   buildAndExecScript,
   buildSetupTrx,
-} from "../utils/index.js";
-import { registerDomain, renewDomain } from "./buildTrxs.js";
-import { accountAddr } from "../config/constants.js";
-import {
-  test1Addr,
-  test2Addr,
-  test1Authz,
-  test2Authz,
-} from "../utils/authz.js";
-import { namehash, normalize } from "../utils/hash.js";
-import { query } from "../utils/index.js";
-const oneYear = 60 * 60 * 24 * 365;
-const oneHour = 60 * 20;
-const flowVaultType = "A.7e60df042a9c0868.FlowToken.Vault";
-const collectionType = "A.b05b2abb42335e88.Domains.Collection";
+} from '../utils/index.js'
+import { registerDomain, renewDomain } from './buildTrxs.js'
+import { accountAddr } from '../config/constants.js'
+import { test1Addr, test2Addr, test1Authz, test2Authz } from '../utils/authz.js'
+import { namehash, normalize } from '../utils/hash.js'
+import { query } from '../utils/index.js'
+const oneYear = 60 * 60 * 24 * 365
+const oneHour = 60 * 20
+const flowVaultType = 'A.7e60df042a9c0868.FlowToken.Vault'
+const collectionType = 'A.b05b2abb42335e88.Domains.Collection'
 
 const main = async () => {
-  fclInit();
+  fclInit()
   // await buildSetupTrx('initDomainCollection', [], test1Authz())
   // await buildSetupTrx('initDomainCollection', [], test2Authz())
 
@@ -159,12 +154,11 @@ const main = async () => {
   // const res = await buildAndExecScript('queryIsDeprecated', [fcl.arg(namehash('depr.flow'), t.String), fcl.arg(14, t.UInt64)])
   // console.log(res)
 
-  // const transferRes = await buildAndSendTrx(
-  //   'transferDomainWithHashName',
-  //   [fcl.arg(namehash('depr.flow'), t.String), fcl.arg(accountAddr, t.Address)],
-  //   test1Authz(),
-  // )
-  // console.log(transferRes)
+  const transferRes = await buildAndSendTrx(
+    'transferDomainWithHashName',
+    [fcl.arg(namehash('manshu.fn'), t.String), fcl.arg('0xc0597793abff95ba', t.Address)],
+  )
+  console.log(transferRes)
 
   // const withdraw = await buildAndSendTrx('withdrawVaultWithVaultType', [
   //   fcl.arg(namehash('caos.nft'), t.String),
@@ -463,11 +457,11 @@ const main = async () => {
   // console.log(mintRes)
 
   // console.log(await buildAndExecScript('queryUsersAllDomain', [fcl.arg(test1Addr, t.Address)]))
-  console.log(
-    await buildAndExecScript("queryUsersAllDomain", [
-      fcl.arg('0x7179def56a8b9c5e', t.Address),
-    ])
-  );
+  // console.log(
+  //   await buildAndExecScript("queryUsersAllDomain", [
+  //     fcl.arg('0xc29275ab27e701de', t.Address),
+  //   ])
+  // );
 
   // const res = await query('https://www.flowns.org/api/data/address/0x95c1afc355056c36')
   // console.log(res.data)
@@ -515,17 +509,20 @@ const main = async () => {
   // ])
   // //
   // console.log(batchRes)
-  let metadata = await buildAndExecScript("getDomainMetadata", [
-    fcl.arg('0x3c09a556ecca42dc', t.Address),
-    fcl.arg(23370, t.UInt64),
-  ]);
+  // let metadata = await buildAndExecScript("getDomainMetadata", [
+  //   fcl.arg('0x3c09a556ecca42dc', t.Address),
+  //   fcl.arg(23370, t.UInt64),
+  // ]);
 
-  console.log(metadata);
-};
+  // let ids = await buildAndExecScript('getAllDomainRecords', [])
+
+
+  // console.log(metadata);
+}
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+    console.error(error)
+    process.exit(1)
+  })

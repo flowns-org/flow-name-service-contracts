@@ -9,13 +9,17 @@
     "MetadataViews": {
       "source": "./cadence/contracts/standard/MetadataViews.cdc",
       "aliases": {
-        "testnet": "0x631e88ae7f1d7c20"
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448",
+        "sandboxnet": "0x83ade3a54eb3870c"
       }
     },
     "NonFungibleToken": {
       "source": "./cadence/contracts/standard/NonFungibleToken.cdc",
       "aliases": {
-        "testnet": "0x631e88ae7f1d7c20"
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448",
+        "sandboxnet": "0x83ade3a54eb3870c"
       }
     },
     "Domains": "./cadence/contracts/Domains.cdc",
@@ -25,21 +29,25 @@
       "source": "./cadence/contracts/standard/FungibleToken.cdc",
       "aliases": {
         "testnet": "0x9a0766d93b6608b7",
-        "emulator": "0xee82856bf20e2aa6"
+        "emulator": "0xee82856bf20e2aa6",
+        "mainnet": "0xf233dcee88fe0abe",
+        "sandboxnet": "0xe20612a0776ca4bf"
       }
     },
     "FlowToken": {
       "source": "./cadence/contracts/tokens/FlowToken.cdc",
       "aliases": {
         "testnet": "0x631e88ae7f1d7c20",
-        "emulator": "0x0ae53cb6e3f42a79"
+        "emulator": "0x0ae53cb6e3f42a79",
+        "sandboxnet": "0x0661ab7d6696a460"
       }
     },
     "FUSD": {
       "source": "./cadence/contracts/tokens/FUSD.cdc",
       "aliases": {
         "testnet": "0xe223d8a629e49c68",
-        "emulator": "0xf8d6e0586b0a20c7"
+        "emulator": "0xf8d6e0586b0a20c7",
+        "sandboxnet": "0x6c52cbc80f034d1b"
       }
     },
     "Kibble": {
@@ -52,7 +60,8 @@
   "networks": {
     "emulator": "127.0.0.1:3569",
     "mainnet": "access.mainnet.nodes.onflow.org:9000",
-    "testnet": "access.devnet.nodes.onflow.org:9000"
+    "testnet": "access.devnet.nodes.onflow.org:9000",
+    "sandboxnet": "access.sandboxnet.nodes.onflow.org:9000"
   },
   "accounts": {
     "emulator-account": {
@@ -82,6 +91,10 @@
     "testnet": {
       "address": "b05b2abb42335e88",
       "keys": "dbf01310a3f2fe3a244fc95aa624a865b8367fc2b93bb5edd3293c1cc2d1e006"
+    },
+    "sandbox": {
+      "address": "8998b29311d1f3da",
+      "keys": "dbf01310a3f2fe3a244fc95aa624a865b8367fc2b93bb5edd3293c1cc2d1e006"
     }
   },
   "deployments": {
@@ -104,6 +117,15 @@
         "Flowns",
         "FNSConfig"
       ]
+    },
+    "mainnet": {},
+    "sandboxnet": {
+      "sandbox": [
+        "Domains",
+        "Flowns",
+        "FNSConfig"
+      ]
     }
   }
 }
+ 
