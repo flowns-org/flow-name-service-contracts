@@ -28,3 +28,4 @@ transaction(nameHash: String, key: String, amount: UFix64) {
     self.vaultRef.deposit(from: <- self.domain.withdrawVault(key: key, amount: amount))
   }
 }
+ 

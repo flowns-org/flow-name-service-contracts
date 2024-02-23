@@ -1,5 +1,10 @@
 import t from '@onflow/types'
-import { fclInit, buildSetupTrx, buildAndExecScript, buildAndSendTrx } from '../utils/index.js'
+import {
+  fclInit,
+  buildSetupTrx,
+  buildAndExecScript,
+  buildAndSendTrx,
+} from '../utils/index.js'
 import fcl from '@onflow/fcl'
 import { namehash } from '../utils/hash.js'
 import { accountAddr } from '../config/constants.js'
@@ -25,9 +30,9 @@ const main = async () => {
   // // console.log('mint nft root name', nftRes)
 
   // // setup flow root  domain
-  await buildSetupTrx('setupRootDomainServer', [
-    fcl.arg(1, t.UInt64),
-  ])
+  // await buildSetupTrx('setupRootDomainServer', [
+  //   fcl.arg(1, t.UInt64),
+  // ])
 
   // // setup nft root domain
   // await buildSetupTrx('setupRootDomainServer', [
@@ -47,44 +52,47 @@ const main = async () => {
   //   fcl.arg('0.0000003', t.UFix64),
   // ])
 
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // let tx = null
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(5, t.Int),
-  //   fcl.arg('0.00000005', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
 
+  // console.log(tx)
 
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(6, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
+  // console.log(tx)
 
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(7, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
+  // console.log(tx)
 
-
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(8, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
-
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // console.log(tx)
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(9, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
-
-  // await buildSetupTrx('setupDomainRentPrice', [
+  // console.log(tx)
+  // tx = await buildSetupTrx('setupDomainRentPrice', [
   //   fcl.arg(0, t.UInt64),
   //   fcl.arg(10, t.Int),
-  //   fcl.arg('0.00000001', t.UFix64),
+  //   fcl.arg('0.0000002', t.UFix64),
   // ])
-
+  // console.log(tx)
 
   // await buildAndSendTrx('setFlownsPauseStatus', [fcl.arg(false, t.Bool)])
 
@@ -150,3 +158,4 @@ main()
     console.error(error)
     process.exit(1)
   })
+ 

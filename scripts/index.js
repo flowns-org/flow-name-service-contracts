@@ -154,11 +154,11 @@ const main = async () => {
   // const res = await buildAndExecScript('queryIsDeprecated', [fcl.arg(namehash('depr.flow'), t.String), fcl.arg(14, t.UInt64)])
   // console.log(res)
 
-  const transferRes = await buildAndSendTrx(
-    'transferDomainWithHashName',
-    [fcl.arg(namehash('manshu.fn'), t.String), fcl.arg('0xc0597793abff95ba', t.Address)],
-  )
-  console.log(transferRes)
+  // const transferRes = await buildAndSendTrx('transferDomainWithHashName', [
+  //   fcl.arg(namehash('manshu.fn'), t.String),
+  //   fcl.arg('0xc0597793abff95ba', t.Address),
+  // ])
+  // console.log(transferRes)
 
   // const withdraw = await buildAndSendTrx('withdrawVaultWithVaultType', [
   //   fcl.arg(namehash('caos.nft'), t.String),
@@ -200,10 +200,11 @@ const main = async () => {
   // console.log(res)
 
   // const res = await buildAndSendTrx('depositDomainVaultWithFlow', [
-  //   fcl.arg(namehash('caos.flow'), t.String),
-  //   fcl.arg('1.0', t.UFix64),
+  //   fcl.arg(namehash('caosbad.fn'), t.String),
+  //   fcl.arg('1000.00', t.UFix64),
   // ])
   // console.log(res)
+
   // const res1 = await buildAndSendTrx('depositDomainVaultWithFlow', [
   //   fcl.arg(namehash('caos.test'), t.String),
   //   fcl.arg('0.01', t.UFix64),
@@ -516,8 +517,20 @@ const main = async () => {
 
   // let ids = await buildAndExecScript('getAllDomainRecords', [])
 
-
   // console.log(metadata);
+
+  // withdraw
+  // const withdrawRes = await await buildAndSendTrx('withdrawRootVault', [
+  //   fcl.arg(0, t.UInt64),
+  //   fcl.arg('1000.00', t.UFix64),
+  // ])
+  // console.log(withdrawRes)
+
+  // let bal = await buildAndExecScript('queryRootDomainVaultBalance', [
+  //   fcl.arg(0, t.UInt64),
+  // ])
+
+  // console.log(bal)
 }
 
 main()

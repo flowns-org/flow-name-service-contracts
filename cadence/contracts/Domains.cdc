@@ -483,13 +483,13 @@ pub contract Domains: NonFungibleToken {
         case Type<MetadataViews.NFTCollectionDisplay>():
             let squareMedia = MetadataViews.Media(
                 file: MetadataViews.HTTPFile(
-                    url: "https://www.flowns.org/_next/image?url=%2Fassets%2Fflowns_v_logo_light.svg&w=256&q=75"
+                    url: "https://www.flowns.org/assets/flowns_logo_light.svg"
                 ),
                 mediaType: "image/svg+xml"
             )
             let banerMedia = MetadataViews.Media(
                 file: MetadataViews.HTTPFile(
-                    url: "https://www.flowns.org/_next/image?url=%2Fassets%2Fflowns_logo_light.svg&w=128&q=75"
+                    url: "https://www.flowns.org/assets/flowns_logo_light.svg"
                 ),
                 mediaType: "image/svg+xml"
             )
