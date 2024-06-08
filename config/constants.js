@@ -93,7 +93,13 @@ export const paths = {
     getALLIds: buildPath('get_all_domain_ids.cdc', 'script'),
     getEthSignInfoByAddr: buildPath('get_eth_sign_info_by_addr.cdc', 'script'),
     test: buildPath('test_script.cdc', 'script'),
-    queryEthSignVerify: buildPath('get_eth_sign_verify.cdc', 'script')
+    queryEthSignVerify: buildPath('get_eth_sign_verify.cdc', 'script'),
+    //==
+    getAccountTotalFlowBalance:  buildPath('get_account_total_flow_balance.cdc', 'script'),
+    getAccountTotalLockedFlowBalance:  buildPath('get_account_total_Locked_flow_balance.cdc', 'script'),
+    getAccountTotalUnlockedFlowBalance:  buildPath('get_account_total_unlocked_flow_balance.cdc', 'script'),
+    checkLockedFlowEnable:  buildPath('is_locked_flow_enable.cdc', 'script'),
+
   },
   transactions: {
     registerDomain: buildPath('register_domain.cdc'),

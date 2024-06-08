@@ -531,6 +531,36 @@ const main = async () => {
   // ])
 
   // console.log(bal)
+
+  // locked account test
+  const lockedAddr = '0xc0597793abff95ba'
+  let lockedEnable = await buildAndExecScript('checkLockedFlowEnable', [
+    fcl.arg(lockedAddr, t.Address),
+  ])
+
+  console.log(lockedEnable)
+
+  let totalBal = await buildAndExecScript('getAccountTotalFlowBalance', [
+    fcl.arg(lockedAddr, t.Address),
+  ])
+
+  console.log(totalBal, 'totalBal')
+
+  let totalLockBal = await buildAndExecScript(
+    'getAccountTotalLockedFlowBalance',
+    [fcl.arg(lockedAddr, t.Address)],
+  )
+
+  console.log(totalLockBal, 'totalLockBal')
+
+  let totalUnlock = await buildAndExecScript(
+    'getAccountTotalUnlockedFlowBalance',
+    [fcl.arg(lockedAddr, t.Address)],
+  )
+
+  console.log(totalUnlock, 'totalUnlock')
+
+  
 }
 
 main()
