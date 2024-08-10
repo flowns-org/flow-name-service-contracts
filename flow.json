@@ -14,6 +14,14 @@
         "sandboxnet": "0x83ade3a54eb3870c"
       }
     },
+    "ViewResolver": {
+      "source": "./cadence/contracts/standard/ViewResolver.cdc",
+      "aliases": {
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448",
+        "sandboxnet": "0x83ade3a54eb3870c"
+      }
+    },
     "NonFungibleToken": {
       "source": "./cadence/contracts/standard/NonFungibleToken.cdc",
       "aliases": {
@@ -53,12 +61,6 @@
         "testnet": "0xe223d8a629e49c68",
         "emulator": "0xf8d6e0586b0a20c7",
         "sandboxnet": "0x6c52cbc80f034d1b"
-      }
-    },
-    "Kibble": {
-      "source": "./cadence/contracts/tokens/Kibble.cdc",
-      "aliases": {
-        "emulator": "0xf8d6e0586b0a20c7"
       }
     }
   },
@@ -107,11 +109,10 @@
       "emulator-account": [
         "MetadataViews",
         "NonFungibleToken",
+        "ViewResolver",
         "Domains",
         "Flowns",
-        "FNSConfig",
-        "Kibble",
-        "FUSD"
+        "FNSConfig"
       ],
       "test1": [],
       "test2": []
@@ -132,4 +133,3 @@
     }
   }
 }
- 

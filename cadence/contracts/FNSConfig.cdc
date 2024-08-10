@@ -1,5 +1,5 @@
 
-pub contract FNSConfig {
+access(all) contract FNSConfig {
 
   access(self) var inboxFTWhitelist: {String: Bool}
   access(self) var inboxNFTWhitelist: {String: Bool}
@@ -32,16 +32,16 @@ pub contract FNSConfig {
 
 
 
-  pub fun checkFTWhitelist(_ typeIdentifier: String) :Bool {
+  access(all) fun checkFTWhitelist(_ typeIdentifier: String) :Bool {
     return self.inboxFTWhitelist[typeIdentifier] ?? false
   }
 
-   pub fun checkNFTWhitelist(_ typeIdentifier: String) :Bool {
+   access(all) fun checkNFTWhitelist(_ typeIdentifier: String) :Bool {
     return self.inboxNFTWhitelist[typeIdentifier] ?? false
   }
 
   
-  pub fun getWhitelist(_ type: String): {String: Bool} {
+  access(all) fun getWhitelist(_ type: String): {String: Bool} {
     if type == "NFT" {
       return self.inboxNFTWhitelist
     }
