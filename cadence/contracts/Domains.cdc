@@ -269,7 +269,7 @@ access(all) contract Domains: NonFungibleToken {
 
     access(all) fun removeSubdomainAddress(nameHash: String, chainType: UInt64)
 
-    access(all) fun withdrawVault(key: String, amount: UFix64): @FungibleToken.Vault
+    access(all) fun withdrawVault(key: String, amount: UFix64): @{FungibleToken.Vault}
 
     access(all) fun withdrawNFT(key: String, itemId: UInt64): @{NonFungibleToken.NFT} 
 
@@ -387,7 +387,7 @@ access(all) contract Domains: NonFungibleToken {
   }
 
   // Domain resource for NFT standard
-  access(all) resource NFT: DomainPublic, DomainPrivate, ViewResolver.Resolver{
+  access(all) resource NFT: DomainPublic, DomainPrivate, ViewResolver.Resolver, NonFungibleToken.NFT{
 
     access(all) let id: UInt64
     access(all) let name: String
@@ -421,7 +421,7 @@ access(all) contract Domains: NonFungibleToken {
       self.createdAt = getCurrentBlock().timestamp
     }
 
-    access(all) fun getViews(): [Type] {
+    access(all) view fun getViews(): [Type] {
       return [
         Type<MetadataViews.Display>(),
         Type<MetadataViews.Royalties>(),
@@ -462,7 +462,7 @@ access(all) contract Domains: NonFungibleToken {
                 self.id
             )
         case Type<MetadataViews.Royalties>():
-            let receieverCap =  Domains.account.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+            let receieverCap =  Domains.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
             let royalty= MetadataViews.Royalty(receiver: receieverCap, cut: 0.1, description: "Flowns will take 10% as second trade royalty fee")
             return MetadataViews.Royalties([royalty])
             
@@ -475,7 +475,7 @@ access(all) contract Domains: NonFungibleToken {
                 publicCollection: Type<&Domains.Collection>(),
                 publicLinkedType: Type<&Domains.Collection>(),
                 createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
-                    return <- Domains.createEmptyCollection()
+                    return <- Domains.createEmptyCollection(nftType: Type<@Domains.NFT>())
                 })
             )
         case Type<MetadataViews.NFTCollectionDisplay>():
@@ -721,7 +721,8 @@ access(all) contract Domains: NonFungibleToken {
       let ids = self.subdomains.keys
       var subdomains:[SubdomainDetail] = []
       for id in ids {
-        let subRef = (&self.subdomains[id] as! &Subdomain?)!
+        // todo
+        let subRef = (&self.subdomains[id] as &Subdomain?)!
         let detail = subRef.getDetail()
         subdomains.append(detail)
       }
@@ -881,6 +882,10 @@ access(all) contract Domains: NonFungibleToken {
         emit DomainReceiveOpened(name: self.getDomainName())
       }
     }
+
+    access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+      return <- Domains.createEmptyCollection(nftType: Type<@Domains.NFT>())
+    }
     
   }
 
@@ -890,9 +895,9 @@ access(all) contract Domains: NonFungibleToken {
 
     access(all) fun getIDs(): [UInt64]
 
-    access(all) fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
+    access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 
-    access(all) fun borrowDomain(id: UInt64): &{Domains.DomainPublic}
+    access(all) fun borrowDomain(id: UInt64): &Domains.NFT
 
     access(all) fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
   }
@@ -917,7 +922,7 @@ access(all) contract Domains: NonFungibleToken {
     }
 
     // withdraw removes an NFT from the collection and moves it to the caller
-    access(all) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
+    access(NonFungibleToken.Withdraw) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
       let domain <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing domain")
       
       emit Withdraw(id: domain.id, from: self.owner?.address)
@@ -927,7 +932,7 @@ access(all) contract Domains: NonFungibleToken {
 
     access(all) fun deposit(token: @{NonFungibleToken.NFT}) {
 
-      let token <- token as! @Domains.NFT
+      let token <- token as! @{NonFungibleToken.NFT, Domains.DomainPublic}
       let id: UInt64 = token.id
       let nameHash = token.nameHash
 
@@ -942,8 +947,9 @@ access(all) contract Domains: NonFungibleToken {
       
       Domains.updateRecords(nameHash: nameHash, address: self.owner?.address)
       
-      // add the new token to the dictionary which removes the old one
-      let oldToken <- self.ownedNFTs[id] <- token
+      // add the new token to the dictionary which removes the old one  
+      // todo
+      let oldToken <- self.ownedNFTs[id] <- token as! @{NonFungibleToken.NFT}
 
       emit Deposit(id: id,to: self.owner?.address)
 
@@ -960,8 +966,8 @@ access(all) contract Domains: NonFungibleToken {
         return self.ownedNFTs.keys.length
     }
 
-    access(all) view fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT} {
-      return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
+    access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
+      return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
     }
 
 
@@ -979,7 +985,7 @@ access(all) contract Domains: NonFungibleToken {
     }
     
     // Borrow domain for public use
-    access(all) fun borrowDomain(id: UInt64): &{Domains.DomainPublic} {
+    access(all) fun borrowDomain(id: UInt64): &Domains.NFT {
       pre {
         self.ownedNFTs[id] != nil: "domain doesn't exist"
       }
@@ -996,50 +1002,26 @@ access(all) contract Domains: NonFungibleToken {
       return ref! as! &Domains.NFT
     }
 
-    access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
-      switch viewType {
-        case Type<MetadataViews.NFTCollectionData>():
-          let collectionData = MetadataViews.NFTCollectionData(
-            storagePath: Domains.CollectionStoragePath,
-            publicPath: Domains.CollectionPublicPath,
-            publicCollection: Type<&Domains.Collection>(),
-            publicLinkedType: Type<&Domains.Collection>(),
-            createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
-              return <-Domains.createEmptyCollection()
-            })
-          )
-          return collectionData
-        case Type<MetadataViews.NFTCollectionDisplay>():
-          let squareMedia = MetadataViews.Media(
-              file: MetadataViews.HTTPFile(
-                  url: "https://www.flowns.org/assets/flowns_logo_light.svg"
-              ),
-              mediaType: "image/svg+xml"
-          )
-          let banerMedia = MetadataViews.Media(
-              file: MetadataViews.HTTPFile(
-                  url: "https://www.flowns.org/assets/flowns_logo_light.svg"
-              ),
-              mediaType: "image/svg+xml"
-          )
-          return MetadataViews.NFTCollectionDisplay(
-            name: "The Flowns domain Collection",
-            description: "This collection is managed by Flowns and present the ownership of domain.",
-            externalURL: MetadataViews.ExternalURL("https://flowns.org"),
-            squareImage: squareMedia,
-            bannerImage: banerMedia,
-            socials: {
-                "twitter": MetadataViews.ExternalURL("https://twitter.com/flownsorg"),
-                "discord": MetadataViews.ExternalURL("https://discord.gg/fXz4gBaYXd"),
-                "website": MetadataViews.ExternalURL("https://flowns.org"),
-                "medium": MetadataViews.ExternalURL("https://medium.com/@Flowns")
-            }
-          )
-      }
-      return nil
+    access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+      return <-Domains.createEmptyCollection(nftType: Type<@Domains.NFT>())
     }
 
+    /// getSupportedNFTTypes returns a list of NFT types that this receiver accepts
+    access(all) view fun getSupportedNFTTypes(): {Type: Bool} {
+      let supportedTypes: {Type: Bool} = {}
+      supportedTypes[Type<@Domains.NFT>()] = true
+      return supportedTypes
+    }
 
+    /// Returns whether or not the gisSupportedNFTTypeiven type is accepted by the collection
+    /// A collection that can accept any type should just return true by default
+    access(all) view fun isSupportedNFTType(type: Type): Bool {
+      if type == Type<@Domains.NFT>() {
+        return true
+      } else {
+        return false
+      }
+    }
 
     access(account) fun mintDomain(name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){
       
@@ -1080,7 +1062,8 @@ access(all) contract Domains: NonFungibleToken {
         nameHash: nameHash,
         parent: parentName,
       )
-      let nft <- domain as @{NonFungibleToken.NFT}
+      // todo
+      let nft <- domain as! @{NonFungibleToken.NFT}
       
       Domains.updateRecords(nameHash: nameHash, address: receiver.address)
       Domains.updateExpired(nameHash: nameHash, time: expiredAt)
@@ -1093,11 +1076,62 @@ access(all) contract Domains: NonFungibleToken {
 
   }
 
-  access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+
+  access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
 
     let collection <- create Collection()
     return <- collection
   }
+
+  access(all) view fun getContractViews(resourceType: Type?): [Type] {
+    return [
+      Type<MetadataViews.NFTCollectionData>(),
+      Type<MetadataViews.NFTCollectionDisplay>()
+    ]
+  }
+
+  access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+    switch viewType {
+      case Type<MetadataViews.NFTCollectionData>():
+        let collectionData = MetadataViews.NFTCollectionData(
+          storagePath: Domains.CollectionStoragePath,
+          publicPath: Domains.CollectionPublicPath,
+          publicCollection: Type<&Domains.Collection>(),
+          publicLinkedType: Type<&Domains.Collection>(),
+          createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+            return <-Domains.createEmptyCollection(nftType: Type<@Domains.NFT>())
+          })
+        )
+        return collectionData
+      case Type<MetadataViews.NFTCollectionDisplay>():
+        let squareMedia = MetadataViews.Media(
+            file: MetadataViews.HTTPFile(
+                url: "https://www.flowns.org/assets/flowns_logo_light.svg"
+            ),
+            mediaType: "image/svg+xml"
+        )
+        let banerMedia = MetadataViews.Media(
+            file: MetadataViews.HTTPFile(
+                url: "https://www.flowns.org/assets/flowns_logo_light.svg"
+            ),
+            mediaType: "image/svg+xml"
+        )
+        return MetadataViews.NFTCollectionDisplay(
+          name: "The Flowns domain Collection",
+          description: "This collection is managed by Flowns and present the ownership of domain.",
+          externalURL: MetadataViews.ExternalURL("https://flowns.org"),
+          squareImage: squareMedia,
+          bannerImage: banerMedia,
+          socials: {
+              "twitter": MetadataViews.ExternalURL("https://twitter.com/flownsorg"),
+              "discord": MetadataViews.ExternalURL("https://discord.gg/fXz4gBaYXd"),
+              "website": MetadataViews.ExternalURL("https://flowns.org"),
+              "medium": MetadataViews.ExternalURL("https://medium.com/@Flowns")
+          }
+        )
+      }
+      return nil
+    }
 
   // Get domain's expired time in timestamp 
   access(all) fun getExpiredTime(_ nameHash: String) : UFix64? {
@@ -1216,7 +1250,7 @@ access(all) view fun isDeprecated(nameHash: String, domainId: UInt64): Bool {
 
     account.storage.save(<- collection, to: self.CollectionStoragePath)
 
-    let collectionCap = account.capabilities.storage.issue<&Domains.Collection>(self.CollectionStoragePath)
+    let collectionCap = account.capabilities.storage.issue<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(self.CollectionStoragePath)
     account.capabilities.publish(collectionCap, at: self.CollectionPublicPath)
 
     emit ContractInitialized()

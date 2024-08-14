@@ -11,7 +11,8 @@
       "aliases": {
         "testnet": "0x631e88ae7f1d7c20",
         "mainnet": "0x1d7e57aa55817448",
-        "sandboxnet": "0x83ade3a54eb3870c"
+        "sandboxnet": "0x83ade3a54eb3870c",
+        "emulator": "0xf8d6e0586b0a20c7"
       }
     },
     "ViewResolver": {
@@ -19,7 +20,8 @@
       "aliases": {
         "testnet": "0x631e88ae7f1d7c20",
         "mainnet": "0x1d7e57aa55817448",
-        "sandboxnet": "0x83ade3a54eb3870c"
+        "sandboxnet": "0x83ade3a54eb3870c",
+        "emulator":"0xf8d6e0586b0a20c7"
       }
     },
     "NonFungibleToken": {
@@ -27,7 +29,8 @@
       "aliases": {
         "testnet": "0x631e88ae7f1d7c20",
         "mainnet": "0x1d7e57aa55817448",
-        "sandboxnet": "0x83ade3a54eb3870c"
+        "sandboxnet": "0x83ade3a54eb3870c",
+        "emulator":"0xf8d6e0586b0a20c7"
       }
     },
     "Domains": "./cadence/contracts/Domains.cdc",
@@ -54,14 +57,6 @@
         "emulator": "0x0ae53cb6e3f42a79",
         "sandboxnet": "0x0661ab7d6696a460"
       }
-    },
-    "FUSD": {
-      "source": "./cadence/contracts/tokens/FUSD.cdc",
-      "aliases": {
-        "testnet": "0xe223d8a629e49c68",
-        "emulator": "0xf8d6e0586b0a20c7",
-        "sandboxnet": "0x6c52cbc80f034d1b"
-      }
     }
   },
   "networks": {
@@ -72,7 +67,7 @@
   },
   "accounts": {
     "emulator-account": {
-      "address": "f8d6e0586b0a20c7",
+      "address": "0xf8d6e0586b0a20c7",
       "keys": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
     },
     "test1": {
@@ -107,9 +102,6 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
-        "MetadataViews",
-        "NonFungibleToken",
-        "ViewResolver",
         "Domains",
         "Flowns",
         "FNSConfig"

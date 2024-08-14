@@ -11,7 +11,7 @@ access(all) contract Flowns {
   access(all) let FlownsAdminStoragePath: StoragePath
   access(all) let CollectionStoragePath: StoragePath
   access(all) let CollectionPublicPath: PublicPath
-  access(all) let CollectionPrivatePath: PrivatePath
+  // access(all) let CollectionPrivatePath: PrivatePath
 
   // variables
   access(all) var totalRootDomains: UInt64
@@ -225,11 +225,11 @@ access(all) contract Flowns {
         
       let referAcc = getAccount(refer!)
 
-      let collectionCap = referAcc.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath) 
-      let collection = collectionCap.borrow()
+      let collection = referAcc.capabilities.borrow<&Domains.Collection>(Domains.CollectionPublicPath) 
+      // let collection = collectionCap.borrow()
       if collection != nil {
         let ids = collection!.getIDs()
-        var defaultDomain: &{Domains.DomainPublic}? = nil
+        var defaultDomain: &Domains.NFT? = nil
         defaultDomain = collection!.borrowDomain(id: ids[0])!
         if ids.length > 0 {
           for id in ids {
@@ -373,6 +373,7 @@ access(all) contract Flowns {
 
       let preVault <- self.domainVault <- vault
       
+      destroy preVault
       // clean the price
       self.prices = {}
       emit RootDomainVaultChanged()
@@ -615,9 +616,10 @@ access(all) contract Flowns {
 
     // renew domain by nameHash with admin auth
     access(account) fun renewDomainWithAdmin(nameHash: String, duration: UFix64) {
-      pre{
-        Domains.getExpiredTime(nameHash) != nil : "Domain doesn't exist"
-      }
+      // pre{
+      //   Domains.getExpiredTime(nameHash) != nil : "Domain doesn't exist"
+      // }
+      assert(Domains.getExpiredTime(nameHash) != nil, message: "Can not find owner")
       let expiredAt = Domains.getExpiredTime(nameHash)! + UFix64(duration)
       // Update domain's expire time with Domains expired mapping
       Domains.updateExpired(nameHash: nameHash, time: expiredAt )
@@ -844,17 +846,15 @@ access(all) contract Flowns {
   }
 
   // query domain info by nameHash
-  access(all) fun getDomain(nameHash: String): &{Domains.DomainPublic}? {
+  access(all) fun getDomain(nameHash: String): &Domains.NFT? {
     let address = Domains.getRecords(nameHash) ?? panic("Domain not exist")
     let account = getAccount(address)
-    let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)!
-    let collection = collectionCap.borrow()!
-    var domain: &{Domains.DomainPublic}? = nil
+    let collection = account.capabilities.borrow<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)!
+    // let collection = collectionCap.borrow()!
+    var domain: &Domains.NFT? = nil
 
     let id = Domains.getDomainId(nameHash)
-    if id != nil && !Domains.isDeprecated(nameHash: nameHash, domainId: id!) {
-      domain = collection.borrowDomain(id: id!)
-    }
+    domain = collection.borrowDomain(id: id!)
     return domain
   }
 
@@ -862,9 +862,9 @@ access(all) contract Flowns {
   // Query root domain
   access(all) fun getRootDomainInfo(domainId: UInt64): RootDomainInfo? {
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    if let collection = rootCollectionCap.borrow()  {
-      return collection.getDomainInfo(domainId: domainId)
+    let collection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    if collection != nil {
+      return collection!.getDomainInfo(domainId: domainId)
     }
     return nil
   }
@@ -872,9 +872,9 @@ access(all) contract Flowns {
   access(all) fun getAllRootDomains(): {UInt64: RootDomainInfo}? {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    if let collection = rootCollectionCap.borrow()  {
-        return collection.getAllDomains()
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    if rootCollection != nil  {
+        return rootCollection!.getAllDomains()
     }
     return nil
   }
@@ -891,9 +891,9 @@ access(all) contract Flowns {
   access(all) fun getRentPrices(domainId: UInt64): {Int: UFix64} {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    if let collection = rootCollectionCap.borrow()  {
-      return collection.getPrices(domainId: domainId)
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    if rootCollection != nil  {
+      return rootCollection!.getPrices(domainId: domainId)
     }
     return {}
   }
@@ -901,9 +901,9 @@ access(all) contract Flowns {
   access(all) fun getRootVaultBalance(domainId: UInt64): UFix64 {
 
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    let collection = rootCollectionCap.borrow()?? panic("Could not borrow collection ")
-    let balance = collection.getVaultBalance(domainId: domainId)
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    // let collection = rootCollectionCap.borrow()?? panic("Could not borrow collection ")
+    let balance = rootCollection!.getVaultBalance(domainId: domainId)
     return balance
   }
 
@@ -912,9 +912,9 @@ access(all) contract Flowns {
       Flowns.isPause == false : "Register pause"
     }
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
-    collection.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver, refer: refer)
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    // let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
+    rootCollection!.registerDomain(domainId: domainId, name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver, refer: refer)
   }
   
   access(all) fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @{FungibleToken.Vault}, refer: Address?) {
@@ -922,9 +922,9 @@ access(all) contract Flowns {
       Flowns.isPause == false : "Renewer pause"
     }
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
-    collection.renewDomain(domainId: domainId, domain: domain, duration: duration, feeTokens: <-feeTokens, refer: refer)
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    // let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
+    rootCollection!.renewDomain(domainId: domainId, domain: domain, duration: duration, feeTokens: <-feeTokens, refer: refer)
   }
 
   access(all) fun renewDomainWithNameHash(nameHash: String, duration: UFix64, feeTokens: @{FungibleToken.Vault}, refer: Address?) {
@@ -934,9 +934,9 @@ access(all) contract Flowns {
     }
     
     let account = Flowns.account
-    let rootCollectionCap = account.getCapability<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
-    let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
-    collection.renewDomainWithNameHash(nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, refer: refer)
+    let rootCollection = account.capabilities.borrow<&{Flowns.RootDomainCollectionPublic}>(self.CollectionPublicPath)
+    // let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
+    rootCollection!.renewDomainWithNameHash(nameHash: nameHash, duration: duration, feeTokens: <-feeTokens, refer: refer)
   }
   
   init() {
