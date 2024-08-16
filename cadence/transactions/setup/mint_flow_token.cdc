@@ -7,16 +7,15 @@ transaction(recipient: Address, amount: UFix64) {
     let tokenAdmin: &FlowToken.Administrator
     let tokenReceiver: &{FungibleToken.Receiver}
 
-    prepare(signer: AuthAccount) {
+    prepare(signer: auth(Storage, BorrowValue) &Account) {
 
-        self.tokenAdmin = signer
-            .borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)
-            ?? panic("Signer is not the token admin")
+        self.tokenAdmin = signer.storage
+            .borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)!
 
         self.tokenReceiver = getAccount(recipient)
-            .getCapability(/public/flowTokenReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Unable to borrow receiver reference")
+            .capabilities
+            .borrow<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+
     }
 
     execute {

@@ -6,17 +6,17 @@ import FlowToken from 0xFlowToken
 transaction() {
   prepare(signer: AuthAccount) {
 
-    signer.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
+    // signer.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
 
-    signer.link<&FUSD.Vault{FungibleToken.Receiver}>(
-      /public/fusdReceiver,
-      target: /storage/fusdVault
-    )
+    // signer.link<&FUSD.Vault{FungibleToken.Receiver}>(
+    //   /public/fusdReceiver,
+    //   target: /storage/fusdVault
+    // )
 
-    signer.link<&FUSD.Vault{FungibleToken.Balance}>(
-      /public/fusdBalance,
-      target: /storage/fusdVault
-    )
+    // signer.link<&FUSD.Vault{FungibleToken.Balance}>(
+    //   /public/fusdBalance,
+    //   target: /storage/fusdVault
+    // )
 
     // signer.save(<-Kibble.createEmptyVault(), to: Kibble.VaultStoragePath)
 

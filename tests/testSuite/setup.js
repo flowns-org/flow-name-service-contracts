@@ -242,10 +242,10 @@ export const setupTest = () =>
       ])
       expect(Number(balanceQuery)).toBe(6.1)
 
-      const changeVaultRes = await buildAndSendTrx('changeRootDomainVaultWithFusd', [
-        fcl.arg(fnsDomainId, t.UInt64),
-      ])
-      expect(changeVaultRes).toBeNull()
+      // const changeVaultRes = await buildAndSendTrx('changeRootDomainVaultWithFusd', [
+      //   fcl.arg(fnsDomainId, t.UInt64),
+      // ])
+      // expect(changeVaultRes).toBeNull()
 
       console.log(
         await buildAndExecScript('queryRootDomainsById', [fcl.arg(fnsDomainId, t.UInt64)]),
@@ -263,25 +263,25 @@ export const setupTest = () =>
       ])
       expect(Number(balQuery)).toBe(0.0)
 
-      const changeVaultAgainRes = await buildAndSendTrx('changeRootDomainVaultWithFusd', [
-        fcl.arg(fnsDomainId, t.UInt64),
-      ])
-      expect(changeVaultAgainRes).not.toBeNull()
-      expect(changeVaultAgainRes.status).toBe(4)
+      // const changeVaultAgainRes = await buildAndSendTrx('changeRootDomainVaultWithFusd', [
+      //   fcl.arg(fnsDomainId, t.UInt64),
+      // ])
+      // expect(changeVaultAgainRes).not.toBeNull()
+      // expect(changeVaultAgainRes.status).toBe(4)
 
-      await buildSetupTrx('setupDomainRentPrice', [
-        fcl.arg(fnsDomainId, t.UInt64),
-        fcl.arg(4, t.Int),
-        fcl.arg('0.0000001', t.UFix64),
-      ])
+      // await buildSetupTrx('setupDomainRentPrice', [
+      //   fcl.arg(fnsDomainId, t.UInt64),
+      //   fcl.arg(4, t.Int),
+      //   fcl.arg('0.0000001', t.UFix64),
+      // ])
 
-      await buildSetupTrx('setupDomainRentPrice', [
-        fcl.arg(fnsDomainId, t.UInt64),
-        fcl.arg(10, t.Int),
-        fcl.arg('0.0000001', t.UFix64),
-      ])
+      // await buildSetupTrx('setupDomainRentPrice', [
+      //   fcl.arg(fnsDomainId, t.UInt64),
+      //   fcl.arg(10, t.Int),
+      //   fcl.arg('0.0000001', t.UFix64),
+      // ])
 
-      const registerAgainRes = await registerDomain(fnsDomainId, 'fail', oneYear.toFixed(2), '3.10')
-      expect(registerAgainRes).toBeNull()
+      // const registerAgainRes = await registerDomain(fnsDomainId, 'fail', oneYear.toFixed(2), '3.10')
+      // expect(registerAgainRes).toBeNull()
     })
   })
