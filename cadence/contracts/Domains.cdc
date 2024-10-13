@@ -913,7 +913,7 @@ access(all) contract Domains: NonFungibleToken {
 
 
   // NFT collection 
-  access(all) resource Collection: NonFungibleToken.Collection {
+  access(all) resource Collection: NonFungibleToken.Collection, CollectionPublic, CollectionPrivate {
 
     access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
 
